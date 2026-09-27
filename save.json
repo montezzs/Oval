@@ -1,0 +1,106 @@
+{
+  "nome": "penis",
+  "ovo": 2,
+  "cabelo": 7,
+  "olho": 1,
+  "boca": 1,
+  "volume": 0.25,
+  "sons": true,
+  "recordes": {
+    "ovo_ritmo_1": 2300,
+    "ovo_ritmo_2": 100100
+  },
+  "janela": [
+    1024,
+    720
+  ],
+  "moedas": 9999999994374,
+  "moedas_total": 10000000000034,
+  "inventario": [
+    "bochechas",
+    "planta",
+    "tapete",
+    "lampada_lava",
+    "retrato",
+    "relogio_cuco",
+    "vitrola",
+    "estante_trofeus",
+    "tv",
+    "aquario",
+    "cama",
+    "cata_vento",
+    "varal_luzes",
+    "canteiro_2",
+    "casinha_pet",
+    "canteiro_3",
+    "piscina",
+    "telescopio",
+    "canteiro_4",
+    "balanco"
+  ],
+  "equipado": {
+    "rosto": "bochechas"
+  },
+  "pet": "",
+  "moveis": [
+    "planta",
+    "tapete",
+    "lampada_lava",
+    "retrato",
+    "relogio_cuco",
+    "vitrola",
+    "estante_trofeus",
+    "tv",
+    "cama",
+    "cata_vento",
+    "varal_luzes",
+    "canteiro_2",
+    "casinha_pet",
+    "canteiro_3",
+    "piscina",
+    "telescopio",
+    "canteiro_4",
+    "balanco"
+  ],
+  "comida": {
+    "semente_moedas": 1,
+    "sanduiche": 1
+  },
+  "necessidades": {
+    "fome": 98.5,
+    "energia": 39.81,
+    "diversao": 78.69,
+    "higiene": 92.68
+  },
+  "jardim": [
+    {},
+    {},
+    {},
+    {}
+  ],
+  "ultimo_tempo": 1790472729.373424,
+  "sempre_dia": false,
+  "album": [],
+  "diario": {
+    "desafio": {
+      "dia": "2026-09-26",
+      "jogo": "ovo_corredor",
+      "tipo": "maior",
+      "meta": 750,
+      "texto": "Faça 750 em CORRIDA!",
+      "feito": false,
+      "pago": false
+    },
+    "variedade_dia": "2026-09-26",
+    "variedade": [
+      "minado",
+      "ovo_ritmo"
+    ],
+    "bau_seq": 1,
+    "bau_ultimo": "2026-09-26"
+  },
+  "jogados": [
+    "minado",
+    "ovo_ritmo"
+  ]
+}
