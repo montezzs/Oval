@@ -15,9 +15,10 @@ from jogos.base import MiniJogo
 #   JOGADOR 1: WASD (+ ESPAÇO / F / G ...)
 #   JOGADOR 2: SETAS (+ ENTER / SHIFT DIREITO / CTRL DIREITO ...)
 #
-# O J1 é o ovo do save. O J2 tem uma aparência própria (salva
-# no save), sempre com uma cor de ovo diferente do J1, e pode
-# ser sorteada no botão "VISUAL DO J2" da tela de início.
+# O J1 é o ovo do save. O J2 tem uma aparência sorteada (salva
+# nas preferências) ou usa o visual de um VIZINHO da rua (outro
+# ovo do jogador, só leitura: nada é gravado no save dele). O
+# botão "J2: ..." da tela de início alterna entre as opções.
 #
 # Os jogos multiplayer chamam self.terminar_multi(vencedor, linhas)
 # com vencedor = 0 (J1), 1 (J2) ou None (empate).
@@ -66,14 +67,19 @@ class MiniJogoMulti(MiniJogo):
 
     def __init__(self, app, menu):
         self._aparencia_j2 = None
+        self._vizinho = None            # Jogador (só leitura) do vizinho
+        self._cor_trocada = False
+        self._mexeu = [False, False]
         super().__init__(app, menu)
+        self._carregar_vizinho()
+        self._montar_menu_inicio()          # o botão do J2 mostra o vizinho
 
     # --------------------------------------------------------
     # JOGADORES
     # --------------------------------------------------------
 
     def _carregar_j2(self):
-        salvo = self.app.save.dados.get("j2")
+        salvo = self.app.config["j2"]
         j1 = self.jogador.aparencia()
         limites = (len(assets.OVOS), len(assets.CABELOS), len(assets.OLHOS), len(assets.BOCAS))
 
@@ -86,19 +92,66 @@ class MiniJogoMulti(MiniJogo):
         return ((j1[0] + 1) % limites[0], (j1[1] + 4) % limites[1],
                 (j1[2] + 1) % limites[2], (j1[3] + 2) % limites[3])
 
+    def _carregar_vizinho(self):
+        """J2 com o visual de outro ovo da rua (config["j2_slot"])."""
+        from core import perfis
+        self._vizinho = None
+        self._cor_trocada = False
+        slot = self.app.config["j2_slot"]
+        if not isinstance(slot, int) or slot < 0 or slot == self.app.slot:
+            return
+        save = perfis.ler_ovo(slot)
+        if save is None:
+            self.app.config["j2_slot"] = -1
+            self.app.config.salvar()
+            return
+        viz = Jogador(save)
+        if viz.ovo == self.jogador.ovo:
+            # Mesma cor do J1: troca só durante a partida
+            outra = next(i for i in range(len(assets.OVOS)) if i != self.jogador.ovo)
+            viz.definir_aparencia(outra, viz.cabelo, viz.olho, viz.boca)
+            self._cor_trocada = True
+        self._vizinho = viz
+        self._slot_vizinho = slot
+
+    def _proximo_j2(self):
+        """SORTEADO -> cada vizinho -> SORTEADO (sorteia de novo)."""
+        from core import perfis
+        vizinhos = [s for s in perfis.slots_ocupados() if s != self.app.slot]
+        atual = self.app.config["j2_slot"]
+        if atual in vizinhos:
+            i = vizinhos.index(atual) + 1
+            novo = vizinhos[i] if i < len(vizinhos) else -1
+        else:
+            novo = vizinhos[0] if vizinhos else -1
+        self.app.config["j2_slot"] = novo
+        self.app.config.salvar()
+        if novo == -1:
+            self.sortear_j2()
+        self._carregar_vizinho()
+        MiniJogo._fundos.clear()
+
+    def rotulo_j2(self):
+        if self._vizinho is not None:
+            nome = self._vizinho.nome.strip()[:8].upper() or "VIZINHO"
+            return f"J2: {nome} (CASA {self._slot_vizinho + 1})"
+        return "J2: SORTEADO"
+
     def sortear_j2(self):
         j1 = self.jogador.aparencia()
         cores = [i for i in range(len(assets.OVOS)) if i != j1[0]]
         nova = (random.choice(cores), random.randrange(len(assets.CABELOS)),
                 random.randrange(len(assets.OLHOS)), random.randrange(len(assets.BOCAS)))
         self._aparencia_j2 = nova
-        self.app.save.dados["j2"] = list(nova)
-        self.app.save.salvar()
+        self.app.config["j2"] = list(nova)
+        self.app.config.salvar()
         MiniJogo._fundos.clear()
 
     def aparencia(self, i):
         if i == 0:
             return self.jogador.aparencia()
+        if self._vizinho is not None:
+            return self._vizinho.aparencia()
         if self._aparencia_j2 is None or self._aparencia_j2[0] == self.jogador.ovo:
             self._aparencia_j2 = self._carregar_j2()
         return self._aparencia_j2
@@ -106,14 +159,17 @@ class MiniJogoMulti(MiniJogo):
     def nome(self, i):
         if i == 0:
             return (self.jogador.nome or "JOGADOR 1").strip() or "JOGADOR 1"
+        if self._vizinho is not None:
+            return self._vizinho.nome.strip() or "JOGADOR 2"
         return "JOGADOR 2"
 
     def cor(self, i):
         return Jogador.cor_do_ovo(self.aparencia(i)[0])
 
-    def desenhar_ovo(self, tela, i, centro, altura, espelhar=False, angulo=0.0):
-        return self.jogador.desenhar(tela, centro, altura, aparencia=self.aparencia(i),
-                                     espelhar=espelhar, angulo=angulo)
+    def desenhar_ovo(self, tela, i, centro, altura, espelhar=False, angulo=0.0, aparencia=None):
+        dono = self._vizinho if (i == 1 and self._vizinho is not None) else self.jogador
+        return dono.desenhar(tela, centro, altura, aparencia=aparencia or self.aparencia(i),
+                             espelhar=espelhar, angulo=angulo)
 
     @staticmethod
     def teclas(i):
@@ -142,6 +198,14 @@ class MiniJogoMulti(MiniJogo):
     def calcular_moedas(self, valor, venceu):
         return self.MOEDAS_PARTIDA + (self.MOEDAS_VITORIA_J1 if venceu else 0)
 
+    def comecar(self):
+        self._mexeu = [False, False]
+        super().comecar()
+
+    def partida_valida(self):
+        # Só paga se os DOIS jogadores apertaram alguma tecla (anti-farm)
+        return all(self._mexeu)
+
     def terminar_multi(self, vencedor, linhas=None):
         """vencedor: 0 (J1), 1 (J2) ou None (empate)."""
         if self.estado == "fim":
@@ -157,6 +221,8 @@ class MiniJogoMulti(MiniJogo):
         self.vencedor = vencedor
         linhas = list(linhas or [])
         linhas.append(f"VITÓRIAS  J1 {placar[0]} × {placar[1]} J2")
+        if self._cor_trocada:
+            linhas.append("COR DO J2 TROCADA NESTA PARTIDA")
         # "venceu" aqui = o J1 venceu (define o bônus de moedas e o som)
         self.terminar(venceu=(vencedor == 0), valor=0, titulo=titulo, linhas=linhas,
                       registrar=False)
@@ -171,7 +237,7 @@ class MiniJogoMulti(MiniJogo):
         VISUAL DO J2 e VOLTAR. Setas em qualquer direção navegam.
         """
         opcoes = list(self.OPCOES) if self.OPCOES else ["JOGAR!"]
-        rotulos = opcoes + ["VISUAL DO J2", "VOLTAR"]
+        rotulos = opcoes + [self.rotulo_j2(), "VOLTAR"]
         self.menu_inicio = ui.Menu(rotulos, LARGURA // 2, 0, 200, 48, 10, 14)
 
         n = len(opcoes)
@@ -184,6 +250,8 @@ class MiniJogoMulti(MiniJogo):
         for k, i in enumerate((n, n + 1)):
             self.menu_inicio.botoes[i].rect = pygame.Rect(
                 LARGURA // 2 - 250 + k * 260, y1 + 60, 240, 48)
+        b = self.menu_inicio.botoes[n]
+        b.tamanho = ui.tamanho_que_cabe(b.rotulo, b.rect.w - 16, (14, 12, 10, 8))
         self.menu_inicio.indice = min(self.opcao, n - 1)
 
     def _evento_inicio(self, e):
@@ -216,7 +284,10 @@ class MiniJogoMulti(MiniJogo):
             self.sair_para_menu()
         elif escolha == n_opcoes:
             self.som("boing")
-            self.sortear_j2()
+            self._proximo_j2()
+            b = self.menu_inicio.botoes[n_opcoes]
+            b.rotulo = self.rotulo_j2()
+            b.tamanho = ui.tamanho_que_cabe(b.rotulo, b.rect.w - 16, (14, 12, 10, 8))
             self._preparar()
         else:
             if self.OPCOES:
@@ -228,7 +299,29 @@ class MiniJogoMulti(MiniJogo):
         # No fim de jogo, espera mais para ninguém pular a tela sem querer
         if self.estado == "fim" and self.tempo_estado < 1.0 and e.type == pygame.KEYDOWN:
             return
+        if self.estado == "jogando" and e.type == pygame.KEYDOWN:
+            quem = jogador_da_tecla(e.key)
+            if quem is not None:
+                self._mexeu[quem] = True
         super().evento(e)
+
+    def _desenhar_avatar_fim(self, tela, caixa):
+        """Os dois ovos: o vencedor pulando, o outro triste (empate: os dois balançam)."""
+        from core.jogador import BOCA_TRISTE
+        vencedor = getattr(self, "vencedor", None)
+        for i, x in ((0, LARGURA // 2 - 80), (1, LARGURA // 2 + 80)):
+            apar = self.aparencia(i)
+            if vencedor is None:
+                dy, ang = 0, math.sin(self.tempo * 3 + i) * 8
+            elif vencedor == i:
+                dy, ang = -abs(math.sin(self.tempo * 5)) * 16, 0
+            else:
+                dy, ang = 0, -14 if i == 0 else 14
+                apar = (apar[0], apar[1], apar[2], BOCA_TRISTE)
+            self.desenhar_ovo(tela, i, (x, caixa.y + 150 + dy), 70, espelhar=(i == 1), angulo=ang,
+                              aparencia=apar)
+        ui.desenhar_texto(tela, "PARA " + self.nome(0).upper(), (caixa.right - 110, caixa.y + 104),
+                          8, (230, 220, 170), "center")
 
     def _desenhar_inicio(self, tela):
         ui.veu(tela, 150)
@@ -241,6 +334,10 @@ class MiniJogoMulti(MiniJogo):
         ui.desenhar_texto(tela, self.TITULO, (LARGURA // 2, topo + 22), tam, AMARELO, "midtop")
         ui.desenhar_texto(tela, "2 JOGADORES", (LARGURA // 2, topo + 62), 12,
                           (180, 200, 255), "midtop")
+
+        if self._cor_trocada:
+            ui.desenhar_texto(tela, "COR DO J2 TROCADA NESTA PARTIDA", (LARGURA // 2, topo + 80), 8,
+                              (230, 220, 170), "midtop")
 
         # VS com os dois ovos e os controles
         y_ovos = topo + 150

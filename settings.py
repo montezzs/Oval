@@ -1,11 +1,29 @@
 import os
+import sys
 
 # ============================================================
 # CAMINHOS
 # ============================================================
 
-# Pasta do projeto (funciona mesmo rodando o jogo de outra pasta)
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# Rodando como .exe (PyInstaller)? Os arquivos do jogo (imagens,
+# fonte, músicas) ficam dentro do pacote; os saves ficam ao lado
+# do .exe, para não se perderem quando o jogo for fechado.
+CONGELADO = getattr(sys, "frozen", False)
+
+if CONGELADO:
+    BASE_DIR = getattr(sys, "_MEIPASS", os.path.dirname(sys.executable))
+    DADOS_DIR = os.path.dirname(os.path.abspath(sys.executable))
+    # Pasta do .exe sem permissão de escrita? Usa %APPDATA%\Oval
+    if not os.access(DADOS_DIR, os.W_OK):
+        DADOS_DIR = os.path.join(os.environ.get("APPDATA", DADOS_DIR), "Oval")
+else:
+    # Pasta do projeto (funciona mesmo rodando o jogo de outra pasta)
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    DADOS_DIR = BASE_DIR
+
+# Para testes: OVAL_DADOS=<pasta> grava saves/músicas geradas em outro lugar
+if os.environ.get("OVAL_DADOS"):
+    DADOS_DIR = os.environ["OVAL_DADOS"]
 
 
 def caminho(*partes):
@@ -13,10 +31,19 @@ def caminho(*partes):
     return os.path.join(BASE_DIR, *partes)
 
 
+def caminho_dados(*partes):
+    """Caminho de um arquivo gravável (saves, músicas geradas)."""
+    return os.path.join(DADOS_DIR, *partes)
+
+
 FONTE = caminho("Fonts", "PressStart2P-Regular.ttf")
 PASTA_MUSICAS = caminho("musicas")
+# Trilhas que já vêm prontas com o jogo
 PASTA_TRILHAS = caminho("musicas", "trilhas")
-ARQUIVO_SAVE = caminho("save.json")
+# Trilhas geradas na hora (quando não vieram prontas)
+PASTA_TRILHAS_GERADAS = caminho_dados("musicas", "trilhas") if CONGELADO else PASTA_TRILHAS
+ARQUIVO_SAVE = caminho_dados("save.json")          # save antigo (1 ovo só)
+PASTA_SAVES = caminho_dados("saves")
 
 # ============================================================
 # JANELA
@@ -25,6 +52,7 @@ ARQUIVO_SAVE = caminho("save.json")
 LARGURA = 1024
 ALTURA = 720
 TITULO = "Oval"
+VERSAO = "2.0"
 FPS = 60
 
 # ============================================================

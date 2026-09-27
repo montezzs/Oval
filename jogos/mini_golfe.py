@@ -876,8 +876,8 @@ class MiniGolfe(MiniJogo):
     def calcular_moedas(self, valor, venceu):
         if not venceu:
             return self.MOEDAS_MIN
-        base = max(10, min(45, 55 - 2 * (valor - PAR_TOTAL)))
-        return base + min(24, 8 * self.em_um)
+        base = max(5, min(26, 26 - 2 * (valor - PAR_TOTAL)))
+        return base + min(4, 2 * self.em_um)
 
     # --------------------------------------------------------
     # PARTIDA

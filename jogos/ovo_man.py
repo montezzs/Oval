@@ -397,8 +397,8 @@ class OvoMan(MiniJogo):
                   acomp="arpejo16", onda_acomp="sino", bateria="galope",
                   energia=0.85, eco=(0.1, 0.15))
 
-    MOEDAS_POR = 150
-    MOEDAS_MAX = 45
+    MOEDAS_POR = 400
+    MOEDAS_MAX = 30
 
     # --------------------------------------------------------
     # CENÁRIO: horta à noite com cerca-viva

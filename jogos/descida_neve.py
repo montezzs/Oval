@@ -261,8 +261,8 @@ class DescidaNeve(MiniJogo):
                   baixo="pop", onda_baixo="triangulo", acomp="arpejo16", onda_acomp="triangulo",
                   bateria="galope", energia=0.7, eco=(0.2, 0.25))
 
-    MOEDAS_POR = 40
-    MOEDAS_MAX = 45
+    MOEDAS_POR = 120
+    MOEDAS_MAX = 25
 
     # --------------------------------------------------------
     # CENÁRIO

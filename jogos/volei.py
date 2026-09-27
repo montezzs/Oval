@@ -265,11 +265,11 @@ class Volei(MiniJogo):
     ]
     OPCOES = ["FÁCIL", "NORMAL", "DIFÍCIL"]
     MENOR_MELHOR = False
-    MOEDAS_MAX = 45
+    MOEDAS_MAX = 26
 
     def calcular_moedas(self, valor, venceu):
-        """3 por ponto feito + 15 se venceu, mais valendo nas dificuldades altas."""
-        base = 3 * self.placar[0] + (15 if venceu else 0)
+        """2 por ponto feito + 6 se venceu, mais valendo nas dificuldades altas."""
+        base = 2 * self.placar[0] + (6 if venceu else 0)
         return min(self.MOEDAS_MAX, round(base * (1.0, 1.25, 1.5)[self.opcao]))
     ROTULO_PONTOS = "PONTOS"
     CONTAGEM = True

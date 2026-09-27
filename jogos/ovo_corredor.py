@@ -454,8 +454,8 @@ class OvoCorredor(MiniJogo):
                   acomp="arpejo16", onda_acomp="sino", bateria="galope",
                   energia=0.85, eco=(0.12, 0.15))
 
-    MOEDAS_POR = 40
-    MOEDAS_MAX = 45
+    MOEDAS_POR = 90
+    MOEDAS_MAX = 28
     MOEDAS_MIN = 2
 
     # --------------------------------------------------------

@@ -318,8 +318,8 @@ class Atravessa(MiniJogo):
                   acomp="contratempo", onda_acomp="quadrada", bateria="rock",
                   energia=0.65, eco=(0.12, 0.15))
 
-    MOEDAS_POR = 80
-    MOEDAS_MAX = 45
+    MOEDAS_POR = 180
+    MOEDAS_MAX = 28
     MOEDAS_MIN = 1
 
     # --------------------------------------------------------

@@ -301,8 +301,8 @@ class Pescaria(MiniJogo):
         "Tem um BAÚ no fundo... mas ele é pesado!",
         "←→ barco • ↓ desce • ↑ sobe • mouse",
     ]
-    MOEDAS_POR = 25
-    MOEDAS_MAX = 45
+    MOEDAS_POR = 60
+    MOEDAS_MAX = 20
 
     TRILHA = dict(bpm=120, tom="F#", escala="menor", lead="quadrada", duty=0.5,
                   envelope="normal", baixo="oompah", onda_baixo="triangulo",
@@ -777,6 +777,12 @@ class Pescaria(MiniJogo):
 
         self.pontos += ganho
         self.pescados += 1 if p.tipo != "bota" else 0
+        # Álbum de peixes (id estável = chave de ESPECIES)
+        try:
+            from core import progresso
+            progresso.colecionar(self.app, "peixes", p.tipo)
+        except Exception:
+            pass
         self.textos.adicionar(texto, (pos[0], pos[1] - 40), cor, 16 if ganho < 100 else 20)
         # Peixe voa para dentro do barco; os pontos voam para o HUD
         self.voando.append([p.tipo, p.dir < 0, pos[0], pos[1], self.bx, SUPERFICIE - 20, 0.0])

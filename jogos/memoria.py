@@ -197,12 +197,12 @@ class Memoria(MiniJogo):
     MENOR_MELHOR = True
 
     def calcular_moedas(self, valor, venceu):
-        """12 / 22 / 35 ao vencer, +8 se foi bem esperto (poucas jogadas)."""
+        """6 / 12 / 20 ao vencer, +4 se foi bem esperto (poucas jogadas)."""
         if not venceu:
             return self.MOEDAS_MIN
-        base = (12, 22, 35)[self.opcao]
+        base = (6, 12, 20)[self.opcao]
         if self.jogadas <= len(self.pares) * 1.5:
-            base += 8
+            base += 4
         return base
     ROTULO_PONTOS = "JOGADAS"
     CONTAGEM = False

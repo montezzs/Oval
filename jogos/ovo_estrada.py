@@ -342,7 +342,7 @@ class OvoEstrada(MiniJogo):
                   acomp="contratempo", onda_acomp="quadrada", bateria="rock",
                   energia=0.7, eco=(0.12, 0.15))
 
-    MOEDAS_MAX = 50
+    MOEDAS_MAX = 30
 
     # --------------------------------------------------------
     # CENÁRIO
@@ -805,7 +805,7 @@ class OvoEstrada(MiniJogo):
         ])
 
     def calcular_moedas(self, valor, venceu):
-        return max(0, min(self.MOEDAS_MAX, self.moedas_pista + self.metros // 50))
+        return max(0, min(self.MOEDAS_MAX, self.moedas_pista + self.metros // 200))
 
     def _pegar_itens(self):
         cx, cy = self._mundo(0, -24)

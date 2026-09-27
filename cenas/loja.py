@@ -18,8 +18,14 @@ from core.jogador import Jogador
 # Cosméticos, pets e móveis ficam em save["inventario"];
 # comidas e sementes em save["comida"] (quantidade).
 
-ABAS = ["CHAPÉUS", "ROSTO", "CORPO", "EFEITOS", "PETS", "CASA", "QUINTAL", "MERCADO"]
+ABAS = ["CHAPÉUS", "ROSTO", "CORPO", "VISUAL", "EFEITOS", "PETS", "CASA", "QUINTAL", "MERCADO"]
 SLOT_DA_ABA = {"CHAPÉUS": "cabeca", "ROSTO": "rosto", "CORPO": "corpo", "EFEITOS": "efeito"}
+
+# Aba VISUAL: aparência extra (core/visual_extra.py), uma página por
+# grupo (CABELO, OLHOS, BOCA, COR, ROUPA). Teclas 1-5 pulam de grupo.
+ABA_VISUAL = "VISUAL"
+GRUPOS_VISUAL = [("CABELO", "cabelo_x"), ("OLHOS", "olhos_x"), ("BOCA", "boca_x"),
+                 ("COR", "cor_x"), ("ROUPA", "roupa")]
 
 COLS, LINS = 4, 3
 CARD = (150, 150)
@@ -73,7 +79,7 @@ class Produto:
 
 class CenaLoja(Cena):
 
-    musica = "jogos"
+    musica = "vitrine"
 
     def __init__(self, app, voltar_para):
         super().__init__(app)
@@ -110,6 +116,20 @@ class CenaLoja(Cena):
             self.rects_abas.append(pygame.Rect(16 + i * largura, 84, largura - 6, 42))
 
         self.produtos = self._montar_produtos()
+        self._pags = {nome: self._dividir(nome) for nome in ABAS}
+
+        # Botões dos grupos da aba VISUAL (no lugar das bolinhas de página)
+        primeiras = []                  # (rótulo, 1ª página do grupo)
+        for i, (rot, _) in enumerate(self._pags[ABA_VISUAL]):
+            if rot and rot not in (r for r, _ in primeiras):
+                primeiras.append((rot, i))
+        n = max(1, len(primeiras))
+        livre = self.seta_dir.x - self.seta_esq.right - 20
+        larg = min(104, (livre - (n - 1) * 8) // n)
+        x0 = GRADE.centerx - (n * larg + (n - 1) * 8) // 2
+        self.rects_grupos = [(rot, i, pygame.Rect(x0 + k * (larg + 8), self.seta_esq.y, larg,
+                                                  self.seta_esq.h))
+                             for k, (rot, i) in enumerate(primeiras)]
 
     # --------------------------------------------------------
     # CATÁLOGO
@@ -118,10 +138,13 @@ class CenaLoja(Cena):
     def _montar_produtos(self):
         inv = set(self.app.save["inventario"])
         abas = {nome: [] for nome in ABAS}
+        slots_visual = {s for _, s in GRUPOS_VISUAL}
 
         cos = _modulo("cosmeticos")
         for pid, d in getattr(cos, "CATALOGO", {}).items():
             aba = next((a for a, s in SLOT_DA_ABA.items() if s == d.get("slot")), None)
+            if aba is None and d.get("slot") in slots_visual:
+                aba = ABA_VISUAL
             if aba and (d.get("loja", True) or pid in inv):
                 abas[aba].append(Produto("cosmetico", pid, d))
 
@@ -143,9 +166,28 @@ class CenaLoja(Cena):
         for pid, d in getattr(itens, "SEMENTES", {}).items():
             abas["MERCADO"].append(Produto("semente", pid, d))
 
+        # CAIXA SURPRESA: um cosmético sorteado pela raridade
+        from core import caixa
+        abas["MERCADO"].append(Produto("caixa", "caixa_surpresa", dict(
+            nome="CAIXA SURPRESA", preco=caixa.PRECO_CAIXA, raridade="RARO",
+            descricao="Um cosmético sorteado! Repetido vira OVOEDAS. Pode vir até exclusivo!")))
+
         for lista in abas.values():
             lista.sort(key=lambda p: (p.preco, p.nome))
         return abas
+
+    def _dividir(self, aba):
+        """Páginas da aba: lista de (rótulo do grupo ou None, produtos)."""
+        n = COLS * LINS
+        lista = self.produtos[aba]
+        if aba == ABA_VISUAL:
+            grupos = [(rot, [p for p in lista if p.dados.get("slot") == slot])
+                      for rot, slot in GRUPOS_VISUAL]
+        else:
+            grupos = [(None, lista)]
+        pags = [(rot, itens[i:i + n]) for rot, itens in grupos if itens
+                for i in range(0, len(itens), n)]
+        return pags or [(None, [])]
 
     @property
     def lista(self):
@@ -153,12 +195,24 @@ class CenaLoja(Cena):
 
     @property
     def paginas(self):
-        return max(1, math.ceil(len(self.lista) / (COLS * LINS)))
+        return len(self._pags[ABAS[self.aba]])
 
     @property
     def na_pagina(self):
-        inicio = self.pagina * COLS * LINS
-        return self.lista[inicio:inicio + COLS * LINS]
+        pags = self._pags[ABAS[self.aba]]
+        return pags[min(self.pagina, len(pags) - 1)][1]
+
+    @property
+    def grupo(self):
+        """Rótulo do grupo da página atual (aba VISUAL) ou None."""
+        pags = self._pags[ABAS[self.aba]]
+        return pags[min(self.pagina, len(pags) - 1)][0]
+
+    def _ir_pagina(self, pagina):
+        if pagina != self.pagina:
+            self.pagina = pagina
+            self.indice = 0
+            self.som("clique", 0.6)
 
     @property
     def atual(self):
@@ -172,6 +226,8 @@ class CenaLoja(Cena):
     # --------------------------------------------------------
 
     def _tem(self, p):
+        if p.tipo == "caixa":
+            return False
         if p.tipo in ("comida", "semente"):
             return self.app.save["comida"].get(p.id, 0)
         return p.id in self.app.save["inventario"]
@@ -231,6 +287,12 @@ class CenaLoja(Cena):
         if not save.gastar(p.preco):
             self.som("erro")
             return
+        from core import progresso
+        progresso.contar(self.app, "compras")
+        progresso.contar(self.app, "moedas_gastas", p.preco)
+        if p.tipo == "caixa":
+            self._abrir_caixa()
+            return
         if p.tipo in ("comida", "semente"):
             save["comida"][p.id] = save["comida"].get(p.id, 0) + 1
         else:
@@ -245,6 +307,23 @@ class CenaLoja(Cena):
         cores = [CORES_RARIDADE.get(p.raridade, BRANCO), AMARELO, BRANCO]
         self.particulas.explodir(PROVADOR.center, cores, 40, 380)
         self._avisar(f"{p.nome} COMPRADO!")
+
+    def _abrir_caixa(self):
+        from core import caixa, progresso
+        save = self.app.save
+        item, nome, raridade, consolo = caixa.sortear(save)
+        progresso.contar(self.app, "caixas")
+        cor = CORES_RARIDADE.get(raridade, BRANCO)
+        self.particulas.explodir(PROVADOR.center, [cor, AMARELO, BRANCO], 90, 460)
+        self.som("levelup" if raridade in ("EPICO", "LENDARIO") else "vencer")
+        if consolo:
+            self._avisar(f"{nome} (REPETIDO): +{consolo} OVOEDAS")
+        else:
+            self._avisar(f"CAIXA: {nome} ({raridade})!")
+            self.produtos = self._montar_produtos()
+        self.app.toasts.adicionar("CAIXA SURPRESA! (" + raridade + ")", nome,
+                                  f"+{consolo}" if consolo else "", None)
+        save.salvar()
 
     def _alternar(self, p, silencioso=False):
         save = self.app.save
@@ -324,6 +403,10 @@ class CenaLoja(Cena):
                 self._mover(0, 1)
             elif e.key in (pygame.K_RETURN, pygame.K_KP_ENTER, pygame.K_SPACE):
                 self._acao()
+            elif ABAS[self.aba] == ABA_VISUAL and pygame.K_1 <= e.key <= pygame.K_9:
+                k = e.key - pygame.K_1
+                if k < len(self.rects_grupos):
+                    self._ir_pagina(self.rects_grupos[k][1])
 
         elif e.type == pygame.MOUSEWHEEL:
             if e.y < 0 and self.pagina < self.paginas - 1:
@@ -346,6 +429,11 @@ class CenaLoja(Cena):
                         self.indice = i
                         self.som("clique", 0.5)
                     return
+            if ABAS[self.aba] == ABA_VISUAL:
+                for _, pagina, r in self.rects_grupos:
+                    if r.collidepoint(e.pos):
+                        self._ir_pagina(pagina)
+                        return
             if self.botao_acao.evento(e):
                 self._acao()
             elif self.seta_esq.collidepoint(e.pos) and self.pagina > 0:
@@ -413,6 +501,17 @@ class CenaLoja(Cena):
                 sup = _modulo("moveis").icone(p.id, tamanho)
             elif p.tipo == "semente":
                 sup = _modulo("itens").icone_semente(p.id, tamanho)
+            elif p.tipo == "caixa":
+                sup = pygame.Surface((tamanho, tamanho), pygame.SRCALPHA)
+                t = tamanho
+                corpo = pygame.Rect(int(t * 0.18), int(t * 0.38), int(t * 0.64), int(t * 0.5))
+                tampa = pygame.Rect(int(t * 0.12), int(t * 0.26), int(t * 0.76), int(t * 0.16))
+                pygame.draw.rect(sup, (170, 90, 230), corpo, border_radius=4)
+                pygame.draw.rect(sup, (200, 130, 255), tampa, border_radius=4)
+                pygame.draw.rect(sup, AMARELO, (t // 2 - t // 14, tampa.y, t // 7, corpo.bottom - tampa.y))
+                pygame.draw.circle(sup, AMARELO, (t // 2 - t // 8, tampa.y - t // 14), t // 10, 3)
+                pygame.draw.circle(sup, AMARELO, (t // 2 + t // 8, tampa.y - t // 14), t // 10, 3)
+                ui.desenhar_texto(sup, "?", (t // 2, corpo.centery + t // 12), max(12, t // 4), BRANCO, "center")
             elif p.tipo == "comida":
                 sup = pygame.Surface((tamanho, tamanho), pygame.SRCALPHA)
                 _modulo("itens").desenhar_comida(sup, p.id, (tamanho // 2, tamanho // 2),
@@ -464,6 +563,9 @@ class CenaLoja(Cena):
             r = sup.get_rect(midbottom=(GRADE.centerx, ALTURA - 8)).inflate(24, 14)
             ui.painel(tela, r, (40, 24, 10), AMARELO, 10, 2, sombra=False)
             tela.blit(sup, sup.get_rect(center=r.center))
+        elif ABAS[self.aba] in ("CASA", "QUINTAL"):
+            ui.desenhar_texto(tela, "QUER MUDAR A FACHADA? USE REFORMAR NA RUA DOS OVOS!",
+                              (GRADE.centerx, ALTURA - 16), 8, (255, 220, 150), "center")
 
         self.particulas.desenhar(tela)
 
@@ -592,6 +694,7 @@ class CenaLoja(Cena):
             pygame.draw.rect(tela, borda, r, 3 if sel else 2, border_radius=14)
 
         # Páginas
+        visual = ABAS[self.aba] == ABA_VISUAL and self.rects_grupos
         if self.paginas > 1:
             for rect, simbolo, ativo in ((self.seta_esq, "<", self.pagina > 0),
                                          (self.seta_dir, ">", self.pagina < self.paginas - 1)):
@@ -599,6 +702,18 @@ class CenaLoja(Cena):
                                  border_radius=10)
                 ui.desenhar_texto(tela, simbolo, rect.center, 16,
                                   BRANCO if ativo else (120, 100, 80), "center")
+        if visual:
+            # Grupos (CABELO, OLHOS...) no lugar das bolinhas
+            atual = self.grupo
+            for k, (rot, _, r) in enumerate(self.rects_grupos):
+                ativo = rot == atual
+                pygame.draw.rect(tela, (120, 70, 20) if ativo else (60, 36, 14), r, border_radius=10)
+                pygame.draw.rect(tela, AMARELO if ativo else (150, 110, 70), r, 2, border_radius=10)
+                ui.desenhar_texto(tela, rot, (r.centerx, r.centery - 3), 8,
+                                  AMARELO if ativo else BRANCO, "center")
+                ui.desenhar_texto(tela, str(k + 1), (r.centerx, r.bottom - 6), 6,
+                                  (200, 170, 120), "center")
+        elif self.paginas > 1:
             for i in range(self.paginas):
                 cor = AMARELO if i == self.pagina else (120, 90, 60)
                 pygame.draw.circle(tela, cor, (GRADE.centerx - (self.paginas - 1) * 10 + i * 20,

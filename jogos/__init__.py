@@ -35,6 +35,10 @@ from jogos.ovo_man import OvoMan
 from jogos.ninho_arrumado import NinhoArrumado
 from jogos.estoura_bolha import EstouraBolha
 from jogos.ovo_estrada import OvoEstrada
+from jogos.ovo_sobrevivente import OvoSobrevivente
+from jogos.micro_ovo import MicroOvo
+from jogos.pinball_ovo import PinballOvo
+from jogos.ovo_cozinheiro import OvoCozinheiro
 
 # ---------------- Novos (2 jogadores) ----------------
 from jogos.sumo_ovo import SumoOvo
@@ -42,11 +46,13 @@ from jogos.hoquei_ovo import HoqueiOvo
 from jogos.guerra_tinta import GuerraTinta
 from jogos.futebol_ovo import FutebolOvo
 from jogos.ovo_bomba import OvoBomba
+from jogos.corrida_rua import CorridaRua
 
 JOGOS = [
     Cobrinha, CampoMinado, Memoria, Volei, ChuvaComida, PuloNuvens, OvoVoador,
     OvoCorredor, Ovonoide, Ovo2048, MiniGolfe, Atravessa, CoralOvos, OvoColher,
     Ovotris, Toupeiras, SaltoLago, Pescaria, DescidaNeve, Invasores, LigaOvos,
     Lanchonete, OvoRitmo, OvoMan, NinhoArrumado, EstouraBolha, OvoEstrada,
-    SumoOvo, HoqueiOvo, GuerraTinta, FutebolOvo, OvoBomba,
+    OvoSobrevivente, MicroOvo, PinballOvo, OvoCozinheiro,
+    SumoOvo, HoqueiOvo, GuerraTinta, FutebolOvo, OvoBomba, CorridaRua,
 ]

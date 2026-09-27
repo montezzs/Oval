@@ -389,8 +389,8 @@ class Invasores(MiniJogo):
                   baixo="walking", onda_baixo="quadrada", acomp="pad", onda_acomp="triangulo",
                   bateria="marcha", energia=0.6, eco=(0.18, 0.2))
 
-    MOEDAS_POR = 60
-    MOEDAS_MAX = 45
+    MOEDAS_POR = 200
+    MOEDAS_MAX = 30
 
     # --------------------------------------------------------
     # CENÁRIO: cozinha à noite

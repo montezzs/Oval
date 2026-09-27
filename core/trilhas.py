@@ -1,4 +1,5 @@
 import os
+import threading
 import zlib
 
 from settings import *
@@ -342,6 +343,82 @@ def registrar(nome, estilo):
     ESTILOS[nome] = dict(estilo)
 
 
+# Temas das telas do jogo (tela inicial, rua, loja...). Também
+# aparecem na JUKEBOX (seção TEMAS) depois de ouvidos uma vez.
+TEMAS = {
+    # TELA INICIAL — abertura alegre
+    "abertura": dict(bpm=112, tom="C", escala="lidia", lead="quadrada", duty=0.25,
+                     envelope="normal", baixo="pop", onda_baixo="triangulo",
+                     acomp="arpejo16", onda_acomp="sino", bateria="pop",
+                     energia=0.55, eco=(0.2, 0.22), vol_acomp=0.06),
+    # VIZINHANÇA (dia) — passeio tranquilo
+    "rua_dos_ovos": dict(bpm=100, tom="G", escala="pentatonica", lead="sino",
+                         envelope="pluck", baixo="walking", onda_baixo="triangulo",
+                         acomp="contratempo", onda_acomp="triangulo", bateria="shuffle",
+                         energia=0.4, eco=(0.25, 0.22), vol_bateria=0.35),
+    # VIZINHANÇA (noite)
+    "rua_noite": dict(bpm=72, tom="A", escala="dorica", lead="seno", envelope="normal",
+                      baixo="longo", onda_baixo="seno", acomp="pad", onda_acomp="triangulo",
+                      bateria="suave", energia=0.2, eco=(0.35, 0.35),
+                      vol_bateria=0.2, vol_lead=0.18),
+    # CHUVA
+    "dia_de_chuva": dict(bpm=86, tom="E", escala="dorica", lead="triangulo",
+                         envelope="normal", baixo="pop", onda_baixo="seno",
+                         acomp="arpejo8", onda_acomp="sino", bateria="halftime",
+                         energia=0.3, eco=(0.3, 0.3), vol_bateria=0.3),
+    # REFORMA
+    "maos_a_obra": dict(bpm=124, tom="F", escala="mixolidia", lead="quadrada", duty=0.5,
+                        envelope="staccato", baixo="oompah", onda_baixo="triangulo",
+                        acomp="chop", onda_acomp="quadrada", bateria="marcha",
+                        energia=0.6, eco=(0.12, 0.15)),
+    # LOJA
+    "vitrine": dict(bpm=104, tom="Ab", escala="maior", lead="sino", envelope="pluck",
+                    baixo="sincopado", onda_baixo="triangulo", acomp="contratempo",
+                    onda_acomp="sino", bateria="reggae", energia=0.45,
+                    eco=(0.22, 0.25), vol_bateria=0.4),
+    # NOME + CRIADOR
+    "nasce_um_ovo": dict(bpm=96, tom="Db", escala="maior", lead="triangulo",
+                         envelope="normal", baixo="pop", onda_baixo="seno",
+                         acomp="arpejo8", onda_acomp="sino", bateria="suave",
+                         energia=0.35, eco=(0.3, 0.28)),
+    # CASA com a luz apagada
+    "cancao_de_ninar": dict(bpm=66, tom="F", escala="pentatonica", lead="sino",
+                            envelope="pluck", baixo="longo", onda_baixo="seno",
+                            acomp="arpejo8", onda_acomp="triangulo", bateria="nenhuma",
+                            energia=0.15, eco=(0.4, 0.35), vol_lead=0.18, vol_acomp=0.05),
+    # SOL (quintal, de dia)
+    "quintal_feliz": dict(bpm=118, tom="A", escala="mixolidia", lead="quadrada", duty=0.125,
+                          envelope="pluck", baixo="tropical", onda_baixo="triangulo",
+                          acomp="arpejo8", onda_acomp="sino", bateria="baiao",
+                          energia=0.5, eco=(0.18, 0.2)),
+}
+
+NOMES_TEMAS = {
+    "ovein": "TEMA DO OVAL",
+    "abertura": "ABERTURA",
+    "rua_dos_ovos": "RUA DOS OVOS",
+    "rua_noite": "RUA DOS OVOS (NOITE)",
+    "dia_de_chuva": "DIA DE CHUVA",
+    "maos_a_obra": "MÃOS À OBRA",
+    "vitrine": "VITRINE",
+    "nasce_um_ovo": "NASCE UM OVO",
+    "cancao_de_ninar": "CANÇÃO DE NINAR",
+    "quintal_feliz": "QUINTAL FELIZ",
+}
+
+DICAS_TEMAS = {
+    "cancao_de_ninar": "DICA: APAGUE A LUZ PARA DORMIR",
+    "dia_de_chuva": "DICA: ESPERE UM DIA DE CHUVA",
+    "rua_noite": "DICA: VISITE A RUA DE NOITE",
+    "quintal_feliz": "DICA: VÁ AO QUINTAL DE DIA",
+    "vitrine": "DICA: VISITE A LOJA",
+    "maos_a_obra": "DICA: REFORME SUA CASA",
+}
+
+for _nome, _estilo in TEMAS.items():
+    ESTILOS[_nome] = dict(_estilo)
+
+
 def _assinatura(nome):
     """Muda quando o estilo muda, para regenerar a música."""
     estilo = ESTILOS[nome]
@@ -350,8 +427,14 @@ def _assinatura(nome):
 
 def arquivo(nome):
     if nome not in TRILHAS and nome in ESTILOS:
-        return os.path.join(PASTA_TRILHAS, f"{nome}_{_assinatura(nome)}.wav")
-    return os.path.join(PASTA_TRILHAS, nome + ".wav")
+        base = f"{nome}_{_assinatura(nome)}.wav"
+    else:
+        base = nome + ".wav"
+    # Trilha que já veio pronta com o jogo? Senão, a pasta das geradas
+    pronta = os.path.join(PASTA_TRILHAS, base)
+    if PASTA_TRILHAS_GERADAS == PASTA_TRILHAS or os.path.exists(pronta):
+        return pronta
+    return os.path.join(PASTA_TRILHAS_GERADAS, base)
 
 
 def existe(nome):
@@ -359,7 +442,7 @@ def existe(nome):
 
 
 def gerar(nome):
-    os.makedirs(PASTA_TRILHAS, exist_ok=True)
+    os.makedirs(PASTA_TRILHAS_GERADAS, exist_ok=True)
 
     if nome in TRILHAS:
         buf = TRILHAS[nome]()
@@ -368,14 +451,55 @@ def gerar(nome):
         buf = compor_estilo(ESTILOS[nome], semente=zlib.crc32(nome.encode()))
 
         # Apaga versões antigas desta trilha
-        for arq in os.listdir(PASTA_TRILHAS):
+        for arq in os.listdir(PASTA_TRILHAS_GERADAS):
             if arq.startswith(nome + "_") and arq.endswith(".wav"):
                 try:
-                    os.remove(os.path.join(PASTA_TRILHAS, arq))
+                    os.remove(os.path.join(PASTA_TRILHAS_GERADAS, arq))
                 except OSError:
                     pass
 
-    s.salvar_wav(arquivo(nome), s.para_pcm(buf, 0.8))
+    # Grava num temporário e troca: o mixer nunca abre um wav pela metade
+    destino = arquivo(nome)
+    temp = f"{destino}.{os.getpid()}.tmp"
+    s.salvar_wav(temp, s.para_pcm(buf, 0.8))
+    os.replace(temp, destino)
+
+
+# ------------------------------------------------------------
+# Geração em segundo plano (se alguma trilha não veio pronta)
+# ------------------------------------------------------------
+
+_fila = []
+_trava = threading.Lock()
+_thread = None
+FALHARAM = set()
+
+
+def _trabalhador():
+    global _thread
+    while True:
+        with _trava:
+            if not _fila:
+                _thread = None
+                return
+            nome = _fila.pop(0)
+        try:
+            if not os.path.exists(arquivo(nome)):
+                gerar(nome)
+        except Exception:
+            FALHARAM.add(nome)
+
+
+def gerar_em_fundo(nome):
+    """Põe a trilha na fila da thread de fundo (não trava a tela)."""
+    global _thread
+    with _trava:
+        if nome in _fila or nome in FALHARAM:
+            return
+        _fila.append(nome)
+        if _thread is None:
+            _thread = threading.Thread(target=_trabalhador, daemon=True)
+            _thread.start()
 
 
 if __name__ == "__main__":

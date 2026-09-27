@@ -309,8 +309,8 @@ def _bate_elipse(cx, cy, rect):
 class OvoVoador(MiniJogo):
 
     ID = "voador"
-    MOEDAS_POR = 1
-    MOEDAS_MAX = 40
+    MOEDAS_POR = 2
+    MOEDAS_MAX = 25
     TITULO = "OVO VOADOR"
     TITULO_CURTO = "OVO VOADOR"
     DESCRICAO = "Seu ovo ganhou asinhas! Voe entre as colunas de doce no pôr do sol."

@@ -1,4 +1,5 @@
 import math
+import random
 
 import pygame
 
@@ -46,7 +47,7 @@ class MiniJogo(Cena):
     MOEDAS_MAX = 40             # teto por partida
     MOEDAS_VITORIA = 0          # bônus quando vence
     MOEDAS_MIN = 1              # consolo por ter jogado (se fez algo)
-    MOEDAS_RECORDE = 10         # bônus por novo recorde
+    MOEDAS_RECORDE = 5          # bônus por novo recorde
     TEMPO_MINIMO = 12.0         # partidas mais curtas só dão MOEDAS_MIN (anti-farm)
 
     # Cache dos fundos (são desenhados uma vez só)
@@ -145,6 +146,8 @@ class MiniJogo(Cena):
 
     def comecar(self):
         self.tempo_partida = 0.0
+        from jogos import trofeus
+        self._medalha_inicio = trofeus.nivel(self.app.save, type(self))[0]
         self._preparar()
         self._mudar_estado("contagem" if self.CONTAGEM else "jogando")
 
@@ -196,6 +199,9 @@ class MiniJogo(Cena):
         valor = self.pontos if valor is None else valor
         self.venceu = venceu
         self.novo_recorde = False
+        self.xp_ganho = 0
+        self._moedas_mostradas = 0
+        self._confete = []
 
         # Zero pontos não conta como recorde
         if registrar and (self.MENOR_MELHOR or valor > 0):
@@ -203,15 +209,36 @@ class MiniJogo(Cena):
                 self.chave_recorde(), valor, self.MENOR_MELHOR)
 
         # Moedas (com bônus de recorde, variedade, pet e "ovo feliz")
-        extra = self.app.ao_terminar_minijogo(self, valor, venceu)
-        if self.tempo_partida < self.TEMPO_MINIMO and not venceu:
-            moedas = min(self.MOEDAS_MIN, self.calcular_moedas(valor, venceu))
+        self.detalhe_moedas = []
+        if not self.partida_valida():
+            # Ninguém jogou de verdade: não paga nada (anti-farm)
+            moedas = 0
+            self.detalhe_moedas = ["NINGUÉM JOGOU: SEM OVOEDAS"]
         else:
-            moedas = self.calcular_moedas(valor, venceu) + extra
-            if self.novo_recorde:
-                moedas += self.MOEDAS_RECORDE
+            curta = self.tempo_partida < self.TEMPO_MINIMO and not venceu
+            # Partida curta não gasta o bônus da 1ª partida do dia
+            extra = self.app.ao_terminar_minijogo(self, valor, venceu, variedade=not curta)
+            base = self.calcular_moedas(valor, venceu)
+            if curta:
+                moedas = min(self.MOEDAS_MIN, base)
+                self.detalhe_moedas = [f"PARTIDA CURTA: +{moedas}",
+                                       f"JOGUE MAIS DE {int(self.TEMPO_MINIMO)} s"]
+            else:
+                moedas = base + extra
+                self.detalhe_moedas.append(f"PARTIDA +{base}")
+                if extra:
+                    self.detalhe_moedas.append(f"1ª DO DIA +{extra}")
+                if self.novo_recorde:
+                    moedas += self.MOEDAS_RECORDE
+                    self.detalhe_moedas.append(f"RECORDE +{self.MOEDAS_RECORDE}")
+            bonus = self.app.bonus_moedas()
+            if moedas > 0 and round(moedas * bonus) > moedas:
+                self.detalhe_moedas.append(f"BÔNUS ×{bonus:.2f}".replace(".", ","))
         moedas = round(moedas * self.app.bonus_moedas()) if moedas > 0 else 0
         self.moedas_ganhas = self.app.save.ganhar(moedas)
+        if self.moedas_ganhas > 0:
+            from core import progresso
+            progresso.contar(self.app, "moedas_jogos", self.moedas_ganhas)
 
         self.titulo_fim = titulo or ("VOCÊ VENCEU!" if venceu else "FIM DE JOGO")
         self.linhas_fim = linhas if linhas is not None else [
@@ -224,15 +251,57 @@ class MiniJogo(Cena):
         rotulos.append("MENU DE JOGOS")
         self.menu_fim = ui.Menu(rotulos, LARGURA // 2, 420, 340, 54, 12, 16)
 
+        self._avaliar_medalha(valor)
+        if self.partida_valida() and not self.MULTI and registrar:
+            from core import codigo
+            codigo.verificar_desafios(self.app, self, valor)
+        if self.novo_recorde:
+            self._confete = [0.0, 0.3, 0.6]
+
         # No multiplayer alguém sempre ganha: som de festa
         self.som("vencer" if venceu or self.novo_recorde or self.MULTI else "perder")
         self._mudar_estado("fim")
+
+    def partida_valida(self):
+        """False = ninguém jogou de verdade (a partida não paga moedas)."""
+        return True
+
+    def _avaliar_medalha(self, valor):
+        """Medalha nova nesta partida? E quanto falta para a próxima?"""
+        from jogos import trofeus
+        from core import progresso
+        antes = getattr(self, "_medalha_inicio", None)
+        agora, _ = trofeus.nivel(self.app.save, type(self))
+        ordem = [None] + trofeus.NIVEIS
+        self.medalha_nova = agora if ordem.index(agora) > ordem.index(antes) else None
+        if self.medalha_nova == "ouro":
+            progresso.contar(self.app, "ouros")
+        self._medalha_inicio = agora
+
+        # "Faltam X para a PRATA" (só nos jogos de pontuação)
+        self.falta_medalha = ""
+        r = trofeus.regra(type(self))
+        if r is None or r["tipo"] not in ("maior", "menor") or agora == "ouro":
+            return
+        proxima = trofeus.NIVEIS[ordem.index(agora)]
+        melhor = trofeus._melhor(self.app.save, type(self), r["tipo"] == "menor")
+        if melhor is None:
+            melhor = valor
+        nome = {"bronze": "BRONZE", "prata": "PRATA", "ouro": "OURO"}[proxima]
+        if r["tipo"] == "menor":
+            self.falta_medalha = f"{nome}: FAÇA {self.formatar(r[proxima])} OU MENOS"
+        else:
+            falta = r[proxima] - melhor
+            if falta > 0:
+                self.falta_medalha = f"FALTAM {self.formatar(falta)} PARA O {nome}!"
 
     def sair_para_menu(self):
         self.som("voltar")
         self.app.trocar(self.menu_jogos)
 
     def tremer(self, forca=0.3):
+        if self.app.config["reduzir_tremor"]:
+            forca *= 0.25
         self.tremor = max(self.tremor, forca)
 
     # --------------------------------------------------------
@@ -368,10 +437,33 @@ class MiniJogo(Cena):
         elif self.estado == "fim":
             self.menu_fim.atualizar(dt)
 
+        if self.estado == "fim":
+            self._atualizar_fim(dt)
+
         # Efeitos continuam no fim de jogo (explosões, confete...)
         if self.estado in ("jogando", "fim"):
             self.particulas.atualizar(dt)
             self.textos.atualizar(dt)
+
+    def _atualizar_fim(self, dt):
+        # Contador de moedas subindo com "tic" (e "plim" no final)
+        if self.moedas_ganhas > 0:
+            mostrar = min(self.moedas_ganhas, int(self.tempo_estado * 40) + 1)
+            antes = getattr(self, "_moedas_mostradas", 0)
+            if mostrar != antes:
+                self._moedas_mostradas = mostrar
+                if mostrar >= self.moedas_ganhas:
+                    self.som("moeda", 0.6)
+                elif mostrar % 2 == 0:
+                    self.som("tic", 0.3)
+        # Confete do recorde em 3 rajadas
+        confete = getattr(self, "_confete", [])
+        while confete and self.tempo_estado >= confete[0]:
+            confete.pop(0)
+            cx = LARGURA // 2 + random.randint(-90, 90)
+            self.particulas.explodir((cx, ALTURA // 2 - 140),
+                                     [AMARELO, (255, 90, 140), (120, 200, 255), BRANCO, (120, 255, 150)],
+                                     40, 420, 1.4, (3, 7), 380)
 
     # --------------------------------------------------------
     # DESENHO
@@ -443,6 +535,11 @@ class MiniJogo(Cena):
         y_rec = self.menu_inicio.botoes[0].rect.y - 36
         ui.desenhar_texto(tela, texto_rec, (LARGURA // 2, y_rec), 14, AMARELO, "midtop")
 
+        # Metas das medalhas (bronze / prata / ouro)
+        y_med = y_rec - 22
+        if self._desenhar_medalhas(tela, y_med):
+            y_rec = y_med
+
         limite = y_rec - 12
         if self.OPCOES:
             ui.desenhar_texto(tela, "ESCOLHA A DIFICULDADE", (LARGURA // 2, y_rec - 30),
@@ -463,6 +560,45 @@ class MiniJogo(Cena):
             pygame.draw.rect(tela, self.COR, r.inflate(8, 8), 4, border_radius=8)
 
         self.menu_inicio.desenhar(tela)
+
+    def _textos_medalhas(self):
+        from jogos import trofeus
+        r = trofeus.regra(type(self))
+        if r is None:
+            return None
+        tipo = r["tipo"]
+        if tipo == "opcao":
+            if not self.OPCOES:
+                return None
+            return [f"VENCER {op}" for op in self.OPCOES[:3]]
+        if tipo == "partidas":
+            return [f"{r[n]} PARTIDA{'S' if r[n] > 1 else ''}" for n in trofeus.NIVEIS]
+        if tipo == "menor":
+            return [f"{self.formatar(r[n])} OU MENOS" for n in trofeus.NIVEIS]
+        return [self.formatar(r[n]) for n in trofeus.NIVEIS]
+
+    def _desenhar_medalhas(self, tela, y):
+        """Uma linha com as 3 metas; a medalha conquistada fica cheia."""
+        from jogos import trofeus
+        textos = self._textos_medalhas()
+        if not textos:
+            return False
+        obtido, _ = trofeus.nivel(self.app.save, type(self))
+        nivel = trofeus.NIVEIS.index(obtido) if obtido else -1
+        cores = [(205, 127, 50), (200, 205, 215), (255, 214, 64)]
+        sups = [ui.texto(t, 8, BRANCO if k <= nivel else (190, 190, 210)) for k, t in enumerate(textos)]
+        total = sum(s.get_width() + 22 for s in sups) + 16 * (len(sups) - 1)
+        x = LARGURA // 2 - total // 2
+        for k, s in enumerate(sups):
+            c = (x + 7, y + 5)
+            if k <= nivel:
+                pygame.draw.circle(tela, cores[k], c, 7)
+                pygame.draw.circle(tela, ui.escurecer(cores[k], 60), c, 7, 2)
+            else:
+                pygame.draw.circle(tela, cores[k], c, 7, 2)
+            tela.blit(s, (x + 20, y + 1))
+            x += s.get_width() + 22 + 16
+        return True
 
     def _desenhar_contagem(self, tela):
         restante = TEMPO_CONTAGEM - self.tempo_estado
@@ -485,6 +621,50 @@ class MiniJogo(Cena):
                           AMARELO, "midtop")
         self.menu_pausa.desenhar(tela)
 
+    def _desenhar_avatar_fim(self, tela, caixa):
+        """Avatar feliz pulando (venceu) ou tonto balançando (perdeu)."""
+        if self.venceu or self.novo_recorde:
+            dy = -abs(math.sin(self.tempo * 5)) * 16
+            ang = 0
+        else:
+            dy = 0
+            ang = math.sin(self.tempo * 4) * 12
+        self.jogador.desenhar(tela, (LARGURA // 2, caixa.y + 150 + dy), 80, angulo=ang)
+        self.app.desenhar_pet(tela, (LARGURA // 2 - 110, caixa.y + 190), feliz=self.venceu)
+
+    def _desenhar_xp_fim(self, tela, caixa):
+        """+XP com a barra do nível e o selo de MEDALHA NOVA (lado esquerdo)."""
+        from core import progresso
+        xp = getattr(self, "xp_ganho", 0)
+        cx = caixa.x + 110
+        if xp:
+            pilula = pygame.Rect(0, 0, 130, 46)
+            pilula.center = (cx, caixa.y + 130)
+            ui.painel(tela, pilula, (24, 44, 70), (120, 220, 255), 23, 3, sombra=False)
+            ui.desenhar_texto(tela, f"+{xp} XP", pilula.center, 14, (170, 235, 255), "center")
+            nivel, atual, meta = progresso.progresso(self.app.save)
+            barra = pygame.Rect(0, 0, 110, 8)
+            barra.midtop = (cx, pilula.bottom + 10)
+            pygame.draw.rect(tela, (60, 60, 90), barra, border_radius=4)
+            enche = min(1.0, self.tempo_estado / 0.8) * atual / meta
+            pygame.draw.rect(tela, (120, 220, 255), (barra.x, barra.y, max(3, int(barra.w * enche)),
+                                                     barra.h), border_radius=4)
+            ui.desenhar_texto(tela, f"NÍVEL {nivel}", (cx, barra.bottom + 6), 8, (180, 220, 255),
+                              "midtop")
+
+        medalha = getattr(self, "medalha_nova", None)
+        if medalha and self.tempo_estado > 0.4:
+            cores = {"bronze": (205, 127, 50), "prata": (200, 205, 215), "ouro": (255, 214, 64)}
+            cor = cores[medalha]
+            k = min(1.0, (self.tempo_estado - 0.4) * 4)
+            raio = int(15 * (1 + 0.3 * math.sin(k * math.pi)))
+            c = (cx - 64, caixa.y + 212)
+            pygame.draw.circle(tela, ui.escurecer(cor, 70), (c[0], c[1] + 2), raio)
+            pygame.draw.circle(tela, cor, c, raio)
+            ui.estrela(tela, c, raio * 0.6, ui.clarear(cor, 60), self.tempo * 1.5)
+            ui.desenhar_texto(tela, "MEDALHA NOVA!", (c[0] + 22, c[1] - 7), 8, AMARELO, "midleft")
+            ui.desenhar_texto(tela, medalha.upper(), (c[0] + 22, c[1] + 7), 10, cor, "midleft")
+
     def _desenhar_fim(self, tela):
         ui.veu(tela, 160)
         caixa = pygame.Rect(0, 0, 600, 560)
@@ -496,25 +676,21 @@ class MiniJogo(Cena):
         ui.desenhar_texto(tela, self.titulo_fim, (LARGURA // 2, caixa.y + 30 + (30 - tam) // 2),
                           tam, cor_titulo, "midtop")
 
-        # Avatar feliz pulando (venceu) ou tonto balançando (perdeu)
-        if self.venceu or self.novo_recorde:
-            dy = -abs(math.sin(self.tempo * 5)) * 16
-            ang = 0
-        else:
-            dy = 0
-            ang = math.sin(self.tempo * 4) * 12
-        self.jogador.desenhar(tela, (LARGURA // 2, caixa.y + 150 + dy), 80, angulo=ang)
-        self.app.desenhar_pet(tela, (LARGURA // 2 - 110, caixa.y + 190), feliz=self.venceu)
+        self._desenhar_avatar_fim(tela, caixa)
 
-        # Moedas ganhas (contando para cima)
+        # Moedas ganhas (contando para cima) e de onde vieram
+        pilula = pygame.Rect(0, 0, 130, 46)
+        pilula.center = (caixa.right - 110, caixa.y + 130)
         if self.moedas_ganhas > 0:
             mostrar = min(self.moedas_ganhas, int(self.tempo_estado * 40) + 1)
-            pilula = pygame.Rect(0, 0, 130, 46)
-            pilula.center = (caixa.right - 110, caixa.y + 150)
             ui.painel(tela, pilula, (60, 48, 20), AMARELO, 23, 3, sombra=False)
             ui.moeda(tela, (pilula.x + 26, pilula.centery), 14)
             ui.desenhar_texto(tela, f"+{mostrar}", (pilula.x + 48, pilula.centery), 16,
                               AMARELO, "midleft")
+        for k, linha in enumerate(getattr(self, "detalhe_moedas", [])[:4]):
+            ui.desenhar_texto(tela, linha, (pilula.centerx, pilula.bottom + 8 + k * 13), 8,
+                              (230, 220, 170), "midtop")
+        self._desenhar_xp_fim(tela, caixa)
 
         y = caixa.y + 230
         for linha in self.linhas_fim:
@@ -530,6 +706,10 @@ class MiniJogo(Cena):
             if rec is not None:
                 ui.desenhar_texto(tela, f"RECORDE: {self.formatar(rec)}", (LARGURA // 2, y + 4),
                                   14, (180, 200, 255), "midtop")
+        falta = getattr(self, "falta_medalha", "")
+        if falta:
+            y += 26
+            ui.desenhar_texto(tela, falta, (LARGURA // 2, y + 4), 10, (255, 200, 120), "midtop")
 
         # Posiciona o menu logo abaixo do texto
         base = max(y + 50, caixa.bottom - len(self.menu_fim.botoes) * 66 - 10)

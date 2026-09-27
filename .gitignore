@@ -1,0 +1,12 @@
+# Saves dos ovos (cada jogador tem os seus)
+saves/
+save_antigo*.json
+erro.log
+
+# Arquivos gerados
+__pycache__/
+build/
+*.exe
+*.tmp
+*.corrompido
+fotos/

@@ -7,8 +7,10 @@ from settings import *
 # ============================================================
 # SAVE
 # ============================================================
-# Guarda nome, aparência, opções de som e recordes num JSON
-# para não perder nada quando o jogo for fechado.
+# Cada ovo tem o seu próprio arquivo (saves/ovo_N.json) com nome,
+# aparência, moedas, recordes, casa, jardim... As preferências de
+# quem está jogando (volume, sons, tamanho da janela...) ficam num
+# arquivo só (saves/global.json), carregado como Config.
 
 PADRAO = {
     "nome": "",
@@ -16,10 +18,7 @@ PADRAO = {
     "cabelo": 0,
     "olho": 0,
     "boca": 0,
-    "volume": VOLUME_PADRAO,
-    "sons": True,
     "recordes": {},
-    "janela": [1024, 720],
 
     # Economia / loja
     "moedas": 0,
@@ -34,58 +33,132 @@ PADRAO = {
     "necessidades": {},
     "jardim": [],
     "ultimo_tempo": 0.0,
-    "sempre_dia": False,
     "album": [],                # borboletas já pegas
     "diario": {},               # baú diário, desafio do ROBERT, limites do dia
     "jogados": [],              # ids de jogos já jogados (jukebox)
+
+    # Vizinhança
+    "casa": {},                 # fachada (ver core/fachada.py)
+    "criado_em": 0.0,
+    "cartas": [],               # cartas dos vizinhos
+
+    # Progresso (core/progresso.py)
+    "xp": 0,
+    "nivel": 1,
+    "conquistas": [],           # ids das conquistas liberadas
+    "stats": {},                # contadores (partidas, banhos, ouros...)
 }
+
+CONFIG_PADRAO = {
+    "versao": 2,
+    "volume": VOLUME_PADRAO,
+    "sons": True,
+    "volume_sfx": 1.0,          # volume dos efeitos (0.0 a 1.0)
+    "tutorial": -1,             # passo do tutorial (-1 = decidir; 99 = acabou)
+    "mostrar_fps": False,
+    "reduzir_tremor": False,
+    "daltonico": False,
+    "amigos": [],               # códigos de amigos (core/codigo.py)
+    "janela": [1024, 720],
+    "sempre_dia": False,
+    "j2": [],                   # aparência sorteada do J2 [ovo, cabelo, olho, boca]
+    "j2_slot": -1,              # ou a casa do vizinho que joga como J2
+    "ultimo_ovo": -1,
+    "temas_ouvidos": [],
+    "viu_rua": False,
+    "tem_ovo": False,           # já criou o 1º ovo (senão: 1ª execução)
+    "migrado": False,
+    "banner_migracao": False,
+}
+
+# Chaves que moram no Config mesmo se alguém pedir ao save do ovo
+CHAVES_GLOBAIS = {"volume", "sons", "volume_sfx", "janela", "sempre_dia", "j2", "j2_slot"}
+
+
+def _validar(dados, padrao):
+    """Copia do `dados` só as chaves conhecidas e com o tipo certo."""
+    saida = copy.deepcopy(padrao)
+    if not isinstance(dados, dict):
+        return saida
+    for chave, valor in dados.items():
+        if chave not in padrao:
+            continue
+        p = padrao[chave]
+        # bool é subclasse de int: não deixa True virar número
+        if isinstance(p, bool) != isinstance(valor, bool):
+            continue
+        if isinstance(valor, type(p)):
+            saida[chave] = valor
+        # int aceito onde o padrão é float
+        elif isinstance(p, float) and isinstance(valor, int):
+            saida[chave] = float(valor)
+    return saida
+
+
+def gravar_json(arquivo, dados):
+    """Gravação atômica: nunca deixa um arquivo pela metade."""
+    pasta = os.path.dirname(arquivo)
+    if pasta:
+        os.makedirs(pasta, exist_ok=True)
+    temp = arquivo + ".tmp"
+    with open(temp, "w", encoding="utf-8") as f:
+        json.dump(dados, f, ensure_ascii=False, indent=2)
+    os.replace(temp, arquivo)
 
 
 class Save:
 
-    def __init__(self, dados=None):
-        self.dados = copy.deepcopy(PADRAO)
+    PADRAO = PADRAO
 
-        if dados:
-            for chave, valor in dados.items():
-                if chave not in PADRAO:
-                    continue
-                padrao = PADRAO[chave]
-                # bool é subclasse de int: não deixa True virar número
-                if isinstance(padrao, bool) != isinstance(valor, bool):
-                    continue
-                if isinstance(valor, type(padrao)):
-                    self.dados[chave] = valor
-                # int aceito onde o padrão é float
-                elif isinstance(padrao, float) and isinstance(valor, int):
-                    self.dados[chave] = float(valor)
+    def __init__(self, dados=None, arquivo=None, config=None):
+        self.dados = _validar(dados, self.PADRAO)
+        # arquivo = None -> rascunho / cópia só de leitura (nunca grava)
+        self.arquivo = arquivo
+        self.config = config
 
     # --------------------------------------------------------
 
-    @classmethod
-    def carregar(cls):
+    @staticmethod
+    def ler(arquivo):
+        """(dict | None, "ok" | "ausente" | "corrompido")."""
+        if not os.path.exists(arquivo):
+            return None, "ausente"
         try:
-            with open(ARQUIVO_SAVE, "r", encoding="utf-8") as f:
-                return cls(json.load(f))
-        except (OSError, ValueError):
-            return cls()
+            with open(arquivo, "r", encoding="utf-8") as f:
+                dados = json.load(f)
+        except (OSError, ValueError, UnicodeDecodeError):
+            return None, "corrompido"
+        if not isinstance(dados, dict):
+            return None, "corrompido"
+        return dados, "ok"
 
     def salvar(self):
+        if self.arquivo is None:
+            return
         try:
-            temp = ARQUIVO_SAVE + ".tmp"
-            with open(temp, "w", encoding="utf-8") as f:
-                json.dump(self.dados, f, ensure_ascii=False, indent=2)
-            os.replace(temp, ARQUIVO_SAVE)
+            gravar_json(self.arquivo, self.dados)
         except OSError:
             pass
 
     # --------------------------------------------------------
 
     def __getitem__(self, chave):
+        if chave in CHAVES_GLOBAIS and self.config is not None:
+            return self.config[chave]
         return self.dados[chave]
 
     def __setitem__(self, chave, valor):
+        if chave in CHAVES_GLOBAIS and self.config is not None:
+            self.config[chave] = valor
+            self.config.salvar()
+            return
         self.dados[chave] = valor
+
+    def get(self, chave, padrao=None):
+        try:
+            return self[chave]
+        except KeyError:
+            return padrao
 
     # --------------------------------------------------------
     # MOEDAS
@@ -125,3 +198,12 @@ class Save:
             return True
 
         return False
+
+
+class Config(Save):
+    """Preferências globais (saves/global.json)."""
+
+    PADRAO = CONFIG_PADRAO
+
+    def __init__(self, dados=None, arquivo=None):
+        super().__init__(dados, arquivo, config=None)

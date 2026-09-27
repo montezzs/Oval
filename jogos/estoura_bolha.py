@@ -275,8 +275,8 @@ class EstouraBolha(MiniJogo):
 
     # O design pedia 1 moeda a cada 60, mas pintinhos (+100) e fases (+500)
     # rendem muito: com 150 uma partida típica (2-3 fases) dá ~20-27 moedas.
-    MOEDAS_POR = 150
-    MOEDAS_MAX = 45
+    MOEDAS_POR = 220
+    MOEDAS_MAX = 27
 
     # --------------------------------------------------------
     # CENÁRIO: hora do banho

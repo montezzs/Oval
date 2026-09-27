@@ -392,8 +392,8 @@ class Ovonoide(MiniJogo):
                   acomp="arpejo16", onda_acomp="quadrada", bateria="disco",
                   energia=0.7, eco=(0.22, 0.3), vol_lead=0.16)
 
-    MOEDAS_POR = 100
-    MOEDAS_MAX = 45
+    MOEDAS_POR = 270
+    MOEDAS_MAX = 30
 
     # --------------------------------------------------------
     # CENÁRIO: fliperama neon

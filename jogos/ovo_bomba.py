@@ -288,10 +288,10 @@ class OvoBomba(MiniJogoMulti):
                   acomp="arpejo16", onda_acomp="quadrada", bateria="breakbeat",
                   energia=0.85, eco=(0.12, 0.2))
 
-    MOEDAS_PARTIDA = 12
-    MOEDAS_VITORIA_J1 = 8
-    MOEDAS_POR_ROUND = 2
-    MOEDAS_TETO = 30
+    MOEDAS_PARTIDA = 8
+    MOEDAS_VITORIA_J1 = 5
+    MOEDAS_POR_ROUND = 1
+    MOEDAS_TETO = 18
 
     # --------------------------------------------------------
     # CENÁRIO: jardim com cerca-viva e grama em xadrez

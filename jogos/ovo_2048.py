@@ -38,7 +38,7 @@ DESFAZER_MAX = 3
 HISTORICO_MAX = 12
 ARRASTO_MIN = 40        # pixels para o arrasto do mouse contar
 CHANCE_QUATRO = 0.10
-BONUS_2048 = 15         # moedas extras ao fazer o primeiro 2048
+BONUS_2048 = 6          # moedas extras ao fazer o primeiro 2048
 
 CIMA, BAIXO, ESQ, DIR = (0, -1), (0, 1), (-1, 0), (1, 0)
 
@@ -522,8 +522,8 @@ class Ovo2048(MiniJogo):
                   baixo="longo", onda_baixo="triangulo", acomp="pad", onda_acomp="triangulo",
                   bateria="halftime", energia=0.3, eco=(0.3, 0.3), vol_bateria=0.3)
 
-    MOEDAS_POR = 100
-    MOEDAS_MAX = 45
+    MOEDAS_POR = 800
+    MOEDAS_MAX = 24
 
     _sprites = {}
     _fundos_tab = {}

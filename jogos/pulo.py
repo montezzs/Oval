@@ -266,8 +266,8 @@ class Nuvem:
 class PuloNuvens(MiniJogo):
 
     ID = "pulo"
-    MOEDAS_POR = 15
-    MOEDAS_MAX = 45
+    MOEDAS_POR = 40
+    MOEDAS_MAX = 25
     TITULO = "PULO NAS NUVENS"
     TITULO_CURTO = "PULO NUVENS"
     DESCRICAO = "Seu ovo quica de nuvem em nuvem! Suba pelo céu até chegar no espaço."

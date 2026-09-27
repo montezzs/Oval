@@ -126,6 +126,14 @@ CATALOGO = {
 EFEITOS = ("nuvenzinha", "aura_notas", "aura_brilhos", "aura_coracoes",
            "aura_dourada")
 
+# Efeitos registrados por outros módulos (core/cosmeticos_novos.py):
+# id -> desenhar(tela, cx, cy, h, t, fase)
+EFEITOS_EXTRA = {}
+
+# Ícones de slots com desenho próprio (core/visual_extra.py):
+# slot -> icone(item_id, tamanho, ovo)
+ICONE_SLOT = {}
+
 
 def esconde_cabelo(ids, cabelo):
     """True se algum chapéu equipado esconde o cabelo `cabelo`."""
@@ -1167,6 +1175,9 @@ def desenhar_efeito(tela, ids, centro, altura, t, fase):
         elif item_id == "aura_dourada":
             tem_efeito = True
             _aura_dourada(tela, cx, cy, h, t, fase)
+        elif item_id in EFEITOS_EXTRA:
+            tem_efeito = True
+            EFEITOS_EXTRA[item_id](tela, cx, cy, h, t, fase)
 
     if not tem_efeito and fase == "frente" and "aureola" in ids:
         _aureola_brilho(tela, cx, cy, h, t)
@@ -1299,6 +1310,8 @@ def icone(item_id, tamanho, ovo=1):
 
     if item_id not in CATALOGO:
         sup = pygame.Surface((tamanho, tamanho), pygame.SRCALPHA)
+    elif CATALOGO[item_id]["slot"] in ICONE_SLOT:
+        sup = ICONE_SLOT[CATALOGO[item_id]["slot"]](item_id, tamanho, ovo)
     elif CATALOGO[item_id]["slot"] == "efeito":
         sup = _icone_efeito(item_id, tamanho, ovo)
     else:
@@ -1308,3 +1321,9 @@ def icone(item_id, tamanho, ovo=1):
         _cache_icones.clear()
     _cache_icones[chave] = sup
     return sup
+
+
+# Coleção nova (registra-se no CATALOGO acima)
+from core import cosmeticos_novos  # noqa: E402,F401
+# Aparência extra: cabelos/olhos/bocas/cores/roupas (registra-se também)
+from core import visual_extra  # noqa: E402,F401

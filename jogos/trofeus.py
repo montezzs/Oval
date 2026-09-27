@@ -51,6 +51,11 @@ REGRAS = {
     "ninho_arrumado": _r(60, 40, 20),
     "estoura_bolha": _r(6000),
     "ovo_estrada": _r(2000),
+    # Mais novos
+    "ovo_sobrevivente": _r(8000, 5000, 2500),
+    "micro_ovo": _r(30, 18, 8),
+    "pinball_ovo": _r(90000, 45000, 20000),
+    "ovo_cozinheiro": _r(1600),
 }
 
 PARTIDAS = dict(tipo="partidas", bronze=1, prata=10, ouro=30)

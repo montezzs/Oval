@@ -30,7 +30,7 @@ X_OVO = 260                     # posição do ovo na tela
 
 # Ovo
 ALTURA_OVO = 70
-BOCA_SUSTO = 2                  # boca "O" (susto na água)
+from core.jogador import BOCA_ABERTA as BOCA_SUSTO  # boca "O" (susto na água)
 
 # Salto
 TEMPO_CARGA = 0.9               # segundos para a força ir de 0 a 1
@@ -350,8 +350,8 @@ class SaltoLago(MiniJogo):
                   baixo="longo", onda_baixo="triangulo", acomp="arpejo8", onda_acomp="sino",
                   bateria="suave", energia=0.3, eco=(0.33, 0.35))
 
-    MOEDAS_POR = 2
-    MOEDAS_MAX = 45
+    MOEDAS_POR = 6
+    MOEDAS_MAX = 18
     MOEDAS_MIN = 1
 
     # --------------------------------------------------------

@@ -211,6 +211,15 @@ def estrela(tela, centro, raio, cor=AMARELO, angulo=0.0):
     pygame.draw.polygon(tela, cor, pontos)
 
 
+def check(tela, centro, tamanho=10, cor=(140, 255, 150)):
+    """Sinal de "feito" desenhado (a fonte pixelada não tem o ✓)."""
+    x, y = centro
+    t = tamanho / 2
+    pontos = [(x - t, y), (x - t * 0.3, y + t * 0.7), (x + t, y - t * 0.8)]
+    pygame.draw.lines(tela, (20, 40, 20), False, [(px + 1, py + 1) for px, py in pontos], 4)
+    pygame.draw.lines(tela, cor, False, pontos, 3)
+
+
 def limao(tela, centro, raio, angulo=0.0):
     """Desenha um limão (usado em vários jogos)."""
     sup = limao_sup(raio)
@@ -492,3 +501,60 @@ class TextoFlutuante:
                 sup = sup.copy()
                 sup.set_alpha(int(255 * vida * 2))
             tela.blit(sup, sup.get_rect(center=(x + desloc[0], y + desloc[1])))
+
+
+# ============================================================
+# TOASTS (avisos de conquista / nível, em qualquer tela)
+# ============================================================
+
+class Toasts:
+    """Painéis que deslizam do canto direito e somem sozinhos."""
+
+    DURACAO = 3.2
+    LARGURA_T = 330
+    ALTURA_T = 64
+
+    def __init__(self, tocar_som=None):
+        self.fila = []
+        self.ativos = []            # [titulo, texto, premio, tempo]
+        self.tocar_som = tocar_som
+
+    def adicionar(self, titulo, texto, premio="", som="conquista"):
+        self.fila.append((titulo, texto, premio, som))
+
+    def atualizar(self, dt):
+        # Um novo entra a cada 0,6 s (no máximo 3 na tela)
+        if self.fila and len(self.ativos) < 3 and \
+                (not self.ativos or self.ativos[-1][3] > 0.6):
+            titulo, texto, premio, som = self.fila.pop(0)
+            self.ativos.append([titulo, texto, premio, 0.0])
+            if self.tocar_som and som:
+                self.tocar_som(som)
+        for t in self.ativos:
+            t[3] += dt
+        self.ativos = [t for t in self.ativos if t[3] < self.DURACAO]
+
+    def desenhar(self, tela):
+        # Canto de baixo, à direita, empilhando para cima (o topo da
+        # tela tem o contador de moedas e os placares dos jogos)
+        y = ALTURA - 16 - self.ALTURA_T
+        for titulo, texto, premio, t in self.ativos:
+            entrada = min(1.0, t / 0.25)
+            saida = min(1.0, (self.DURACAO - t) / 0.3)
+            k = min(entrada, saida)
+            k = 1 - (1 - k) ** 3
+            x = LARGURA - int((self.LARGURA_T + 16) * k)
+            r = pygame.Rect(x, y, self.LARGURA_T, self.ALTURA_T)
+            painel(tela, r, (34, 30, 64), AMARELO, 14, 3)
+            # Medalhinha
+            c = (r.x + 32, r.centery)
+            pygame.draw.circle(tela, (200, 140, 30), c, 20)
+            pygame.draw.circle(tela, AMARELO, c, 16)
+            estrela(tela, c, 10, (255, 250, 210), t * 3)
+            desenhar_texto(tela, titulo, (r.x + 62, r.y + 14), 12, AMARELO, "topleft")
+            tam = tamanho_que_cabe(texto, r.w - (130 if premio else 76), (10, 8))
+            desenhar_texto(tela, texto, (r.x + 62, r.y + 38), tam, BRANCO, "topleft")
+            if premio:
+                moeda(tela, (r.right - 58, r.y + 40), 8)
+                desenhar_texto(tela, premio, (r.right - 46, r.y + 40), 10, AMARELO, "midleft")
+            y -= self.ALTURA_T + 10

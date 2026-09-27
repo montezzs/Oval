@@ -244,9 +244,9 @@ class Lanchonete(MiniJogo):
         "←→ escolhe • ESPAÇO põe • 1-7 • ↑ lixo",
     ]
     OPCOES = ["CAFÉ DA MANHÃ", "ALMOÇO", "HORA DO RUSH"]
-    MOEDAS_POR = 25
-    MOEDAS_MAX = 45
-    MOEDAS_VITORIA = 5
+    MOEDAS_POR = 50
+    MOEDAS_MAX = 24
+    MOEDAS_VITORIA = 4
 
     TRILHA = dict(bpm=150, tom="Bb", escala="blues", lead="quadrada", duty=0.5,
                   envelope="normal", baixo="walking", onda_baixo="triangulo",

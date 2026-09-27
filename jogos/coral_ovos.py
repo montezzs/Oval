@@ -170,7 +170,7 @@ class CoralOvos(MiniJogo):
                   baixo="pop", onda_baixo="seno", acomp="arpejo8", onda_acomp="sino",
                   bateria="suave", energia=0.35, eco=(0.28, 0.3))
 
-    MOEDAS_MAX = 40
+    MOEDAS_MAX = 30
 
     # --------------------------------------------------------
     # CENÁRIO: palco de teatro
@@ -408,7 +408,7 @@ class CoralOvos(MiniJogo):
             total = pygame.mixer.get_num_channels()
             self.canal = 1 - self.canal
             canal = pygame.mixer.Channel(max(0, total - 1 - self.canal))
-            snd.set_volume(0.6 * volume)
+            snd.set_volume(0.6 * volume * self.audio.volume_sfx)
             canal.play(snd)
         except pygame.error:
             pass
@@ -606,7 +606,7 @@ class CoralOvos(MiniJogo):
                       linhas=linhas)
 
     def calcular_moedas(self, valor, venceu):
-        moedas = 2 * valor
+        moedas = valor + valor // 4
         if self.opcao == 2:
             moedas = int(moedas * 1.5)
         if valor > 0:

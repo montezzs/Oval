@@ -31,9 +31,9 @@ RAIO_POSTE = 4
 # Rebatedores (os ovos)
 R_REB = 42
 ALTURA_OVO = 76
-ACELERACAO = 3000
-VEL_MAX_REB = 520
-ATRITO_REB = 6.0
+ACELERACAO = 4800
+VEL_MAX_REB = 560
+ATRITO_REB = 8.5
 CASA = [(MESA.left + 110, GOL_Y), (MESA.right - 110, GOL_Y)]
 
 # Limão (disco)
@@ -77,6 +77,11 @@ COR_BRILHO = (90, 120, 200)
 
 _cache = {}
 
+# Giros do limão pré-desenhados (rotate a cada frame pesa)
+PASSOS_GIRO = 48
+# Squash do ovo em degraus (smoothscale a cada frame pesa)
+PASSOS_ESTICAR = 12
+
 
 def _circulo_alpha(raio, cor, alpha):
     chave = ("c", raio, cor, alpha)
@@ -84,6 +89,17 @@ def _circulo_alpha(raio, cor, alpha):
     if s is None:
         s = pygame.Surface((raio * 2 + 2, raio * 2 + 2), pygame.SRCALPHA)
         pygame.draw.circle(s, (*cor, alpha), (raio + 1, raio + 1), raio)
+        _cache[chave] = s
+    return s
+
+
+def _limao_girado(raio, quente, angulo):
+    passo = int((angulo % 360) / 360 * PASSOS_GIRO) % PASSOS_GIRO
+    chave = ("giro", raio, quente, passo)
+    s = _cache.get(chave)
+    if s is None:
+        base = _limao_quente(raio) if quente else ui.limao_sup(raio)
+        s = pygame.transform.rotate(base, passo * 360 / PASSOS_GIRO)
         _cache[chave] = s
     return s
 
@@ -160,9 +176,9 @@ class HoqueiOvo(MiniJogoMulti):
     CONTROLES_J2 = "SETAS + ENTER"
     CONTAGEM = True
 
-    MOEDAS_PARTIDA = 12
-    MOEDAS_VITORIA_J1 = 8
-    MOEDAS_MAX = 30
+    MOEDAS_PARTIDA = 8
+    MOEDAS_VITORIA_J1 = 5
+    MOEDAS_MAX = 18
 
     TRILHA = dict(bpm=152, tom="E", escala="maior", lead="serra", envelope="normal",
                   baixo="rock", onda_baixo="quadrada", acomp="chop", onda_acomp="quadrada",
@@ -254,10 +270,10 @@ class HoqueiOvo(MiniJogoMulti):
             pygame.draw.circle(sup, (120, 30, 30), (px, py), 7, 2)
 
         # Plaquinhas de patrocínio na borda
-        for texto, cx, cy in (("OVEIO", 250, MESA.top - BORDA // 2),
+        for texto, cx, cy in (("OVAL", 250, MESA.top - BORDA // 2),
                               ("LIMÕES & CIA", LARGURA - 250, MESA.top - BORDA // 2),
                               ("LIMÕES & CIA", 250, MESA.bottom + BORDA // 2),
-                              ("OVEIO", LARGURA - 250, MESA.bottom + BORDA // 2)):
+                              ("OVAL", LARGURA - 250, MESA.bottom + BORDA // 2)):
             t = ui.texto(texto, 10, (40, 40, 60), sombra=False)
             r = t.get_rect(center=(cx, cy)).inflate(16, 8)
             pygame.draw.rect(sup, (255, 230, 90), r, border_radius=4)
@@ -297,7 +313,11 @@ class HoqueiOvo(MiniJogoMulti):
         self.banner = None
         # Avatares guardados (o cache do jogador pode ser limpo)
         self._avatares = [self.jogador.avatar(ALTURA_OVO, self.aparencia(i)).copy() for i in (0, 1)]
+        self._avatares[1] = pygame.transform.flip(self._avatares[1], True, False)
         self._mini = [self.jogador.avatar(34, self.aparencia(i)).copy() for i in (0, 1)]
+        self._mini[1] = pygame.transform.flip(self._mini[1], True, False)
+        self._esticados = {}
+        self._hud_cache = None
 
     def _banner(self, texto, cor, tempo, tamanho=28):
         self.banner = [texto, cor, tempo, tamanho, tempo]
@@ -728,7 +748,7 @@ class HoqueiOvo(MiniJogoMulti):
             self._banner("MATCH POINT!", (255, 150, 150), 1.4, 20)
 
     def calcular_moedas(self, valor, venceu):
-        base = self.MOEDAS_PARTIDA + sum(self.placar)
+        base = self.MOEDAS_PARTIDA + sum(self.placar) // 3
         if venceu:
             base += self.MOEDAS_VITORIA_J1
         return min(self.MOEDAS_MAX, base)
@@ -756,8 +776,7 @@ class HoqueiOvo(MiniJogoMulti):
                     raio = max(4, int(R_LIMAO * (1 - k * 0.14)))
                     alpha = (130 if L.quente else 90) - k * 18
                     tela.blit(_circulo_alpha(raio, cor, alpha), (px - raio - 1, py - raio - 1))
-            sup = _limao_quente(R_LIMAO) if L.quente else ui.limao_sup(R_LIMAO)
-            sup = pygame.transform.rotate(sup, L.angulo % 360)
+            sup = _limao_girado(R_LIMAO, L.quente, L.angulo)
             tela.blit(sup, sup.get_rect(center=(round(L.x), round(L.y))))
             if self.fase == "saque" and self.estado == "jogando":
                 raio = R_LIMAO + 8 + int(abs(math.sin(t * 6)) * 5)
@@ -808,19 +827,27 @@ class HoqueiOvo(MiniJogoMulti):
             pygame.draw.arc(tela, (200, 210, 230), rect, math.pi / 2, math.pi / 2 + math.tau * frac, 3)
 
         # O ovo em cima (squash quando rebate)
-        sup = self._avatares[r.i]
-        if r.i == 1:
-            sup = pygame.transform.flip(sup, True, False)
-        e = r.esticar
-        if abs(e) > 0.02:
-            w, h = sup.get_size()
-            sup = pygame.transform.smoothscale(sup, (max(2, round(w * (1 - 0.18 * e))),
-                                                     max(2, round(h * (1 + 0.16 * e)))))
+        e = round(r.esticar * PASSOS_ESTICAR) / PASSOS_ESTICAR
+        sup = self._ovo_esticado(r.i, e)
         w, h = sup.get_size()
         altura_vista = ALTURA_OVO * (1 + 0.16 * e) if abs(e) > 0.02 else ALTURA_OVO
         # Os pés ficam no centro de baixo do disco
         centro_ovo_y = cy + R_REB * 0.45 - altura_vista / 2
         tela.blit(sup, sup.get_rect(center=(cx, round(centro_ovo_y - h * 0.01))))
+
+    def _ovo_esticado(self, i, e):
+        """Avatar com squash/stretch (em degraus, guardado em cache)."""
+        if abs(e) <= 0.02:
+            return self._avatares[i]
+        chave = (i, e)
+        sup = self._esticados.get(chave)
+        if sup is None:
+            base = self._avatares[i]
+            w, h = base.get_size()
+            sup = pygame.transform.smoothscale(base, (max(2, round(w * (1 - 0.18 * e))),
+                                                      max(2, round(h * (1 + 0.16 * e)))))
+            self._esticados[chave] = sup
+        return sup
 
     def _desenhar_banner(self, tela):
         if not self.banner or self.estado != "jogando":
@@ -837,23 +864,10 @@ class HoqueiOvo(MiniJogoMulti):
         """Placar central com os dois ovinhos."""
         caixa = pygame.Rect(0, 6, 540, 66)
         caixa.centerx = LARGURA // 2
-        ui.painel(tela, caixa, (20, 24, 40), BRANCO, 14, 3, sombra=False)
-
-        for i in (0, 1):
-            lado = -1 if i == 0 else 1
-            sup = self._mini[i]
-            if i == 1:
-                sup = pygame.transform.flip(sup, True, False)
-            x_ovo = caixa.centerx + lado * 238
-            tela.blit(sup, sup.get_rect(center=(x_ovo, caixa.centery + 2)))
-            nome = self.nome(i)[:10]
-            ui.desenhar_texto(tela, nome, (caixa.centerx + lado * 205, caixa.y + 20), 12,
-                              CORES_JOGADOR[i], "midright" if i == 1 else "midleft")
-            ui.desenhar_texto(tela, str(self.placar[i]), (caixa.centerx + lado * 50, caixa.centery + 2),
-                              32, AMARELO, "center")
-        ui.desenhar_texto(tela, "×", (caixa.centerx, caixa.centery + 2), 20, BRANCO, "center")
-        ui.desenhar_texto(tela, f"ATÉ {self.meta}", (caixa.centerx + (-150), caixa.bottom - 12), 10,
-                          (180, 200, 255), "center")
+        chave = (self.meta, tuple(self.placar))
+        if self._hud_cache is None or self._hud_cache[0] != chave:
+            self._hud_cache = (chave, self._montar_hud(caixa))
+        tela.blit(self._hud_cache[1], caixa.topleft)
         if len(self.limoes) == 2 and self.fase != "gol":
             ui.desenhar_texto(tela, "2 LIMÕES!", (caixa.centerx + 150, caixa.bottom - 12), 10,
                               AMARELO, "center")
@@ -863,6 +877,24 @@ class HoqueiOvo(MiniJogoMulti):
                 ui.desenhar_texto(tela, f"LIMÃO EXTRA EM {falta}", (caixa.centerx + 150,
                                                                    caixa.bottom - 12), 10,
                                   (255, 200, 120), "center")
+
+    def _montar_hud(self, caixa):
+        """Placar pré-desenhado (só muda quando sai gol)."""
+        sup = pygame.Surface(caixa.size, pygame.SRCALPHA)
+        c = sup.get_rect()
+        ui.painel(sup, c, (20, 24, 40), BRANCO, 14, 3, sombra=False)
+        for i in (0, 1):
+            lado = -1 if i == 0 else 1
+            mini = self._mini[i]
+            sup.blit(mini, mini.get_rect(center=(c.centerx + lado * 238, c.centery + 2)))
+            ui.desenhar_texto(sup, self.nome(i)[:10], (c.centerx + lado * 205, c.y + 20), 12,
+                              CORES_JOGADOR[i], "midright" if i == 1 else "midleft")
+            ui.desenhar_texto(sup, str(self.placar[i]), (c.centerx + lado * 50, c.centery + 2),
+                              32, AMARELO, "center")
+        ui.desenhar_texto(sup, "×", (c.centerx, c.centery + 2), 20, BRANCO, "center")
+        ui.desenhar_texto(sup, f"ATÉ {self.meta}", (c.centerx - 150, c.bottom - 12), 10,
+                          (180, 200, 255), "center")
+        return sup
 
     # --------------------------------------------------------
     # TELA DE INÍCIO (VS) COMPACTA

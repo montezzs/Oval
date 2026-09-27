@@ -67,10 +67,11 @@ class Necessidades:
 
     # --------------------------------------------------------
 
-    def atualizar(self, dt, dormindo=False, mult_sono=1.0, mult_higiene=1.0):
+    def atualizar(self, dt, dormindo=False, mult_sono=1.0, mult_higiene=1.0,
+                  mult_fome=1.0, mult_diversao=1.0):
         minuto = dt / 60.0
-        self.mudar("fome", -TAXAS["fome"] * minuto)
-        self.mudar("diversao", -TAXAS["diversao"] * minuto)
+        self.mudar("fome", -TAXAS["fome"] * minuto * mult_fome)
+        self.mudar("diversao", -TAXAS["diversao"] * minuto * mult_diversao)
         self.mudar("higiene", -TAXAS["higiene"] * minuto * mult_higiene)
         if dormindo:
             self.mudar("energia", DORMIR_POR_SEGUNDO * mult_sono * dt)

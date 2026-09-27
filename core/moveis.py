@@ -2383,3 +2383,7 @@ def icone(movel_id, tamanho):
         _icones.clear()
     _icones[chave] = s
     return s
+
+
+# Coleção nova (registra-se no CATALOGO e em _CLASSES)
+from core import moveis_novos  # noqa: E402,F401

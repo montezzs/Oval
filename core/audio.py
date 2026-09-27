@@ -178,6 +178,43 @@ def _sfx_acerto():
     return b
 
 
+def _sfx_tic():
+    b = s.buffer_vazio(0.035)
+    s.nota(b, 0, len(b), 1500, "quadrada", 0.25, 0.25, envelope="pluck")
+    return b
+
+
+def _sfx_levelup():
+    b = s.buffer_vazio(1.0)
+    n = int(0.07 * s.TAXA)
+    for i, f in enumerate([523, 659, 784, 1046, 1318, 1568]):
+        s.nota(b, i * n, n + 200, f, "quadrada", 0.25, 0.25)
+    s.nota(b, 6 * n, len(b) - 6 * n, 2093, "sino", 0.35, envelope="pluck")
+    s.nota(b, 6 * n, len(b) - 6 * n, 1046, "triangulo", 0.4, envelope="pluck")
+    return b
+
+
+def _sfx_conquista():
+    b = s.buffer_vazio(0.7)
+    n = int(0.09 * s.TAXA)
+    for i, f in enumerate([784, 988, 1175]):
+        s.nota(b, i * n, len(b) - i * n, f, "sino", 0.3, envelope="pluck")
+    s.nota(b, 3 * n, len(b) - 3 * n, 1568, "triangulo", 0.3, envelope="pluck")
+    return b
+
+
+def _sfx_obturador():
+    rnd = random.Random(12)
+    n = int(0.16 * s.TAXA)
+    b = []
+    for i in range(n):
+        t = i / n
+        # dois "cliques" de ruído: abre e fecha
+        env = max(0.0, 1 - t * 12) + max(0.0, 1 - abs(t - 0.55) * 14)
+        b.append(rnd.uniform(-1, 1) * 0.5 * env)
+    return b
+
+
 SFX = {
     "clique": _sfx_clique,
     "selecionar": _sfx_selecionar,
@@ -198,7 +235,32 @@ SFX = {
     "asa": _sfx_asa,
     "ponto": _sfx_ponto,
     "acerto": _sfx_acerto,
+    "tic": _sfx_tic,
+    "levelup": _sfx_levelup,
+    "conquista": _sfx_conquista,
+    "obturador": _sfx_obturador,
 }
+
+# Efeitos que tocam MUITO: ganham versões com o tom um pouco
+# diferente (sorteadas a cada vez) para não cansar o ouvido.
+VARIAR_TOM = ("clique", "moeda", "pulo", "ponto", "bater", "boing", "comer", "revelar", "tic")
+TONS = (0.94, 1.0, 1.06)
+
+
+def _reamostrar(buf, fator):
+    """Tom (e duração) multiplicados por `fator`."""
+    n = max(1, int(len(buf) / fator))
+    ultimo = len(buf) - 1
+    saida = []
+    for i in range(n):
+        x = i * fator
+        k = int(x)
+        if k >= ultimo:
+            saida.append(buf[ultimo])
+        else:
+            f = x - k
+            saida.append(buf[k] * (1 - f) + buf[k + 1] * f)
+    return saida
 
 
 # ============================================================
@@ -217,13 +279,21 @@ class Audio:
         self._proxima = None       # faixa esperando o fade
         self._fade = 0.0           # 1 = volume cheio
         self._saindo = False
+        self._esperando = None     # trilha sendo gerada em segundo plano
+        self._relogio_espera = 0.0
 
         if self.ativo:
             pygame.mixer.set_num_channels(16)
             for nome, gerar in SFX.items():
                 try:
-                    pcm = s.para_pcm(gerar(), 0.7)
-                    self.sons[nome] = pygame.mixer.Sound(file=s.wav_em_memoria(pcm))
+                    buf = gerar()
+                    tons = TONS if nome in VARIAR_TOM else (1.0,)
+                    variacoes = []
+                    for fator in tons:
+                        b = buf if fator == 1.0 else _reamostrar(buf, fator)
+                        pcm = s.para_pcm(b, 0.7)
+                        variacoes.append(pygame.mixer.Sound(file=s.wav_em_memoria(pcm)))
+                    self.sons[nome] = variacoes
                 except pygame.error:
                     pass
 
@@ -251,14 +321,36 @@ class Audio:
         self.save["sons"] = not self.save["sons"]
         self.save.salvar()
 
+    @property
+    def volume_sfx(self):
+        """0.0 = efeitos desligados."""
+        if not self.save["sons"]:
+            return 0.0
+        return max(0.0, min(1.0, float(self.save["volume_sfx"])))
+
+    def proximo_volume_sfx(self):
+        """100% -> 75% -> 50% -> 25% -> DESLIGADO -> 100%..."""
+        atual = self.volume_sfx
+        menores = [v for v in reversed(VOLUMES) if v < atual - 0.01 and v > 0]
+        if atual <= 0.01:
+            self.save["sons"] = True
+            self.save["volume_sfx"] = 1.0
+        elif menores:
+            self.save["volume_sfx"] = menores[0]
+        else:
+            self.save["sons"] = False
+        self.save.salvar()
+
     # --------------------------------------------------------
     # MÚSICA
     # --------------------------------------------------------
 
     def tocar(self, nome):
         """Troca a música com fade. Não faz nada se já estiver tocando."""
-        if not self.ativo or nome == (self._proxima or self.atual):
+        if not self.ativo or nome == (self._proxima or self._esperando or self.atual):
             return
+        self._esperando = None
+        self._marcar_ouvido(nome)
 
         if self.atual is None:
             self._iniciar(nome)
@@ -274,8 +366,21 @@ class Audio:
             raise ValueError(f"trilha desconhecida: {nome}")
         arq = trilhas.arquivo(nome)
         if not os.path.exists(arq):
-            trilhas.gerar(nome)
+            # Gera numa thread e toca quando ficar pronta (não trava a tela)
+            trilhas.gerar_em_fundo(nome)
+            return None
         return arq
+
+    def _marcar_ouvido(self, nome):
+        """Temas ouvidos aparecem na jukebox (seção TEMAS)."""
+        if nome in trilhas.TEMAS:
+            try:
+                ouvidos = self.save["temas_ouvidos"]
+            except KeyError:
+                return
+            if nome not in ouvidos:
+                ouvidos.append(nome)
+                self.save.salvar()
 
     def _iniciar(self, nome):
         self.atual = nome
@@ -284,7 +389,14 @@ class Audio:
         self._fade = 0.0
 
         try:
-            pygame.mixer.music.load(self._arquivo(nome))
+            arq = self._arquivo(nome)
+            if arq is None:
+                # Ainda gerando: silêncio até ficar pronta
+                pygame.mixer.music.stop()
+                self.atual = None
+                self._esperando = nome
+                return
+            pygame.mixer.music.load(arq)
             pygame.mixer.music.set_volume(0.0)
             pygame.mixer.music.play(-1)
         except (pygame.error, OSError, ValueError):
@@ -321,6 +433,18 @@ class Audio:
 
         passo = dt / self.TEMPO_FADE
 
+        if self._esperando is not None:
+            self._relogio_espera += dt
+            if self._relogio_espera > 0.5:
+                self._relogio_espera = 0.0
+                nome = self._esperando
+                if nome in trilhas.FALHARAM:
+                    self._esperando = None
+                elif os.path.exists(trilhas.arquivo(nome)):
+                    self._esperando = None
+                    self._iniciar(nome)
+            return
+
         if self._saindo:
             self._fade -= passo
             if self._fade <= 0:
@@ -336,9 +460,11 @@ class Audio:
     # --------------------------------------------------------
 
     def som(self, nome, volume=1.0):
-        if not self.ativo or not self.sons_ligados:
+        vol = self.volume_sfx if self.ativo else 0.0
+        if vol <= 0:
             return
-        snd = self.sons.get(nome)
-        if snd is not None:
-            snd.set_volume(0.55 * volume)
+        variacoes = self.sons.get(nome)
+        if variacoes:
+            snd = random.choice(variacoes)
+            snd.set_volume(min(1.0, 0.55 * volume * vol))
             snd.play()

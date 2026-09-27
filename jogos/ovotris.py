@@ -228,8 +228,8 @@ class Ovotris(MiniJogo):
                   acomp="arpejo8", onda_acomp="sino", bateria="marcha",
                   energia=0.75, eco=(0.1, 0.15))
 
-    MOEDAS_POR = 300
-    MOEDAS_MAX = 45
+    MOEDAS_POR = 1000
+    MOEDAS_MAX = 30
 
     # --------------------------------------------------------
     # CENÁRIO: galinheiro à noite

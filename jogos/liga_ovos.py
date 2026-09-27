@@ -252,8 +252,8 @@ class LigaOvos(MiniJogo):
                   baixo="pop", onda_baixo="seno", acomp="arpejo8", onda_acomp="sino",
                   bateria="halftime", energia=0.4, eco=(0.25, 0.25), vol_bateria=0.35)
 
-    MOEDAS_POR = 40
-    MOEDAS_MAX = 45
+    MOEDAS_POR = 100
+    MOEDAS_MAX = 30
 
     _sprites = {}
 

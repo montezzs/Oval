@@ -173,7 +173,7 @@ _estado_trilha = {"thread": None, "falhou": False}
 def _gerar_em_segundo_plano():
     arq = trilhas.arquivo(ID_JOGO)
     try:
-        os.makedirs(PASTA_TRILHAS, exist_ok=True)
+        os.makedirs(os.path.dirname(arq), exist_ok=True)
         buf = _compor_musica()
         temp = f"{arq}.{os.getpid()}.tmp"
         sint.salvar_wav(temp, sint.para_pcm(buf, 0.8))
@@ -489,7 +489,7 @@ class OvoRitmo(MiniJogo):
     CONTAGEM = True
     TRILHA = None           # música composta à mão (ver _compor_musica)
 
-    MOEDAS_MAX = 45
+    MOEDAS_MAX = 24
     SINCRONIZAR = True      # corrigir o relógio pela posição do áudio
 
     # --------------------------------------------------------
@@ -905,8 +905,8 @@ class OvoRitmo(MiniJogo):
                       linhas=linhas)
 
     def calcular_moedas(self, valor, venceu):
-        moedas = self.acertos // 6
-        moedas += {"S": 15, "A": 10, "B": 5}.get(self.nota_final, 0)
+        moedas = self.acertos // 15
+        moedas += {"S": 8, "A": 5, "B": 2}.get(self.nota_final, 0)
         if valor > 0:
             moedas = max(moedas, self.MOEDAS_MIN)
         return max(0, min(self.MOEDAS_MAX, moedas))
