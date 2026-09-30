@@ -59,7 +59,9 @@ class Janela:
         # Sem janela de verdade (testes com o driver "dummy"), o SCALED não
         # tem renderizador e pode derrubar o processo: usa o modo antigo
         sem_video = os.environ.get("SDL_VIDEODRIVER", "").lower() in ("dummy", "offscreen")
-        if not os.environ.get("OVAL_SEM_GPU") and not sem_video:
+        # O SCALED corrompeu memória em algumas máquinas (crash nativo ao
+        # trocar de cena): fica só como opção de teste (OVAL_GPU=1)
+        if os.environ.get("OVAL_GPU") and not sem_video:
             try:
                 self.superficie = pygame.display.set_mode((LARGURA, ALTURA),
                                                           pygame.SCALED | pygame.RESIZABLE)
@@ -195,5 +197,7 @@ class Janela:
             self.superficie.blit(self.tela, self.destino)
         else:
             alvo = self.superficie.subsurface(self.destino)
-            pygame.transform.smoothscale(self.tela, self.destino.size, alvo)
+            # scale (vizinho mais próximo) é ~4x mais rápido que smoothscale
+            # e combina com a arte pixelada
+            pygame.transform.scale(self.tela, self.destino.size, alvo)
         pygame.display.flip()

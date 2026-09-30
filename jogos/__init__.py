@@ -48,6 +48,17 @@ from jogos.futebol_ovo import FutebolOvo
 from jogos.ovo_bomba import OvoBomba
 from jogos.corrida_rua import CorridaRua
 
+# ---------------- Contra BOT ou 2 jogadores ----------------
+from jogos.xadegg import Xadegg
+from jogos.quatro_linha import QuatroEmLinha
+from jogos.pontinhos import Pontinhos
+from jogos.jogo_velha import JogoVelha
+from jogos.ovo_kombat import OvoKombat
+from jogos.thumb_fighter import ThumbFighter
+from jogos.boliche import Boliche
+from jogos.dardos import Dardos
+from jogos.rei_quintal import ReiQuintal
+
 JOGOS = [
     Cobrinha, CampoMinado, Memoria, Volei, ChuvaComida, PuloNuvens, OvoVoador,
     OvoCorredor, Ovonoide, Ovo2048, MiniGolfe, Atravessa, CoralOvos, OvoColher,
@@ -55,4 +66,5 @@ JOGOS = [
     Lanchonete, OvoRitmo, OvoMan, NinhoArrumado, EstouraBolha, OvoEstrada,
     OvoSobrevivente, MicroOvo, PinballOvo, OvoCozinheiro,
     SumoOvo, HoqueiOvo, GuerraTinta, FutebolOvo, OvoBomba, CorridaRua,
+    Xadegg, QuatroEmLinha, Pontinhos, JogoVelha, OvoKombat, ThumbFighter, Boliche, Dardos, ReiQuintal,
 ]

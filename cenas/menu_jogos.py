@@ -63,7 +63,9 @@ class CenaMenuJogos(Cena):
     @property
     def jogos(self):
         multi = ABAS[self.aba][1]
-        return [j for j in self.todos if bool(getattr(j, "MULTI", False)) == multi]
+        # Jogos híbridos (bot ou 2 jogadores) aparecem nas duas abas
+        return [j for j in self.todos
+                if bool(getattr(j, "MULTI", False)) == multi or getattr(j, "HIBRIDO", False)]
 
     @property
     def indice(self):
@@ -271,7 +273,8 @@ class CenaMenuJogos(Cena):
         for i, (nome, multi) in enumerate(ABAS):
             r = self.rects_abas[i]
             ativa = i == self.aba
-            qtd = sum(1 for j in self.todos if bool(getattr(j, "MULTI", False)) == multi)
+            qtd = sum(1 for j in self.todos
+                      if bool(getattr(j, "MULTI", False)) == multi or getattr(j, "HIBRIDO", False))
             pygame.draw.rect(tela, (90, 60, 150) if ativa else (40, 30, 70), r, border_radius=12)
             pygame.draw.rect(tela, AMARELO if ativa else (140, 120, 180), r, 3, border_radius=12)
             ui.desenhar_texto(tela, f"{nome} ({qtd})", r.center, 14,

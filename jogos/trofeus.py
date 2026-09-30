@@ -62,6 +62,8 @@ PARTIDAS = dict(tipo="partidas", bronze=1, prata=10, ouro=30)
 
 
 def regra(jogo):
+    if getattr(jogo, "HIBRIDO", False):
+        return REGRAS.get(jogo.ID, dict(tipo="opcao"))
     if getattr(jogo, "MULTI", False):
         return REGRAS.get(jogo.ID, PARTIDAS)
     return REGRAS.get(jogo.ID)
