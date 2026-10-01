@@ -1,0 +1,14 @@
+# Python
+__pycache__/
+*.pyc
+
+# PyInstaller (o .exe é publicado nas Releases do GitHub)
+build/
+dist/
+*.exe
+*.spec
+
+# Arquivos locais
+erro.log
+save.json
+save.json.tmp
