@@ -221,7 +221,7 @@ class CenaMenuJogos(Cena):
         self.fundo.desenhar(tela)
 
         y = 22 + math.sin(self.tempo * 2) * 3
-        ui.desenhar_texto(tela, "MINI JOGOS", (LARGURA // 2, y), 36, AMARELO, "midtop")
+        ui.desenhar_texto(tela, "MINI JOGOS", (LARGURA // 2, y), 36, AMARELO, "midtop", True, True)
         self.botao_voltar.desenhar(tela)
         self.botao_loja.desenhar(tela)
         ui.desenhar_moedas(tela, self.app.save["moedas"], (LARGURA - 16, 76), "topright")
@@ -282,7 +282,8 @@ class CenaMenuJogos(Cena):
                              border_radius=22)
             tela.blit(brilho, (rect.x - 10, rect.y - 10))
 
-        pygame.draw.rect(tela, (0, 0, 0), rect.move(0, 6), border_radius=16)
+        # Sombra fica no chão: quando o card sobe, ela "descola" dele
+        ui.sombra_suave(tela, rect.move(0, int(6 * anim)), 16, 6, 110)
         pygame.draw.rect(tela, jogo.COR, rect, border_radius=16)
 
         mini = self._miniatura(jogo)
@@ -291,11 +292,11 @@ class CenaMenuJogos(Cena):
                          border_radius=4)
 
         ui.desenhar_texto(tela, jogo.TITULO_CURTO or jogo.TITULO, (rect.centerx, rect.y + 138),
-                          14, BRANCO, "midtop")
+                          14, UI_TEXTO, "midtop", True, True)
 
         rec = self._texto_recorde(jogo)
         ui.desenhar_texto(tela, rec, (rect.centerx, rect.y + 168), 10,
-                          AMARELO if "★" in rec else (220, 220, 240), "midtop")
+                          AMARELO if "★" in rec else (220, 220, 240), "midtop", True, True)
 
         borda = ui.misturar(BRANCO, AMARELO, anim)
         pygame.draw.rect(tela, borda, rect, 4, border_radius=16)

@@ -32,9 +32,13 @@ def preparar(msg):
     return _LIGADURA.sub("f‌", msg.translate(_SEM_ACENTO))
 
 
-def texto(msg, tamanho=20, cor=BRANCO, sombra=True):
-    """Devolve uma Surface com o texto (com sombra opcional)."""
-    chave = (msg, tamanho, cor, sombra)
+def texto(msg, tamanho=20, cor=BRANCO, sombra=True, contorno=False):
+    """
+    Devolve uma Surface com o texto (com sombra opcional).
+    `contorno` desenha uma borda escura em volta das letras: deixa
+    títulos e números legíveis em cima de qualquer fundo.
+    """
+    chave = (msg, tamanho, cor, sombra, contorno)
     sup = _cache_texto.get(chave)
 
     if sup is not None:
@@ -47,7 +51,24 @@ def texto(msg, tamanho=20, cor=BRANCO, sombra=True):
     msg = preparar(msg)
     frente = f.render(msg, False, cor)
 
-    if sombra:
+    if contorno:
+        b = 2 if tamanho >= 24 else 1
+        desloc = max(2, tamanho // 8) if sombra else 0
+        sup = pygame.Surface(
+            (frente.get_width() + b * 2 + desloc, frente.get_height() + b * 2 + desloc),
+            pygame.SRCALPHA
+        )
+        if sombra:
+            atras = f.render(msg, False, (0, 0, 0))
+            atras.set_alpha(120)
+            sup.blit(atras, (b + desloc, b + desloc))
+        borda = f.render(msg, False, UI_CONTORNO)
+        for dx in (-b, 0, b):
+            for dy in (-b, 0, b):
+                if dx or dy:
+                    sup.blit(borda, (b + dx, b + dy))
+        sup.blit(frente, (b, b))
+    elif sombra:
         desloc = max(2, tamanho // 8)
         sup = pygame.Surface(
             (frente.get_width() + desloc, frente.get_height() + desloc),
@@ -65,17 +86,17 @@ def texto(msg, tamanho=20, cor=BRANCO, sombra=True):
 
 
 def desenhar_texto(tela, msg, pos, tamanho=20, cor=BRANCO,
-                   ancora="topleft", sombra=True):
+                   ancora="topleft", sombra=True, contorno=False):
     """Desenha texto. `ancora` pode ser center, midtop, topright..."""
-    sup = texto(msg, tamanho, cor, sombra)
+    sup = texto(msg, tamanho, cor, sombra, contorno)
     rect = sup.get_rect(**{ancora: pos})
     tela.blit(sup, rect)
     return rect
 
 
-def centralizado(tela, msg, y, tamanho=20, cor=BRANCO, sombra=True):
+def centralizado(tela, msg, y, tamanho=20, cor=BRANCO, sombra=True, contorno=False):
     return desenhar_texto(tela, msg, (LARGURA // 2, y), tamanho, cor,
-                          "midtop", sombra)
+                          "midtop", sombra, contorno)
 
 
 def tamanho_que_cabe(msg, largura_max, tamanhos=(30, 24, 20, 16, 12)):
@@ -117,26 +138,112 @@ def quebrar_linhas(msg, tamanho, largura_max):
 _sombras = {}
 
 
+def sombra_suave(tela, rect, raio=12, desloc=6, alpha=90):
+    """
+    Sombra arredondada com a borda "esfumada" (3 camadas de alpha).
+    Fica mais macia que um retângulo preto chapado.
+    """
+    rect = pygame.Rect(rect)
+    pad = 4
+    chave = (rect.w, rect.h, raio, alpha)
+    s = _sombras.get(chave)
+
+    if s is None:
+        if len(_sombras) > 160:
+            _sombras.clear()
+        s = pygame.Surface((rect.w + pad * 2, rect.h + pad * 2), pygame.SRCALPHA)
+        caixa = s.get_rect()
+        pygame.draw.rect(s, (0, 0, 0, alpha // 3), caixa, border_radius=raio + pad)
+        pygame.draw.rect(s, (0, 0, 0, alpha * 2 // 3), caixa.inflate(-pad, -pad),
+                         border_radius=raio + pad // 2)
+        pygame.draw.rect(s, (0, 0, 0, alpha), caixa.inflate(-pad * 2, -pad * 2),
+                         border_radius=raio)
+        _sombras[chave] = s
+
+    tela.blit(s, (rect.x - pad, rect.y - pad + desloc))
+
+
 def painel(tela, rect, cor=UI_FUNDO, borda=UI_BORDA, raio=16,
-           espessura=4, sombra=True):
-    """Painel arredondado com sombra."""
+           espessura=4, sombra=True, brilho=True):
+    """Painel arredondado com sombra suave e um brilho fino em cima."""
     rect = pygame.Rect(rect)
 
     if sombra:
-        chave = (rect.w, rect.h, raio)
-        s = _sombras.get(chave)
-        if s is None:
-            if len(_sombras) > 64:
-                _sombras.clear()
-            s = pygame.Surface((rect.w, rect.h), pygame.SRCALPHA)
-            pygame.draw.rect(s, (0, 0, 0, 100), s.get_rect(), border_radius=raio)
-            _sombras[chave] = s
-        tela.blit(s, (rect.x + 6, rect.y + 6))
+        sombra_suave(tela, rect, raio, 6, 100)
 
     pygame.draw.rect(tela, cor, rect, border_radius=raio)
 
+    # Brilho interno na parte de cima (dá volume, estilo "almofada")
+    if brilho and rect.h >= 30 and rect.w >= 40:
+        interno = rect.inflate(-espessura * 2 - 2, -espessura * 2 - 2)
+        antes = tela.get_clip()
+        topo = pygame.Rect(rect.x, rect.y, rect.w, min(rect.h // 2, raio + 6))
+        tela.set_clip(topo.clip(antes))
+        pygame.draw.rect(tela, clarear(cor, 22), interno, 2,
+                         border_radius=max(2, raio - espessura))
+        tela.set_clip(antes)
+
     if espessura:
         pygame.draw.rect(tela, borda, rect, espessura, border_radius=raio)
+
+
+def botao_base(tela, rect, cor=UI_BOTAO, cor_hover=None, hover=False,
+               borda=None, raio=14, destaque=False):
+    """
+    Base para botões desenhados à mão (com ícone): sombra suave,
+    "degrau" embaixo, brilho e borda. Sobe no hover e afunda ao
+    apertar. Devolve o Rect onde desenhar o conteúdo.
+    """
+    rect = pygame.Rect(rect)
+    if cor_hover is None:
+        cor_hover = clarear(cor, 30)
+
+    apertado = hover and pygame.mouse.get_pressed()[0]
+    if apertado:
+        r = rect.move(0, 2)
+    elif hover:
+        r = rect.move(0, -2)
+    else:
+        r = rect
+
+    sombra_suave(tela, rect, raio, 5, 80)
+
+    c = cor_hover if (hover or destaque) else cor
+    if apertado:
+        c = escurecer(c, 20)
+
+    pygame.draw.rect(tela, escurecer(c, 45), r.move(0, 3), border_radius=raio)
+    pygame.draw.rect(tela, c, r, border_radius=raio)
+    faixa = pygame.Rect(r.x + 6, r.y + 4, r.w - 12, max(3, r.h // 6))
+    pygame.draw.rect(tela, clarear(c, 24), faixa, border_radius=max(2, raio // 2))
+
+    if borda is None:
+        borda = UI_DESTAQUE if hover else UI_BORDA
+    pygame.draw.rect(tela, borda, r, 3, border_radius=raio)
+    return r
+
+
+# ============================================================
+# EASING (animações mais "macias")
+# ============================================================
+
+def suavizar(t):
+    """Smoothstep: começa e termina devagar (0..1 -> 0..1)."""
+    t = max(0.0, min(1.0, t))
+    return t * t * (3 - 2 * t)
+
+
+def sair_rapido(t):
+    """Ease-out cúbico: rápido no começo, freia no fim."""
+    t = max(0.0, min(1.0, t))
+    return 1 - (1 - t) ** 3
+
+
+def quicar(t, forca=1.70158):
+    """Ease-out "back": passa um pouquinho do alvo e volta (efeito pop)."""
+    t = max(0.0, min(1.0, t))
+    t -= 1
+    return 1 + (forca + 1) * t ** 3 + forca * t ** 2
 
 
 def gradiente(largura, altura, cor_topo, cor_base):
@@ -295,15 +402,46 @@ def moeda(tela, centro, raio, giro=1.0):
     tela.blit(s, s.get_rect(center=(int(centro[0]), int(centro[1]))))
 
 
+# Último valor mostrado em cada pílula de moedas (para o "pop")
+_moedas_hud = {}
+TEMPO_POP_MOEDAS = 280          # ms
+
+
 def desenhar_moedas(tela, qtd, pos, ancora="topleft", tamanho=16):
-    """Pílula com o ícone da moeda e a quantidade."""
-    sup = texto(f"{qtd}", tamanho, AMARELO)
+    """
+    Pílula com o ícone da moeda e a quantidade. Quando o valor
+    sobe, a pílula dá um "pop" (cresce, brilha e solta um brilho).
+    """
+    agora = pygame.time.get_ticks()
+    chave = (tuple(pos), ancora)
+    antes = _moedas_hud.get(chave)
+    if antes is None:
+        antes = (qtd, -TEMPO_POP_MOEDAS)
+    elif qtd > antes[0]:
+        antes = (qtd, agora)
+    else:
+        antes = (qtd, antes[1])
+    _moedas_hud[chave] = antes
+    pop = max(0.0, 1.0 - (agora - antes[1]) / TEMPO_POP_MOEDAS)
+
+    cor = misturar(AMARELO, BRANCO, pop * 0.7)
+    sup = texto(f"{qtd}", tamanho, cor, True, True)
     raio = tamanho - 2
     r = pygame.Rect(0, 0, sup.get_width() + raio * 2 + 34, max(40, tamanho + 24))
     setattr(r, ancora, pos)
-    painel(tela, r, (50, 38, 14), AMARELO, r.h // 2, 3, sombra=False)
-    moeda(tela, (r.x + 14 + raio, r.centery), raio)
+
+    cresce = int(6 * pop)
+    pilula = r.inflate(cresce * 2, cresce)
+    sombra_suave(tela, pilula, pilula.h // 2, 4, 70)
+    painel(tela, pilula, UI_MOEDA_FUNDO, misturar(AMARELO, BRANCO, pop * 0.6),
+           pilula.h // 2, 3, sombra=False)
+    centro_moeda = (r.x + 14 + raio, r.centery)
+    moeda(tela, centro_moeda, raio + int(3 * pop))
     tela.blit(sup, sup.get_rect(midleft=(r.x + 22 + raio * 2, r.centery + 1)))
+
+    if pop > 0:
+        estrela(tela, (centro_moeda[0] + raio, centro_moeda[1] - raio), 3 + 5 * pop,
+                (255, 252, 220), pop * 2)
     return r
 
 
@@ -329,31 +467,50 @@ class Botao:
         self.cor_texto = cor_texto
         self.selecionado = False
         self._anim = 0.0
+        self._aperto = 0.0          # 1 = mouse segurando o botão
+        self._clique = 0.0          # "amassadinha" logo depois do clique
 
     @property
     def hover(self):
         return self.rect.collidepoint(pygame.mouse.get_pos())
 
     def evento(self, e):
-        return (
+        clicou = (
             e.type == pygame.MOUSEBUTTONDOWN
             and e.button == 1
             and self.rect.collidepoint(e.pos)
         )
+        if clicou:
+            self._clique = 1.0
+        return clicou
 
     def atualizar(self, dt):
         alvo = 1.0 if (self.hover or self.selecionado) else 0.0
         self._anim += (alvo - self._anim) * min(1.0, dt * 14)
 
+        apertado = 1.0 if (self.hover and pygame.mouse.get_pressed()[0]) else 0.0
+        self._aperto += (apertado - self._aperto) * min(1.0, dt * 22)
+        self._clique = max(0.0, self._clique - dt * 5)
+
     def desenhar(self, tela):
         ativo = self._anim
-        sobe = int(3 * ativo)
-        r = self.rect.move(0, -sobe)
+        aperto = max(self._aperto, self._clique)
 
-        # Sombra
-        pygame.draw.rect(tela, (0, 0, 0), self.rect.move(0, 5), border_radius=12)
+        # Hover: sobe e cresce um pouquinho. Apertado: afunda e encolhe.
+        sobe = int(3 * ativo - 4 * aperto)
+        escala = 0.04 * ativo - 0.05 * aperto
+        r = self.rect.inflate(int(self.rect.w * escala), int(self.rect.h * escala))
+        r = r.move(0, -sobe)
+
+        # Sombra suave (fica mais curta quando o botão afunda)
+        sombra_suave(tela, self.rect, 12, int(7 - 3 * aperto), 95)
 
         cor = misturar(self.cor, self.cor_hover, ativo)
+        if aperto > 0.01:
+            cor = escurecer(cor, int(22 * aperto))
+
+        # "Degrau" embaixo: dá a cara de botão fofinho de apertar
+        pygame.draw.rect(tela, escurecer(cor, 50), r.move(0, 4), border_radius=12)
         pygame.draw.rect(tela, cor, r, border_radius=12)
 
         # Faixa de brilho em cima
@@ -364,7 +521,7 @@ class Botao:
         pygame.draw.rect(tela, borda, r, 3, border_radius=12)
 
         desenhar_texto(tela, self.rotulo, r.center, self.tamanho,
-                       self.cor_texto, "center")
+                       self.cor_texto, "center", True, True)
 
 
 class Menu:
@@ -481,13 +638,16 @@ class TextoFlutuante:
 
     def atualizar(self, dt):
         for t in self.lista:
-            t[2] -= 60 * dt
+            # Sobe rápido e vai freando (ease-out)
+            t[2] -= (25 + 60 * t[3]) * dt
             t[3] -= dt * 1.2
         self.lista = [t for t in self.lista if t[3] > 0]
 
     def desenhar(self, tela, desloc=(0, 0)):
         for msg, x, y, vida, cor, tam in self.lista:
-            sup = texto(msg, tam, cor)
+            # "Pop" ao nascer: começa maior e encolhe rapidinho
+            cresce = int(round(6 * max(0.0, 1.0 - (1.0 - vida) / 0.18)))
+            sup = texto(msg, tam + cresce, cor, True, True)
             if vida < 0.5:
                 sup = sup.copy()
                 sup.set_alpha(int(255 * vida * 2))

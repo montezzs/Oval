@@ -444,7 +444,7 @@ class CenaLoja(Cena):
 
     def desenhar(self, tela):
         self.fundo.desenhar(tela)
-        ui.desenhar_texto(tela, "LOJA", (LARGURA // 2, 18), 40, AMARELO, "midtop")
+        ui.desenhar_texto(tela, "LOJA", (LARGURA // 2, 18), 40, AMARELO, "midtop", True, True)
         self.botao_voltar.desenhar(tela)
         ui.desenhar_moedas(tela, self.app.save["moedas"], (LARGURA - 16, 20), "topright", 18)
 
@@ -452,9 +452,13 @@ class CenaLoja(Cena):
         for i, nome in enumerate(ABAS):
             r = self.rects_abas[i]
             ativa = i == self.aba
+            if ativa or r.collidepoint(pygame.mouse.get_pos()):
+                r = r.move(0, -3)          # aba ativa/hover "levanta"
+            ui.sombra_suave(tela, self.rects_abas[i], 10, 4, 70)
             pygame.draw.rect(tela, (120, 70, 20) if ativa else (60, 36, 14), r, border_radius=10)
             pygame.draw.rect(tela, AMARELO if ativa else (190, 150, 100), r, 3, border_radius=10)
-            ui.desenhar_texto(tela, nome, r.center, 10, AMARELO if ativa else BRANCO, "center")
+            ui.desenhar_texto(tela, nome, r.center, 10, AMARELO if ativa else UI_TEXTO, "center",
+                              True, ativa)
 
         self._desenhar_provador(tela)
         self._desenhar_grade(tela)
@@ -556,7 +560,7 @@ class CenaLoja(Cena):
             if sel:
                 r = r.move(0, -4)
             cor_r = CORES_RARIDADE.get(p.raridade, BRANCO)
-            pygame.draw.rect(tela, (0, 0, 0), r.move(0, 5), border_radius=14)
+            ui.sombra_suave(tela, self._rect_card(i), 14, 6 if sel else 5, 100)
             pygame.draw.rect(tela, (70, 44, 20) if not sel else (100, 64, 28), r, border_radius=14)
             pygame.draw.rect(tela, cor_r, (r.x, r.y, r.w, 8), border_top_left_radius=14,
                              border_top_right_radius=14)
@@ -610,7 +614,8 @@ class CenaLoja(Cena):
         caixa.center = (LARGURA // 2, ALTURA // 2)
         ui.painel(tela, caixa, (40, 26, 12), AMARELO, 18, 4)
         p = self.confirmar
-        ui.desenhar_texto(tela, "COMPRAR", (caixa.centerx, caixa.y + 24), 16, BRANCO, "midtop")
+        ui.desenhar_texto(tela, "COMPRAR", (caixa.centerx, caixa.y + 24), 16, UI_TEXTO, "midtop",
+                          True, True)
         for j, linha in enumerate(ui.quebrar_linhas(p.nome, 16, caixa.w - 40)[:2]):
             ui.desenhar_texto(tela, linha, (caixa.centerx, caixa.y + 54 + j * 24), 16, AMARELO,
                               "midtop")

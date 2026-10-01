@@ -24,6 +24,7 @@ from core.cena import Cena, tecla_voltar
 # e chamar self.terminar(...) quando a partida acabar.
 
 TEMPO_CONTAGEM = 1.8
+TEMPO_VAI = 0.6             # quanto tempo o "VAI!" fica na tela
 
 
 class MiniJogo(Cena):
@@ -111,6 +112,8 @@ class MiniJogo(Cena):
         self.tempo_partida = 0.0    # segundos jogando (sem contar pausa)
         self.particulas = ui.Particulas()
         self.textos = ui.TextoFlutuante()
+        self._confete_fim = ui.Particulas()     # festa da tela de fim (por cima de tudo)
+        self._vai = 0.0                    # tempo restante do "VAI!"
         self.camada = pygame.Surface((LARGURA, ALTURA))
         self.botao_pausa = pygame.Rect(LARGURA - 64, 12, 48, 48)
         self._montar_menu_inicio()
@@ -137,11 +140,19 @@ class MiniJogo(Cena):
         self.tremor = 0.0
         self.particulas.limpar()
         self.textos.lista.clear()
+        self._confete_fim.limpar()
+        self._vai = 0.0
         self.reiniciar()
 
     def _mudar_estado(self, estado):
         self.estado = estado
         self.tempo_estado = 0.0
+
+        # Chuva de confete quando a partida termina bem
+        if estado == "fim" and (self.venceu or self.novo_recorde or self.MULTI):
+            cores = [AMARELO, (255, 140, 170), (140, 220, 255), (150, 235, 140), UI_TEXTO]
+            for x in (LARGURA // 2 - 230, LARGURA // 2 + 230):
+                self._confete_fim.explodir((x, ALTURA // 2 - 140), cores, 26, 420, 1.8, (3, 6), 380)
 
     def comecar(self):
         self.tempo_partida = 0.0
@@ -254,14 +265,17 @@ class MiniJogo(Cena):
     def desenhar_hud(self, tela):
         """HUD padrão: pontos à esquerda e recorde ao lado."""
         caixa = pygame.Rect(12, 12, 300, 48)
-        ui.painel(tela, caixa, (20, 24, 40), BRANCO, 12, 3, sombra=False)
+        ui.sombra_suave(tela, caixa, 12, 4, 70)
+        ui.painel(tela, caixa, UI_PAINEL_HUD, UI_BORDA, 12, 3, sombra=False)
         ui.desenhar_texto(tela, f"{self.ROTULO_PONTOS}: {self.formatar(self.pontos)}",
-                          (caixa.x + 16, caixa.centery), 14, AMARELO, "midleft")
+                          (caixa.x + 16, caixa.centery), 14, AMARELO, "midleft", True, True)
 
+        # Recorde fica direto sobre o jogo: contorno para ler em qualquer fundo
         rec = self.recorde()
         if rec is not None:
             ui.desenhar_texto(tela, f"RECORDE: {self.formatar(rec)}",
-                              (caixa.right + 16, caixa.centery), 12, BRANCO, "midleft")
+                              (caixa.right + 16, caixa.centery), 12, UI_TEXTO, "midleft",
+                              True, True)
 
     # --------------------------------------------------------
     # LOOP
@@ -356,6 +370,7 @@ class MiniJogo(Cena):
         elif self.estado == "contagem":
             if self.tempo_estado >= TEMPO_CONTAGEM:
                 self._mudar_estado("jogando")
+                self._vai = TEMPO_VAI
         elif self.estado == "inicio":
             antes = self.menu_inicio.indice
             self.menu_inicio.atualizar(dt)
@@ -372,6 +387,10 @@ class MiniJogo(Cena):
         if self.estado in ("jogando", "fim"):
             self.particulas.atualizar(dt)
             self.textos.atualizar(dt)
+        if self.estado == "fim":
+            self._confete_fim.atualizar(dt)
+        if self.estado == "jogando":
+            self._vai = max(0.0, self._vai - dt)
 
     # --------------------------------------------------------
     # DESENHO
@@ -400,16 +419,16 @@ class MiniJogo(Cena):
             self._desenhar_pausa(tela)
         elif self.estado == "fim":
             self._desenhar_fim(tela)
+        elif self.estado == "jogando" and self._vai > 0:
+            self._desenhar_vai(tela)
 
     def _desenhar_botao_pausa(self, tela):
         if self.estado not in ("jogando", "contagem"):
             return
-        r = self.botao_pausa
-        hover = r.collidepoint(pygame.mouse.get_pos())
-        pygame.draw.rect(tela, (70, 80, 130) if hover else (20, 24, 40), r, border_radius=12)
-        pygame.draw.rect(tela, BRANCO, r, 3, border_radius=12)
-        pygame.draw.rect(tela, BRANCO, (r.centerx - 9, r.centery - 10, 6, 20))
-        pygame.draw.rect(tela, BRANCO, (r.centerx + 3, r.centery - 10, 6, 20))
+        hover = self.botao_pausa.collidepoint(pygame.mouse.get_pos())
+        r = ui.botao_base(tela, self.botao_pausa, UI_PAINEL_HUD, (70, 80, 130), hover, raio=12)
+        pygame.draw.rect(tela, UI_TEXTO, (r.centerx - 9, r.centery - 10, 6, 20), border_radius=2)
+        pygame.draw.rect(tela, UI_TEXTO, (r.centerx + 3, r.centery - 10, 6, 20), border_radius=2)
 
     def _desenhar_inicio(self, tela):
         ui.veu(tela, 150)
@@ -417,12 +436,12 @@ class MiniJogo(Cena):
         topo = 40
         caixa = pygame.Rect(0, topo, 700, ALTURA - topo - 40)
         caixa.centerx = LARGURA // 2
-        ui.painel(tela, caixa, (28, 32, 56), self.COR, 22, 5)
+        ui.painel(tela, caixa, UI_PAINEL, self.COR, 22, 5)
 
         # Título com o avatar do lado
         tam = ui.tamanho_que_cabe(self.TITULO, caixa.w - 190, (30, 26, 22, 18))
         ui.desenhar_texto(tela, self.TITULO, (LARGURA // 2, topo + 28 + (30 - tam) // 2), tam,
-                          AMARELO, "midtop")
+                          AMARELO, "midtop", True, True)
         self.jogador.desenhar(tela, (caixa.x + 60, topo + 46 + math.sin(self.tempo * 3) * 4), 44)
         self.jogador.desenhar(tela, (caixa.right - 60, topo + 46 + math.cos(self.tempo * 3) * 4),
                               44, espelhar=True)
@@ -431,7 +450,7 @@ class MiniJogo(Cena):
         y = topo + 92
         for linha in self.INSTRUCOES:
             for sub in ui.quebrar_linhas(linha, 12, caixa.w - 80):
-                ui.desenhar_texto(tela, sub, (LARGURA // 2, y), 12, BRANCO, "midtop")
+                ui.desenhar_texto(tela, sub, (LARGURA // 2, y), 12, UI_TEXTO, "midtop")
                 y += 22
             y += 6
 
@@ -441,12 +460,13 @@ class MiniJogo(Cena):
         rec = self.recorde(opcao)
         texto_rec = f"★ RECORDE: {self.formatar(rec)} ★" if rec is not None else "★ SEM RECORDE AINDA ★"
         y_rec = self.menu_inicio.botoes[0].rect.y - 36
-        ui.desenhar_texto(tela, texto_rec, (LARGURA // 2, y_rec), 14, AMARELO, "midtop")
+        ui.desenhar_texto(tela, texto_rec, (LARGURA // 2, y_rec), 14, AMARELO, "midtop",
+                          True, True)
 
         limite = y_rec - 12
         if self.OPCOES:
             ui.desenhar_texto(tela, "ESCOLHA A DIFICULDADE", (LARGURA // 2, y_rec - 30),
-                              12, (180, 200, 255), "midtop")
+                              12, UI_TEXTO_SUAVE, "midtop")
             limite = y_rec - 42
 
         # Prévia do jogo no espaço que sobrar
@@ -458,7 +478,7 @@ class MiniJogo(Cena):
                 self._previa = self.miniatura(self.jogador, tamanho)
                 self._previa_tam = tamanho
             r = self._previa.get_rect(midtop=(LARGURA // 2, y + 4))
-            pygame.draw.rect(tela, (0, 0, 0), r.inflate(12, 12).move(0, 4), border_radius=10)
+            ui.sombra_suave(tela, r.inflate(12, 12), 10, 5, 120)
             tela.blit(self._previa, r)
             pygame.draw.rect(tela, self.COR, r.inflate(8, 8), 4, border_radius=8)
 
@@ -468,36 +488,101 @@ class MiniJogo(Cena):
         restante = TEMPO_CONTAGEM - self.tempo_estado
         passo = TEMPO_CONTAGEM / 3
         numero = int(restante / passo) + 1
-        frac = (restante % passo) / passo
-        tamanho = int(56 + 40 * frac)
+        t = 1.0 - (restante % passo) / passo        # 0 -> 1 dentro de cada número
         rotulo = str(max(1, min(3, numero)))
-        ui.desenhar_texto(tela, rotulo, (LARGURA // 2, ALTURA // 2), tamanho,
-                          AMARELO, "center")
-        ui.desenhar_texto(tela, "PREPARE-SE!", (LARGURA // 2, ALTURA // 2 + 80), 16,
-                          BRANCO, "center")
+        centro = (LARGURA // 2, ALTURA // 2)
+
+        # Disco macio atrás do número (entra com "pop")
+        pop = ui.quicar(min(1.0, t / 0.3))
+        raio = int(78 * pop)
+        if raio > 4:
+            disco = pygame.Surface((raio * 2 + 8, raio * 2 + 8), pygame.SRCALPHA)
+            c = (raio + 4, raio + 4)
+            pygame.draw.circle(disco, (*UI_PAINEL, 190), c, raio)
+            pygame.draw.circle(disco, (*AMARELO, 220), c, raio, 5)
+            tela.blit(disco, disco.get_rect(center=centro))
+
+        # Número cresce com pop e some no finalzinho
+        tamanho = max(8, int(64 * pop) // 4 * 4)       # passos de 4: menos fontes em cache
+        sup = ui.texto(rotulo, tamanho, AMARELO, True, True)
+        if t > 0.8:
+            sup = sup.copy()
+            sup.set_alpha(int(255 * (1.0 - t) / 0.2))
+        tela.blit(sup, sup.get_rect(center=centro))
+
+        ui.desenhar_texto(tela, "PREPARE-SE!", (LARGURA // 2, ALTURA // 2 + 110), 16,
+                          UI_TEXTO, "center", True, True)
+
+    def _desenhar_vai(self, tela):
+        """'VAI!' rapidinho logo depois da contagem."""
+        k = 1.0 - self._vai / TEMPO_VAI
+        tamanho = max(8, int(56 * ui.quicar(min(1.0, k / 0.35))) // 4 * 4)
+        sup = ui.texto("VAI!", tamanho, (140, 240, 140), True, True)
+        if k > 0.55:
+            sup = sup.copy()
+            sup.set_alpha(int(255 * max(0.0, 1.0 - k) / 0.45))
+        tela.blit(sup, sup.get_rect(center=(LARGURA // 2, ALTURA // 2)))
 
     def _desenhar_pausa(self, tela):
         ui.veu(tela, 170)
         caixa = pygame.Rect(0, 0, 440, 360)
         caixa.center = (LARGURA // 2, ALTURA // 2 + 20)
-        ui.painel(tela, caixa, (28, 32, 56), self.COR, 20, 5)
+        ui.painel(tela, caixa, UI_PAINEL, self.COR, 20, 5)
         ui.desenhar_texto(tela, "PAUSADO", (LARGURA // 2, caixa.y + 34), 28,
-                          AMARELO, "midtop")
+                          AMARELO, "midtop", True, True)
         self.menu_pausa.desenhar(tela)
 
+    # Raios de luz atrás do avatar quando a partida termina bem
+    _raios = None
+
+    @classmethod
+    def _sup_raios(cls):
+        if MiniJogo._raios is None:
+            lado = 260
+            s = pygame.Surface((lado, lado), pygame.SRCALPHA)
+            c = lado // 2
+            for i in range(12):
+                a = i * math.tau / 12
+                pontos = [(c, c),
+                          (c + math.cos(a - 0.13) * c, c + math.sin(a - 0.13) * c),
+                          (c + math.cos(a + 0.13) * c, c + math.sin(a + 0.13) * c)]
+                pygame.draw.polygon(s, (255, 226, 120, 38), pontos)
+            MiniJogo._raios = s
+        return MiniJogo._raios
+
     def _desenhar_fim(self, tela):
-        ui.veu(tela, 160)
+        t = self.tempo_estado
+        festa = self.venceu or self.novo_recorde
+
+        # Véu entra suave (não "corta" o jogo de uma vez)
+        ui.veu(tela, int(160 * ui.suavizar(t / 0.25)))
         caixa = pygame.Rect(0, 0, 600, 560)
         caixa.center = (LARGURA // 2, ALTURA // 2 + 10)
-        ui.painel(tela, caixa, (28, 32, 56), AMARELO if self.venceu else self.COR, 22, 5)
+        ui.painel(tela, caixa, UI_PAINEL, AMARELO if self.venceu else self.COR, 22, 5)
 
-        cor_titulo = AMARELO if self.venceu else (255, 120, 120)
-        tam = ui.tamanho_que_cabe(self.titulo_fim, caixa.w - 40, (30, 24, 20, 16))
-        ui.desenhar_texto(tela, self.titulo_fim, (LARGURA // 2, caixa.y + 30 + (30 - tam) // 2),
-                          tam, cor_titulo, "midtop")
+        # Raios girando atrás do avatar
+        if festa:
+            raios = pygame.transform.rotate(self._sup_raios(), self.tempo * 25)
+            antes = tela.get_clip()
+            tela.set_clip(caixa.inflate(-10, -10).clip(antes))
+            tela.blit(raios, raios.get_rect(center=(LARGURA // 2, caixa.y + 150)))
+            tela.set_clip(antes)
+
+        # Faixa do título (entra com "pop")
+        cor_titulo = AMARELO if self.venceu else (255, 150, 150)
+        tam = ui.tamanho_que_cabe(self.titulo_fim, caixa.w - 80, (30, 24, 20, 16))
+        pop = ui.quicar(min(1.0, t / 0.4))
+        sup = ui.texto(self.titulo_fim, tam, cor_titulo, True, True)
+        faixa = pygame.Rect(0, 0, int((sup.get_width() + 70) * pop), int(58 * min(1.0, pop)))
+        faixa.center = (LARGURA // 2, caixa.y + 44)
+        if faixa.w > 30 and faixa.h > 10:
+            ui.painel(tela, faixa, ui.misturar(UI_PAINEL, cor_titulo, 0.22), cor_titulo,
+                      16, 3, sombra=True)
+        if pop > 0.5:
+            tela.blit(sup, sup.get_rect(center=(faixa.centerx, faixa.centery + 1)))
 
         # Avatar feliz pulando (venceu) ou tonto balançando (perdeu)
-        if self.venceu or self.novo_recorde:
+        if festa:
             dy = -abs(math.sin(self.tempo * 5)) * 16
             ang = 0
         else:
@@ -506,33 +591,47 @@ class MiniJogo(Cena):
         self.jogador.desenhar(tela, (LARGURA // 2, caixa.y + 150 + dy), 80, angulo=ang)
         self.app.desenhar_pet(tela, (LARGURA // 2 - 110, caixa.y + 190), feliz=self.venceu)
 
-        # Moedas ganhas (contando para cima)
+        # Moedas ganhas (contando para cima e dando um "pop" no final)
         if self.moedas_ganhas > 0:
-            mostrar = min(self.moedas_ganhas, int(self.tempo_estado * 40) + 1)
-            pilula = pygame.Rect(0, 0, 130, 46)
+            total = self.moedas_ganhas
+            duracao = max(0.5, min(1.4, 0.4 + total * 0.02))
+            mostrar = max(1, min(total, int(round(total * ui.sair_rapido(t / duracao)))))
+            brilho = max(0.0, 1.0 - (t - duracao) / 0.35) if t >= duracao else 0.0
+            pilula = pygame.Rect(0, 0, 136, 48).inflate(int(14 * brilho), int(8 * brilho))
             pilula.center = (caixa.right - 110, caixa.y + 150)
-            ui.painel(tela, pilula, (60, 48, 20), AMARELO, 23, 3, sombra=False)
-            ui.moeda(tela, (pilula.x + 26, pilula.centery), 14)
-            ui.desenhar_texto(tela, f"+{mostrar}", (pilula.x + 48, pilula.centery), 16,
-                              AMARELO, "midleft")
+            ui.desenhar_texto(tela, "MOEDAS", (pilula.centerx, pilula.y - 8), 10,
+                              UI_TEXTO_SUAVE, "midbottom")
+            ui.sombra_suave(tela, pilula, pilula.h // 2, 4, 80)
+            ui.painel(tela, pilula, UI_MOEDA_FUNDO, ui.misturar(AMARELO, BRANCO, brilho * 0.6),
+                      pilula.h // 2, 3, sombra=False)
+            ui.moeda(tela, (pilula.x + 28, pilula.centery), 15 + int(3 * brilho),
+                     giro=abs(math.cos(self.tempo * 2.5)))
+            ui.desenhar_texto(tela, f"+{mostrar}", (pilula.x + 52, pilula.centery), 18,
+                              ui.misturar(AMARELO, BRANCO, brilho * 0.7), "midleft", True, True)
+            if brilho > 0:
+                ui.estrela(tela, (pilula.right - 8, pilula.y + 4), 4 + 8 * brilho,
+                           (255, 252, 220), brilho * 3)
 
         y = caixa.y + 230
         for linha in self.linhas_fim:
-            ui.desenhar_texto(tela, linha, (LARGURA // 2, y), 16, BRANCO, "midtop")
+            ui.desenhar_texto(tela, linha, (LARGURA // 2, y), 16, UI_TEXTO, "midtop")
             y += 30
 
         if self.novo_recorde:
-            if int(self.tempo * 4) % 2 == 0:
-                ui.desenhar_texto(tela, "★ NOVO RECORDE! ★", (LARGURA // 2, y + 4), 18,
-                                  AMARELO, "midtop")
+            # Pulsa suave em vez de piscar
+            k = (math.sin(self.tempo * 6) + 1) / 2
+            ui.desenhar_texto(tela, "★ NOVO RECORDE! ★", (LARGURA // 2, y + 4), 18,
+                              ui.misturar(AMARELO, BRANCO, k * 0.5), "midtop", True, True)
         else:
             rec = self.recorde()
             if rec is not None:
                 ui.desenhar_texto(tela, f"RECORDE: {self.formatar(rec)}", (LARGURA // 2, y + 4),
-                                  14, (180, 200, 255), "midtop")
+                                  14, UI_TEXTO_SUAVE, "midtop")
 
         # Posiciona o menu logo abaixo do texto
         base = max(y + 50, caixa.bottom - len(self.menu_fim.botoes) * 66 - 10)
         for i, b in enumerate(self.menu_fim.botoes):
             b.rect.midtop = (LARGURA // 2, base + i * 66)
         self.menu_fim.desenhar(tela)
+
+        self._confete_fim.desenhar(tela)

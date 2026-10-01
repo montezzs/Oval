@@ -235,12 +235,13 @@ class MiniJogoMulti(MiniJogo):
         topo = 30
         caixa = pygame.Rect(0, topo, 760, ALTURA - topo - 30)
         caixa.centerx = LARGURA // 2
-        ui.painel(tela, caixa, (28, 32, 56), self.COR, 22, 5)
+        ui.painel(tela, caixa, UI_PAINEL, self.COR, 22, 5)
 
         tam = ui.tamanho_que_cabe(self.TITULO, caixa.w - 60, (28, 24, 20))
-        ui.desenhar_texto(tela, self.TITULO, (LARGURA // 2, topo + 22), tam, AMARELO, "midtop")
+        ui.desenhar_texto(tela, self.TITULO, (LARGURA // 2, topo + 22), tam, AMARELO, "midtop",
+                          True, True)
         ui.desenhar_texto(tela, "2 JOGADORES", (LARGURA // 2, topo + 62), 12,
-                          (180, 200, 255), "midtop")
+                          UI_TEXTO_SUAVE, "midtop")
 
         # VS com os dois ovos e os controles
         y_ovos = topo + 150
@@ -248,16 +249,16 @@ class MiniJogoMulti(MiniJogo):
             balanco = math.sin(self.tempo * 3 + i * 1.5) * 5
             self.desenhar_ovo(tela, i, (x, y_ovos + balanco), 70, espelhar=(i == 1))
             ui.desenhar_texto(tela, self.nome(i), (x, y_ovos + 52), 14,
-                              CORES_JOGADOR[i], "midtop")
+                              CORES_JOGADOR[i], "midtop", True, True)
             ctrl = self.CONTROLES_J1 if i == 0 else self.CONTROLES_J2
             ui.desenhar_texto(tela, ctrl, (x, y_ovos + 74), 10, BRANCO, "midtop")
-        ui.desenhar_texto(tela, "VS", (LARGURA // 2, y_ovos), 36, AMARELO, "center")
+        ui.desenhar_texto(tela, "VS", (LARGURA // 2, y_ovos), 36, AMARELO, "center", True, True)
 
         # Instruções
         y = y_ovos + 104
         for linha in self.INSTRUCOES:
             for sub in ui.quebrar_linhas(linha, 12, caixa.w - 80):
-                ui.desenhar_texto(tela, sub, (LARGURA // 2, y), 12, BRANCO, "midtop")
+                ui.desenhar_texto(tela, sub, (LARGURA // 2, y), 12, UI_TEXTO, "midtop")
                 y += 20
             y += 4
 
@@ -268,14 +269,15 @@ class MiniJogoMulti(MiniJogo):
                           "topright" if self.OPCOES else "midtop")
         if self.OPCOES:
             ui.desenhar_texto(tela, "ESCOLHA O MODO:", (caixa.x + 40, y_rec), 12,
-                              (180, 200, 255), "topleft")
+                              UI_TEXTO_SUAVE, "topleft")
 
         self.menu_inicio.desenhar(tela)
 
     def desenhar_hud(self, tela):
         """HUD padrão do multi: nomes nos cantos (jogos costumam ter placar próprio)."""
         for i, (pos, anc) in enumerate((((16, 16), "topleft"), ((LARGURA - 80, 16), "topright"))):
-            sup = ui.texto(self.nome(i), 14, CORES_JOGADOR[i])
+            sup = ui.texto(self.nome(i), 14, CORES_JOGADOR[i], True, True)
             r = sup.get_rect(**{anc: pos}).inflate(20, 16)
-            ui.painel(tela, r, (20, 24, 40), BRANCO, 10, 2, sombra=False)
+            ui.sombra_suave(tela, r, 10, 4, 70)
+            ui.painel(tela, r, UI_PAINEL_HUD, UI_BORDA, 10, 2, sombra=False)
             tela.blit(sup, sup.get_rect(center=r.center))

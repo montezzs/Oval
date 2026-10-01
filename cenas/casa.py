@@ -924,15 +924,13 @@ class CenaCasa(Cena):
 
         # Loja + moedas
         hover = self.botao_loja.collidepoint(mouse)
-        pygame.draw.rect(tela, (200, 130, 40) if hover else (160, 100, 30), self.botao_loja,
-                         border_radius=14)
-        pygame.draw.rect(tela, BRANCO, self.botao_loja, 3, border_radius=14)
-        sacola = pygame.Rect(self.botao_loja.x + 12, self.botao_loja.y + 20, 26, 26)
+        loja = ui.botao_base(tela, self.botao_loja, (160, 100, 30), (200, 130, 40), hover)
+        sacola = pygame.Rect(loja.x + 12, loja.y + 20, 26, 26)
         pygame.draw.rect(tela, (255, 150, 60), sacola, border_radius=6)
         pygame.draw.arc(tela, BRANCO, (sacola.x + 5, sacola.y - 10, 16, 20), 0, 3.14, 3)
         pygame.draw.ellipse(tela, BRANCO, (sacola.x + 9, sacola.y + 8, 8, 11))
-        ui.desenhar_texto(tela, "LOJA", (self.botao_loja.x + 76, self.botao_loja.centery), 14,
-                          BRANCO, "center")
+        ui.desenhar_texto(tela, "LOJA", (loja.x + 76, loja.centery), 14,
+                          UI_TEXTO, "center", True, True)
         ui.desenhar_moedas(tela, int(self.moedas_hud), (LARGURA - 16, 86), "topright", 16)
         for x, y, atraso in self.moedas_voando:
             if atraso >= 0:
@@ -948,12 +946,10 @@ class CenaCasa(Cena):
 
         # Pausa
         hover = self.botao_pausa.collidepoint(mouse)
-        pygame.draw.rect(tela, (70, 80, 130) if hover else (30, 36, 60), self.botao_pausa,
-                         border_radius=14)
-        pygame.draw.rect(tela, BRANCO, self.botao_pausa, 3, border_radius=14)
-        cx, cy = self.botao_pausa.center
-        pygame.draw.rect(tela, BRANCO, (cx - 11, cy - 13, 8, 26), border_radius=2)
-        pygame.draw.rect(tela, BRANCO, (cx + 3, cy - 13, 8, 26), border_radius=2)
+        pausa = ui.botao_base(tela, self.botao_pausa, (30, 36, 60), (70, 80, 130), hover)
+        cx, cy = pausa.center
+        pygame.draw.rect(tela, UI_TEXTO, (cx - 11, cy - 13, 8, 26), border_radius=2)
+        pygame.draw.rect(tela, UI_TEXTO, (cx + 3, cy - 13, 8, 26), border_radius=2)
 
         if self.slide > 0:
             return
@@ -963,13 +959,11 @@ class CenaCasa(Cena):
             ativo = (nome == "sabao" and self.banho.ativo) or (nome == "comida" and self.bandeja.aberta) \
                 or (nome == "luz" and self.luz_apagada) or (nome == "bola" and self.bola_pet.ativa)
             hover = r.collidepoint(mouse)
-            pygame.draw.rect(tela, (0, 0, 0), r.move(0, 4), border_radius=14)
-            pygame.draw.rect(tela, (90, 100, 160) if hover or ativo else (30, 36, 60), r,
-                             border_radius=14)
-            pygame.draw.rect(tela, AMARELO if ativo else BRANCO, r, 3, border_radius=14)
+            r = ui.botao_base(tela, r, (30, 36, 60), (90, 100, 160), hover,
+                              AMARELO if ativo else None, 14, destaque=ativo)
             self._icone_ferramenta(tela, nome, (r.centerx, r.centery - 6))
             ui.desenhar_texto(tela, ROTULOS_FERRAMENTA[nome], (r.centerx, r.bottom - 10), 8,
-                              BRANCO, "center")
+                              UI_TEXTO, "center", True, True)
 
         # Aviso
         if self.tempo_aviso > 0:
@@ -1031,8 +1025,12 @@ class CenaCasa(Cena):
             cor = VERMELHO if v < 30 else (AMARELO if v < 70 else VERDE)
             if v < 30 and int(self.tempo * 3) % 2 == 0:
                 cor = (255, 150, 150)
-            pygame.draw.rect(tela, cor, (barra.x, barra.y, max(2, int(barra.w * v / 100)), barra.h),
-                             border_radius=4)
+            cheio = pygame.Rect(barra.x, barra.y, max(2, int(barra.w * v / 100)), barra.h)
+            pygame.draw.rect(tela, cor, cheio, border_radius=4)
+            # Brilho fininho em cima da barra (cara de "gel")
+            if cheio.w > 6:
+                pygame.draw.line(tela, ui.clarear(cor, 60), (cheio.x + 3, cheio.y + 2),
+                                 (cheio.right - 4, cheio.y + 2), 2)
         if n.feliz():
             r = pygame.Rect(x0 + 404, y0, 116, 30)
             ui.painel(tela, r, (60, 50, 10), AMARELO, 10, 2, sombra=False)

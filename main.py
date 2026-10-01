@@ -27,7 +27,7 @@ from cenas.nome import CenaNome
 #   cenas/menu_jogos.py  -> escolher um mini jogo
 #   jogos/*.py           -> os mini jogos
 
-TEMPO_TRANSICAO = 0.22
+TEMPO_TRANSICAO = 0.24
 
 
 class App:
@@ -203,7 +203,8 @@ class App:
         self.cena.desenhar(self.tela)
 
         if self._fade > 0:
-            ui.veu(self.tela, int(255 * self._fade), (8, 8, 16))
+            # Smoothstep: o escurecimento começa e termina macio
+            ui.veu(self.tela, int(255 * ui.suavizar(self._fade)), (14, 10, 26))
 
         self.janela.apresentar()
 

@@ -62,7 +62,7 @@ class CenaPausa(Cena):
         caixa = pygame.Rect(0, 0, 500, 560)
         caixa.midtop = (LARGURA // 2, 70)
         ui.painel(tela, caixa, (30, 34, 60), BRANCO, 20, 4)
-        ui.desenhar_texto(tela, "PAUSADO", (LARGURA // 2, 100), 32, AMARELO, "midtop")
+        ui.desenhar_texto(tela, "PAUSADO", (LARGURA // 2, 100), 32, AMARELO, "midtop", True, True)
         self.menu.desenhar(tela)
         ui.centralizado(tela, "ESC para voltar", 660, 12)
 
@@ -131,7 +131,7 @@ class CenaOpcoes(Cena):
         caixa = pygame.Rect(0, 0, 540, 500)
         caixa.midtop = (LARGURA // 2, 70)
         ui.painel(tela, caixa, (30, 34, 60), BRANCO, 20, 4)
-        ui.desenhar_texto(tela, "OPÇÕES", (LARGURA // 2, 100), 32, AMARELO, "midtop")
+        ui.desenhar_texto(tela, "OPÇÕES", (LARGURA // 2, 100), 32, AMARELO, "midtop", True, True)
         self.menu.desenhar(tela)
         ui.centralizado(tela, "Dica: arraste a borda da janela para redimensionar", 596, 10)
         ui.centralizado(tela, "ESC para voltar", 660, 12)

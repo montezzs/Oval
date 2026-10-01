@@ -1,4 +1,5 @@
 import os
+import sys
 
 # ============================================================
 # CAMINHOS
@@ -6,6 +7,14 @@ import os
 
 # Pasta do projeto (funciona mesmo rodando o jogo de outra pasta)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# No .exe (PyInstaller) os arquivos ficam numa pasta temporária que some
+# ao fechar o jogo, então o save vai para %APPDATA%\Oval
+if getattr(sys, "frozen", False):
+    PASTA_DADOS = os.path.join(os.environ.get("APPDATA") or os.path.expanduser("~"), "Oval")
+    os.makedirs(PASTA_DADOS, exist_ok=True)
+else:
+    PASTA_DADOS = BASE_DIR
 
 
 def caminho(*partes):
@@ -16,7 +25,7 @@ def caminho(*partes):
 FONTE = caminho("Fonts", "PressStart2P-Regular.ttf")
 PASTA_MUSICAS = caminho("musicas")
 PASTA_TRILHAS = caminho("musicas", "trilhas")
-ARQUIVO_SAVE = caminho("save.json")
+ARQUIVO_SAVE = os.path.join(PASTA_DADOS, "save.json")
 
 # ============================================================
 # JANELA
@@ -57,10 +66,21 @@ AZUL = (60, 150, 230)
 ROXO = (140, 90, 210)
 LARANJA = (255, 150, 50)
 
-# Cores da interface
-UI_FUNDO = (32, 36, 58)
-UI_BORDA = (255, 255, 255)
-UI_DESTAQUE = (255, 196, 60)
-UI_BOTAO = (58, 66, 104)
-UI_BOTAO_HOVER = (84, 96, 150)
+# Cores da interface (paleta "cozy": azul-ameixa noturno + creme + mel)
+UI_FUNDO = (36, 38, 66)
+UI_BORDA = (255, 246, 228)        # creme: menos duro que o branco puro
+UI_DESTAQUE = (255, 200, 72)
+UI_BOTAO = (62, 68, 112)
+UI_BOTAO_HOVER = (92, 104, 168)
 UI_SOMBRA = (0, 0, 0, 110)
+
+UI_PAINEL = (32, 34, 60)          # fundo dos painéis por cima dos jogos
+UI_PAINEL_HUD = (26, 28, 50)      # caixinhas pequenas de HUD
+UI_TEXTO = (255, 250, 240)        # texto principal (branco quentinho)
+UI_TEXTO_SUAVE = (190, 204, 250)  # texto secundário (dicas, recorde)
+UI_CONTORNO = (26, 18, 40)        # contorno de títulos (legibilidade)
+UI_SUCESSO = (70, 175, 100)
+UI_SUCESSO_HOVER = (96, 205, 126)
+UI_PERIGO = (196, 70, 82)
+UI_PERIGO_HOVER = (230, 98, 108)
+UI_MOEDA_FUNDO = (64, 44, 16)
