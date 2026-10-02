@@ -46,8 +46,12 @@ def main():
         sys.exit(1)
 
     dados = []
-    for pasta in ("Fonts", "Img", "musicas"):
-        dados += ["--add-data", f"{os.path.join(PASTA, pasta)};{pasta}"]
+    # Os .mid de musicas/midi só servem para editar, não vão no .exe
+    for origem, destino in (("Fonts", "Fonts"), ("Img", "Img"),
+                            ("musicas/trilhas", "musicas/trilhas"),
+                            ("musicas/sfx", "musicas/sfx"),
+                            ("musicas/Ovein.mp3", "musicas")):
+        dados += ["--add-data", f"{os.path.join(PASTA, origem)};{destino}"]
     rodar(sys.executable, "-m", "PyInstaller", "--noconfirm", "--clean",
           "--onefile", "--windowed", "--name", "Oval",
           "--icon", os.path.join(PASTA, "Img", "oval.ico"),
