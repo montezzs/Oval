@@ -3,6 +3,7 @@ import math
 import pygame
 
 from settings import *
+from core.idioma import t
 from core import progresso, ui
 from core.cena import Cena, tecla_voltar
 
@@ -112,7 +113,7 @@ class CenaConquistas(Cena):
             ativa = i == self.aba
             pygame.draw.rect(tela, (90, 60, 150) if ativa else (40, 36, 70), r, border_radius=10)
             pygame.draw.rect(tela, AMARELO if ativa else (120, 110, 170), r, 2, border_radius=10)
-            ui.desenhar_texto(tela, nome, r.center, 12, AMARELO if ativa else BRANCO, "center")
+            ui.desenhar_texto(tela, t(nome), r.center, 12, AMARELO if ativa else BRANCO, "center")
 
         tela.set_clip(AREA)
         y0 = AREA.y - int(self.rolagem)
@@ -126,17 +127,17 @@ class CenaConquistas(Cena):
         nivel, xp, meta = progresso.progresso(save)
         linha = pygame.Rect(caixa.x + 30, caixa.y + 16, caixa.w - 60, 80)
         self.jogador.desenhar(tela, (linha.x + 30, linha.y + 36), 52)
-        ui.desenhar_texto(tela, f"{self.jogador.nome}  •  NÍVEL {nivel}", (linha.x + 70, linha.y + 10),
+        ui.desenhar_texto(tela, t("{nome}  •  NÍVEL {n}", nome=self.jogador.nome, n=nivel), (linha.x + 70, linha.y + 10),
                           18, BRANCO, "topleft")
         barra = pygame.Rect(linha.x + 70, linha.y + 44, 420, 12)
         pygame.draw.rect(tela, (60, 60, 90), barra, border_radius=6)
         pygame.draw.rect(tela, (120, 220, 255), (barra.x, barra.y, max(4, int(barra.w * xp / meta)),
                                                  barra.h), border_radius=6)
-        texto_xp = "NÍVEL MÁXIMO!" if nivel >= progresso.NIVEL_MAX else f"{xp}/{meta} XP"
+        texto_xp = t("NÍVEL MÁXIMO!") if nivel >= progresso.NIVEL_MAX else f"{xp}/{meta} XP"
         ui.desenhar_texto(tela, texto_xp, (barra.right + 12, barra.centery), 10, (180, 220, 255), "midleft")
-        ui.desenhar_texto(tela, f"DIA {progresso.idade_dias(save)} DE VIDA", (linha.right, linha.y + 10),
+        ui.desenhar_texto(tela, t("DIA {n} DE VIDA", n=progresso.idade_dias(save)), (linha.right, linha.y + 10),
                           10, (230, 220, 170), "topright")
-        ui.desenhar_texto(tela, f"CONQUISTAS {feitas}/{len(progresso.CONQUISTAS)}", (linha.right, linha.y + 30),
+        ui.desenhar_texto(tela, t("CONQUISTAS {n}/{total}", n=feitas, total=len(progresso.CONQUISTAS)), (linha.right, linha.y + 30),
                           10, AMARELO, "topright")
 
     # --------------------------------------------------------
@@ -161,8 +162,8 @@ class CenaConquistas(Cena):
             else:
                 pygame.draw.circle(tela, (70, 76, 110), c, 11)
                 pygame.draw.circle(tela, (110, 116, 150), c, 11, 2)
-            ui.desenhar_texto(tela, nome, (r.x + 36, r.y + 5), 10, AMARELO if feita else BRANCO, "topleft")
-            ui.desenhar_texto(tela, desc, (r.x + 36, r.y + 20), 8,
+            ui.desenhar_texto(tela, t(nome), (r.x + 36, r.y + 5), 10, AMARELO if feita else BRANCO, "topleft")
+            ui.desenhar_texto(tela, t(desc), (r.x + 36, r.y + 20), 8,
                               (230, 220, 170) if feita else (170, 175, 200), "topleft")
             if feita:
                 ui.check(tela, (r.right - 16, r.centery), 14)
@@ -183,10 +184,10 @@ class CenaConquistas(Cena):
             completa = catalogo and all(cid in tem for cid, _ in catalogo)
             cor = AMARELO if completa else BRANCO
             achados = sum(1 for cid, _ in catalogo if cid in tem)
-            ui.desenhar_texto(tela, f"{rotulo}  {achados}/{len(catalogo)}", (AREA.x + 6, y + 8), 14, cor,
+            ui.desenhar_texto(tela, f"{t(rotulo)}  {achados}/{len(catalogo)}", (AREA.x + 6, y + 8), 14, cor,
                               "topleft")
             if not completa and nome != "borboletas":
-                ui.desenhar_texto(tela, f"COMPLETE E GANHE {progresso.PREMIO_COLECAO} OVOEDAS",
+                ui.desenhar_texto(tela, t("COMPLETE E GANHE {n} OVOEDAS", n=progresso.PREMIO_COLECAO),
                                   (AREA.right - 6, y + 10), 8, (230, 220, 170), "topright")
             y += 40
             larg = (AREA.w - 30) // 4
@@ -195,7 +196,7 @@ class CenaConquistas(Cena):
                 ok = cid in tem
                 pygame.draw.rect(tela, (60, 90, 60) if ok else (40, 42, 64), r, border_radius=8)
                 pygame.draw.rect(tela, (140, 255, 150) if ok else (80, 84, 110), r, 2, border_radius=8)
-                texto = str(rot).upper() if ok else "???"
+                texto = t(str(rot)).upper() if ok else "???"
                 ui.desenhar_texto(tela, texto, r.center, 8, BRANCO if ok else (130, 130, 160), "center")
             y += math.ceil(max(1, len(catalogo)) / 4) * 34 + 16
 
@@ -207,19 +208,19 @@ class CenaConquistas(Cena):
             col, lin = i % 2, i // 2
             r = pygame.Rect(AREA.x + col * (col_w + 20), y0 + lin * 30, col_w, 26)
             pygame.draw.rect(tela, (38, 42, 70), r, border_radius=6)
-            ui.desenhar_texto(tela, rotulo, (r.x + 10, r.centery), 8, (200, 205, 230), "midleft")
+            ui.desenhar_texto(tela, t(rotulo), (r.x + 10, r.centery), 8, (200, 205, 230), "midleft")
             valor = st.get(chave, 0)
             ui.desenhar_texto(tela, str(valor if isinstance(valor, int) else 0), (r.right - 10, r.centery), 10,
                               AMARELO, "midright")
         y = y0 + math.ceil(len(ESTATISTICAS) / 2) * 30 + 16
-        ui.desenhar_texto(tela, f"OVOEDAS GANHAS NA VIDA: {save['moedas_total']}", (AREA.x + 10, y), 10, AMARELO,
+        ui.desenhar_texto(tela, t("OVOEDAS GANHAS NA VIDA: {n}", n=save['moedas_total']), (AREA.x + 10, y), 10, AMARELO,
                           "topleft")
 
         # Coração dos pets
         af = st.get("afeicao", {})
         if isinstance(af, dict) and af:
             y += 30
-            ui.desenhar_texto(tela, "CORAÇÃO DOS PETS (carinho e vitórias enchem)", (AREA.x + 10, y), 10,
+            ui.desenhar_texto(tela, t("CORAÇÃO DOS PETS (carinho e vitórias enchem)"), (AREA.x + 10, y), 10,
                               (255, 170, 200), "topleft")
             y += 22
             for i, (pet, valor) in enumerate(sorted(af.items(), key=lambda x: -x[1])[:8]):

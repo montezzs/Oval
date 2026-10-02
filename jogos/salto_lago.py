@@ -1,3 +1,5 @@
+from core import idioma
+from core.idioma import t
 import math
 import random
 
@@ -644,7 +646,7 @@ class SaltoLago(MiniJogo):
                 self.perfeitos += 1
                 self.maior_combo = max(self.maior_combo, self.combo)
                 ganho = 2 + min(4, self.combo - 1)
-                txt = "PERFEITO!" if self.combo < 2 else f"PERFEITO x{self.combo}!"
+                txt = idioma.t("PERFEITO!") if self.combo < 2 else idioma.t("PERFEITO x{n}!", n=self.combo)
                 self.textos.adicionar(txt, (tela[0], tela[1] - 26), AMARELO, 20)
                 self.textos.adicionar(f"+{ganho}", (tela[0], tela[1]), AMARELO, 16)
                 self.particulas.explodir((tela[0], Y_FOLHA - 10),
@@ -671,11 +673,11 @@ class SaltoLago(MiniJogo):
             self.estado_ovo = "mola"
             self.espera_mola = 0.3
             self.pontos += 3
-            self.textos.adicionar("MOLA! +3", (tela[0], tela[1] - 26), LOTUS, 16)
+            self.textos.adicionar(idioma.t("MOLA! +3"), (tela[0], tela[1] - 26), LOTUS, 16)
         if alvo.boia:
             alvo.boia = False
             self.boias = min(3, self.boias + 1)
-            self.textos.adicionar("BOIA!", (tela[0], tela[1] - 50), (255, 120, 120), 16)
+            self.textos.adicionar(idioma.t("BOIA!"), (tela[0], tela[1] - 50), (255, 120, 120), 16)
             self.som("moeda", 0.7)
 
     def _cair(self, x):
@@ -686,7 +688,7 @@ class SaltoLago(MiniJogo):
         pos = (x - self.cam_x, Y_FOLHA)
         self.particulas.explodir(pos, [(120, 200, 255), (200, 240, 255), (60, 150, 230)],
                                  30, 300, 0.8, (3, 6))
-        self.textos.adicionar("GLUB!", (pos[0], pos[1] - 80), (200, 240, 255), 20)
+        self.textos.adicionar(idioma.t("GLUB!"), (pos[0], pos[1] - 80), (200, 240, 255), 20)
         self.ondas.append([x, 0.0])
         self.som("bater", 0.7)
         self.tremer(0.15)
@@ -719,12 +721,12 @@ class SaltoLago(MiniJogo):
             self.estado_ovo = "parado"
             self.squash = 0.14
             pos = (destino.x(t) - self.cam_x, Y_FOLHA - 60)
-            self.textos.adicionar("SALVO PELA BOIA!", (pos[0], pos[1] - 30), (255, 150, 150), 14)
+            self.textos.adicionar(idioma.t("SALVO PELA BOIA!"), (pos[0], pos[1] - 30), (255, 150, 150), 14)
             self.som("acerto", 0.6)
         else:
-            self.terminar(linhas=[f"PONTOS: {self.pontos}",
-                                  f"SALTOS: {self.saltos}  PERFEITOS: {self.perfeitos}",
-                                  f"MAIOR COMBO: {self.maior_combo}"])
+            self.terminar(linhas=[idioma.t("PONTOS: {n}", n=self.pontos),
+                                  idioma.t("SALTOS: {n}  PERFEITOS: {p}", n=self.saltos, p=self.perfeitos),
+                                  idioma.t("MAIOR COMBO: {n}", n=self.maior_combo)])
 
     # --------------------------------------------------------
     # DESENHO
@@ -927,22 +929,22 @@ class SaltoLago(MiniJogo):
 
         if self.estado == "jogando" and self.saltos == 0 and self.estado_ovo == "parado" \
                 and self.tempo_partida < 6:
-            ui.desenhar_texto(tela, "SEGURE E SOLTE!", (LARGURA // 2, 250), 16, BRANCO, "center")
+            ui.desenhar_texto(tela, idioma.t("SEGURE E SOLTE!"), (LARGURA // 2, 250), 16, BRANCO, "center")
 
     def desenhar_hud(self, tela):
         # Pontos e recorde no mesmo painel (o céu claro apagaria o texto)
         caixa = pygame.Rect(12, 12, 420, 48)
         ui.painel(tela, caixa, (20, 24, 40), BRANCO, 12, 3, sombra=False)
-        ui.desenhar_texto(tela, f"PONTOS: {self.pontos}", (caixa.x + 16, caixa.centery), 14,
+        ui.desenhar_texto(tela, t("PONTOS: {n}", n=self.pontos), (caixa.x + 16, caixa.centery), 14,
                           AMARELO, "midleft")
         rec = self.recorde()
         if rec is not None:
-            ui.desenhar_texto(tela, f"RECORDE: {rec}", (caixa.x + 236, caixa.centery), 12,
+            ui.desenhar_texto(tela, t("RECORDE: {v}", v=rec), (caixa.x + 236, caixa.centery), 12,
                               (180, 200, 255), "midleft")
 
         caixa = pygame.Rect(12, 66, 300, 36)
         ui.painel(tela, caixa, (20, 24, 40), BRANCO, 10, 2, sombra=False)
-        ui.desenhar_texto(tela, f"SALTOS {self.saltos}", (caixa.x + 12, caixa.centery), 12,
+        ui.desenhar_texto(tela, t("SALTOS {n}", n=self.saltos), (caixa.x + 12, caixa.centery), 12,
                           (180, 220, 255), "midleft")
         if self.combo >= 2:
             ui.desenhar_texto(tela, f"COMBO x{self.combo}", (caixa.x + 150, caixa.centery), 12,
@@ -950,7 +952,7 @@ class SaltoLago(MiniJogo):
         if self.boias:
             caixa = pygame.Rect(12, 108, 60 + 34 * self.boias, 40)
             ui.painel(tela, caixa, (20, 24, 40), (255, 150, 150), 10, 2, sombra=False)
-            ui.desenhar_texto(tela, "BOIA", (caixa.x + 10, caixa.centery), 10, BRANCO, "midleft")
+            ui.desenhar_texto(tela, t("BOIA"), (caixa.x + 10, caixa.centery), 10, BRANCO, "midleft")
             for i in range(self.boias):
                 b = _boia_sup(12)
                 tela.blit(b, b.get_rect(center=(caixa.x + 72 + i * 30, caixa.centery)))

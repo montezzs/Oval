@@ -5,6 +5,7 @@ import random
 import pygame
 
 from settings import *
+from core.idioma import t as tr
 from core import ui
 
 # ============================================================
@@ -137,7 +138,7 @@ class Borboletas:
 
         if chave not in save["album"]:
             save["album"].append(chave)
-            self.ctx.avisar(f"NOVA NO ÁLBUM: {nome}!")
+            self.ctx.avisar(tr("NOVA NO ÁLBUM: {nome}!", nome=tr(nome)))
             self.ctx.som("vencer", 0.6)
             if len(save["album"]) >= len(ESPECIES) and "asas_borboleta" not in save["inventario"]:
                 save["inventario"].append("asas_borboleta")
@@ -168,7 +169,7 @@ class Borboletas:
         caixa = pygame.Rect(0, 0, 700, 440)
         caixa.center = (LARGURA // 2, ALTURA // 2)
         ui.painel(tela, caixa, (250, 245, 225), (160, 120, 70), 18, 5)
-        ui.desenhar_texto(tela, "ÁLBUM DE BORBOLETAS", (caixa.centerx, caixa.y + 20), 20,
+        ui.desenhar_texto(tela, tr("ÁLBUM DE BORBOLETAS"), (caixa.centerx, caixa.y + 20), 20,
                           (120, 80, 40), "midtop", sombra=False)
         album = self.ctx.app.save["album"]
         for i, (chave, nome, cor) in enumerate(ESPECIES):
@@ -181,13 +182,13 @@ class Borboletas:
             b.x, b.y, b.especie, b.fase = r.centerx, r.y + 58, i, 0.0
             if tem:
                 b.desenhar(tela, self.ctx.tempo)
-                ui.desenhar_texto(tela, nome, (r.centerx, r.bottom - 26), 8, (90, 60, 30),
+                ui.desenhar_texto(tela, tr(nome), (r.centerx, r.bottom - 26), 8, (90, 60, 30),
                                   "midtop", sombra=False)
             else:
                 pygame.draw.circle(tela, (205, 195, 170), (r.centerx, r.y + 58), 26)
                 ui.desenhar_texto(tela, "?", (r.centerx, r.y + 58), 20, (170, 160, 140), "center",
                                   sombra=False)
-        ui.desenhar_texto(tela, f"{len(album)}/{len(ESPECIES)} — complete e ganhe ASAS!",
+        ui.desenhar_texto(tela, tr("{n}/{total} — complete e ganhe ASAS!", n=len(album), total=len(ESPECIES)),
                           (caixa.centerx, caixa.bottom - 30), 10, (120, 80, 40), "midtop",
                           sombra=False)
 

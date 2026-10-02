@@ -11,6 +11,8 @@
 #   "opcao"    -> venceu na dificuldade: bronze=0, prata=1, ouro=2
 #   "partidas" -> total de partidas decididas no multiplayer
 
+from core.idioma import t
+
 NIVEIS = ["bronze", "prata", "ouro"]
 
 
@@ -99,7 +101,7 @@ def nivel(save, jogo):
         for n in NIVEIS:
             if total >= r[n]:
                 obtido = n
-        return obtido, f"{total} partidas"
+        return obtido, t("{n} partidas", n=total)
 
     if tipo == "opcao":
         obtido = None
@@ -108,7 +110,7 @@ def nivel(save, jogo):
             venceu = v is not None and (v >= r["vitoria"] if "vitoria" in r else True)
             if venceu:
                 obtido = n
-        return obtido, "venceu " + (jogo.OPCOES[NIVEIS.index(obtido)] if obtido else "-")
+        return obtido, t("venceu {modo}", modo=t(jogo.OPCOES[NIVEIS.index(obtido)]) if obtido else "-")
 
     menor = tipo == "menor"
     melhor = _melhor(save, jogo, menor)
@@ -118,7 +120,7 @@ def nivel(save, jogo):
     for n in NIVEIS:
         if (melhor <= r[n]) if menor else (melhor >= r[n]):
             obtido = n
-    return obtido, f"recorde {jogo.formatar(melhor)}"
+    return obtido, t("recorde {v}", v=jogo.formatar(melhor))
 
 
 def lista(save):
@@ -128,7 +130,7 @@ def lista(save):
     for jogo in JOGOS:
         n, txt = nivel(save, jogo)
         if n:
-            resultado.append((jogo.TITULO_CURTO or jogo.TITULO, n, txt))
+            resultado.append((t(jogo.TITULO_CURTO or jogo.TITULO), n, txt))
     ordem = {"ouro": 0, "prata": 1, "bronze": 2}
     resultado.sort(key=lambda x: ordem[x[1]])
     return resultado
@@ -137,11 +139,11 @@ def lista(save):
 def meta_desafio(jogo):
     """(tipo, meta, texto) para o desafio do dia do ROBERT."""
     r = regra(jogo)
-    nome = jogo.TITULO_CURTO or jogo.TITULO
+    nome = t(jogo.TITULO_CURTO or jogo.TITULO)
     if getattr(jogo, "MULTI", False):
-        return "vitoria", 1, f"Jogue {nome} com um amigo e VENÇA!"
+        return "vitoria", 1, t("Jogue {nome} com um amigo e VENÇA!", nome=nome)
     if r is None or r["tipo"] == "opcao":
-        return "vitoria", 1, f"Vença uma partida de {nome}!"
+        return "vitoria", 1, t("Vença uma partida de {nome}!", nome=nome)
     if r["tipo"] == "menor":
-        return "menor", r["bronze"], f"Faça {jogo.formatar(r['bronze'])} ou menos em {nome}!"
-    return "maior", r["bronze"], f"Faça {jogo.formatar(r['bronze'])} em {nome}!"
+        return "menor", r["bronze"], t("Faça {v} ou menos em {nome}!", v=jogo.formatar(r['bronze']), nome=nome)
+    return "maior", r["bronze"], t("Faça {v} em {nome}!", v=jogo.formatar(r['bronze']), nome=nome)

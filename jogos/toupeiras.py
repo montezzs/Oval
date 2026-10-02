@@ -5,6 +5,7 @@ import pygame
 
 from settings import *
 from core import ui
+from core.idioma import t
 from jogos.base import MiniJogo
 
 # ============================================================
@@ -484,7 +485,7 @@ class Toupeiras(MiniJogo):
             # Buraco vazio: só levanta poeira e zera o combo
             self.erros += 1
             if self.combo >= 3:
-                self.textos.adicionar("COMBO PERDIDO", (bx, by - 60), (220, 210, 255), 12)
+                self.textos.adicionar(t("COMBO PERDIDO"), (bx, by - 60), (220, 210, 255), 12)
             self.combo = 0
             self.particulas.explodir((bx, by), _poeira(), 14, 160, 0.5, (4, 9), gravidade=-40)
             self.som("virar", 0.6)
@@ -501,7 +502,7 @@ class Toupeiras(MiniJogo):
             self.combo = 0
             self.bebes_acertados += 1
             self.tonto = TEMPO_TONTO
-            self.textos.adicionar("AI! -20", (bx, topo[1] - 20), (255, 120, 140), 18)
+            self.textos.adicionar(t("AI! -20"), (bx, topo[1] - 20), (255, 120, 140), 18)
             self.lagrimas.append([bx + 14, topo[1] + 40, 0.0, 0.8])
             self.lagrimas.append([bx - 14, topo[1] + 44, -30.0, 0.7])
             self.som("erro")
@@ -517,7 +518,7 @@ class Toupeiras(MiniJogo):
             m.visivel = max(m.visivel, 0.6)
             self.particulas.explodir((bx, topo[1] - 10), [(250, 205, 40), (200, 160, 20), BRANCO],
                                      14, 260, 0.6, (4, 8))
-            self.textos.adicionar("PLÉC!", (bx + 30, topo[1] - 20), (255, 230, 120), 14)
+            self.textos.adicionar(t("PLÉC!"), (bx + 30, topo[1] - 20), (255, 230, 120), 14)
             self.som("bater")
             self.tremer(0.08)
             return
@@ -542,7 +543,7 @@ class Toupeiras(MiniJogo):
             self.particulas.explodir(topo, [AMARELO, (255, 250, 200), BRANCO], 26, 280, 0.8)
             self.som("moeda")
         elif tipo == "robert":
-            self.textos.adicionar("VALEU, OVO!", (bx, topo[1] - 50), (255, 160, 220), 14)
+            self.textos.adicionar(t("VALEU, OVO!"), (bx, topo[1] - 50), (255, 160, 220), 14)
             self.particulas.explodir(topo, [(255, 70, 90), (255, 160, 50), (250, 220, 60),
                                             (80, 200, 90), (80, 160, 255)], 36, 300, 0.9)
             self.som("acerto")
@@ -551,7 +552,7 @@ class Toupeiras(MiniJogo):
             self.som("bater", 0.9)
 
         if self.combo in (5, 10, 15, 20):
-            self.textos.adicionar(f"COMBO ×{mult}!", (LARGURA // 2, 230), LARANJA, 22)
+            self.textos.adicionar(t("COMBO ×{n}!", n=mult), (LARGURA // 2, 230), LARANJA, 22)
 
     # --------------------------------------------------------
     # LÓGICA
@@ -576,7 +577,7 @@ class Toupeiras(MiniJogo):
                 for m in self.toupeiras:
                     if m.estado in ("subindo", "fora"):
                         m.estado, m.t = "descendo", 0.0
-                self.textos.adicionar("TEMPO!", (LARGURA // 2, 240), AMARELO, 28)
+                self.textos.adicionar(t("TEMPO!"), (LARGURA // 2, 240), AMARELO, 28)
                 self.som("bandeira")
             else:
                 self._surgir(dt)
@@ -668,11 +669,11 @@ class Toupeiras(MiniJogo):
     def _fim(self):
         meta = META[self.opcao]
         venceu = self.pontos >= meta
-        linhas = [f"PONTOS: {self.pontos}  (META {meta})",
-                  f"ACERTOS: {self.acertos}   MAIOR COMBO: {self.maior_combo}"]
+        linhas = [t("PONTOS: {n}  (META {meta})", n=self.pontos, meta=meta),
+                  t("ACERTOS: {n}   MAIOR COMBO: {c}", n=self.acertos, c=self.maior_combo)]
         if self.bebes_acertados:
-            linhas.append(f"BEBÊS ASSUSTADOS: {self.bebes_acertados}")
-        self.terminar(venceu=venceu, titulo="HORTA SALVA!" if venceu else "TEMPO ESGOTADO!",
+            linhas.append(t("BEBÊS ASSUSTADOS: {n}", n=self.bebes_acertados))
+        self.terminar(venceu=venceu, titulo=t("HORTA SALVA!") if venceu else t("TEMPO ESGOTADO!"),
                       linhas=linhas)
 
     # --------------------------------------------------------
@@ -795,9 +796,9 @@ class Toupeiras(MiniJogo):
         voltas = 5
         pontos = []
         for i in range(voltas * 2 + 1):
-            t = i / (voltas * 2)
-            px = haste_b[0] + (topo_ovo[0] - haste_b[0]) * t
-            py = haste_b[1] + (topo_ovo[1] - haste_b[1]) * t
+            tt = i / (voltas * 2)
+            px = haste_b[0] + (topo_ovo[0] - haste_b[0]) * tt
+            py = haste_b[1] + (topo_ovo[1] - haste_b[1]) * tt
             lado = (11 if i % 2 else -11) if 0 < i < voltas * 2 else 0
             pontos.append((px + lado * 0.7, py + lado * 0.7))
         pygame.draw.lines(tela, (60, 60, 80), False, pontos, 7)
@@ -814,7 +815,7 @@ class Toupeiras(MiniJogo):
         tela.blit(sup, sup.get_rect(center=(int(cx), int(cy))))
 
         if impacto > 0.3:
-            ui.desenhar_texto(tela, "BOING!", (mx + 44, my - 18), 12, BRANCO, "center")
+            ui.desenhar_texto(tela, t("BOING!"), (mx + 44, my - 18), 12, BRANCO, "center")
         if self.tonto > 0:
             for k in range(3):
                 a = self.tempo * 7 + k * math.tau / 3
@@ -824,13 +825,13 @@ class Toupeiras(MiniJogo):
         fundo = (26, 22, 18)
         caixa = pygame.Rect(12, 12, 300, 48)
         ui.painel(tela, caixa, fundo, BRANCO, 12, 3, sombra=False)
-        ui.desenhar_texto(tela, f"PONTOS: {self.pontos}", (caixa.x + 16, caixa.centery), 14,
+        ui.desenhar_texto(tela, t("PONTOS: {n}", n=self.pontos), (caixa.x + 16, caixa.centery), 14,
                           AMARELO, "midleft")
 
         if self.combo >= 2:
             mult = _multiplicador(self.combo)
             cor = LARANJA if mult >= 3 else AMARELO if mult == 2 else BRANCO
-            texto = f"COMBO {self.combo}" + (f"  ×{mult}" if mult > 1 else "")
+            texto = t("COMBO {n}", n=self.combo) + (f"  ×{mult}" if mult > 1 else "")
             sup = ui.texto(texto, 12, cor)
             c2 = pygame.Rect(12, 66, sup.get_width() + 28, 30)
             ui.painel(tela, c2, fundo, cor, 10, 2, sombra=False)
@@ -862,10 +863,10 @@ class Toupeiras(MiniJogo):
         caixa.right = relogio.right + 20 + 208
         ui.painel(tela, caixa, fundo, BRANCO, 12, 3, sombra=False)
         ok = self.pontos >= meta
-        ui.desenhar_texto(tela, f"META: {meta}", (caixa.x + 12, caixa.y + 9),
+        ui.desenhar_texto(tela, t("META: {n}", n=meta), (caixa.x + 12, caixa.y + 9),
                           10, (150, 240, 120) if ok else (200, 220, 255))
         rec = self.recorde()
-        ui.desenhar_texto(tela, f"RECORDE: {rec if rec is not None else '--'}",
+        ui.desenhar_texto(tela, t("RECORDE: {n}", n=rec if rec is not None else "--"),
                           (caixa.x + 12, caixa.y + 27), 10, AMARELO)
         if ok:
             ui.estrela(tela, (caixa.right - 20, caixa.centery), 10, AMARELO, self.tempo)

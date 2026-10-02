@@ -1,3 +1,4 @@
+from core.idioma import t
 import math
 import random
 
@@ -240,7 +241,7 @@ class ThumbFighter(MiniJogoHibrido):
             canto = ["UM,", "DOIS,", "TRÊS,", "QUATRO..."]
             k = int(self.t_fase / 0.4)
             if k < 4 and (self.banner is None or self.banner[0] != canto[k]):
-                self._banner_(canto[k], BRANCO, 0.4, f"ROUND {self.n_round}")
+                self._banner_(canto[k], BRANCO, 0.4, t("ROUND {n}", n=self.n_round))
                 self.som("tic", 0.6)
             elif k == 4 and (self.banner is None or self.banner[0] != "GUERRA DE DEDÃO!"):
                 self._banner_("GUERRA DE DEDÃO!", AMARELO, 0.8)
@@ -258,9 +259,9 @@ class ThumbFighter(MiniJogoHibrido):
             if self.t_fase > 1.8:
                 v = 0 if self.rounds[0] >= 2 else (1 if self.rounds[1] >= 2 else None)
                 if v is not None:
-                    self.terminar_multi(v, [f"ROUNDS  {self.rounds[0]} × {self.rounds[1]}"])
+                    self.terminar_multi(v, [t("ROUNDS  {a} × {b}", a=self.rounds[0], b=self.rounds[1])])
                 elif self.n_round >= 5:
-                    self.terminar_multi(None, [f"ROUNDS  {self.rounds[0]} × {self.rounds[1]}"])
+                    self.terminar_multi(None, [t("ROUNDS  {a} × {b}", a=self.rounds[0], b=self.rounds[1])])
                 else:
                     self._novo_round()
             return
@@ -377,14 +378,14 @@ class ThumbFighter(MiniJogoHibrido):
             return
         if o.esquiva > 0 and o.ext < 0.8:
             d.mudar("tonto")
-            self.textos.adicionar("ESQUIVOU!", (po[0], po[1] - 60), (140, 220, 255), 12)
+            self.textos.adicionar(t("ESQUIVOU!"), (po[0], po[1] - 60), (140, 220, 255), 12)
             self.som("boing", 0.6)
         elif pd[1] < po[1] - 10:
             self._prender(d, o)
         else:
             d.mudar("tonto")
             o.vang += (1 if o.i == 0 else -1) * -80
-            self.textos.adicionar("BATEU!", (pd[0], pd[1] - 50), (255, 200, 120), 12)
+            self.textos.adicionar(t("BATEU!"), (pd[0], pd[1] - 50), (255, 200, 120), 12)
             self.som("bater", 0.5)
             self.tremer(0.1)
 
@@ -396,7 +397,7 @@ class ThumbFighter(MiniJogoHibrido):
         o.esquiva = 0.0
         self.pressas[o.i] = 0
         self.particulas.explodir(o.ponta(), [AMARELO, BRANCO, self.cor(d.i)], 26, 360, 0.6)
-        self.textos.adicionar("PEGOU!", (o.ponta()[0], o.ponta()[1] - 70), AMARELO, 16)
+        self.textos.adicionar(t("PEGOU!"), (o.ponta()[0], o.ponta()[1] - 70), AMARELO, 16)
         self.som("bater")
         self.tremer(0.3)
 
@@ -410,7 +411,7 @@ class ThumbFighter(MiniJogoHibrido):
         o.ext = 0.9
         o.vang = (1 if o.i == 0 else -1) * -200
         p = o.ponta()
-        self.textos.adicionar(texto, (p[0], p[1] - 70), (140, 255, 160) if fugiu else BRANCO, 14)
+        self.textos.adicionar(t(texto), (p[0], p[1] - 70), (140, 255, 160) if fugiu else BRANCO, 14)
         if fugiu:
             self.particulas.explodir(p, [(140, 255, 160), BRANCO], 20, 300, 0.5)
             self.som("boing")
@@ -419,11 +420,11 @@ class ThumbFighter(MiniJogoHibrido):
         self.fase = "ponto"
         self.t_fase = 0.0
         if v is None:
-            self._banner_(texto, AMARELO, 1.8, "NINGUÉM PONTUA")
+            self._banner_(texto, AMARELO, 1.8, t("NINGUÉM PONTUA"))
             self.som("erro", 0.6)
             return
         self.rounds[v] += 1
-        self._banner_(texto, AMARELO, 1.8, f"PONTO DE {self.nome(v).upper()}")
+        self._banner_(texto, AMARELO, 1.8, t("PONTO DE {nome}", nome=self.nome(v).upper()))
         self.som("vencer" if v == 0 or not self.solo else "perder", 0.8)
         for k in range(3):
             self.particulas.explodir((LARGURA // 2 + random.randint(-200, 200),
@@ -586,11 +587,12 @@ class ThumbFighter(MiniJogoHibrido):
                 pygame.draw.rect(tela, (140, 255, 160), (bx, 520, int(bw * min(1.0, o.fuga / FUGA_MAX)),
                                                          10))
                 if not (o.i == 1 and self.solo):
-                    ui.desenhar_texto(tela, "APERTE TUDO!", (int(p[0]), 546), 10, BRANCO, "center")
+                    ui.desenhar_texto(tela, t("APERTE TUDO!"), (int(p[0]), 546), 10, BRANCO, "center")
         self.particulas.desenhar(tela)
         self.textos.desenhar(tela)
         if self.banner and self.estado != "inicio":
             texto, cor, _, sub = self.banner
+            texto = t(texto)
             ui.desenhar_texto(tela, texto, (LARGURA // 2, 260), 40 if len(texto) < 12 else 30,
                               cor, "center")
             if sub:
@@ -622,8 +624,8 @@ class ThumbFighter(MiniJogoHibrido):
         caixa = pygame.Rect(0, topo, 780, ALTURA - topo - 24)
         caixa.centerx = LARGURA // 2
         ui.painel(tela, caixa, (40, 26, 36), self.COR, 22, 5)
-        ui.desenhar_texto(tela, self.TITULO, (LARGURA // 2, topo + 20), 28, AMARELO, "midtop")
-        ui.desenhar_texto(tela, "VS BOT OU 2 JOGADORES", (LARGURA // 2, topo + 58), 12,
+        ui.desenhar_texto(tela, t(self.TITULO), (LARGURA // 2, topo + 20), 28, AMARELO, "midtop")
+        ui.desenhar_texto(tela, t("VS BOT OU 2 JOGADORES"), (LARGURA // 2, topo + 58), 12,
                           (255, 200, 160), "midtop")
         y_ovos = topo + 124
         for i, x in ((0, caixa.x + 150), (1, caixa.right - 150)):
@@ -631,16 +633,16 @@ class ThumbFighter(MiniJogoHibrido):
             self.desenhar_ovo(tela, i, (x, y_ovos + balanco), 60, espelhar=(i == 1))
             ui.desenhar_texto(tela, self.nome(i), (x, y_ovos + 42), 14, CORES_JOGADOR[i], "midtop")
             ctrl = self.CONTROLES_J1 if i == 0 else self.CONTROLES_J2
-            ui.desenhar_texto(tela, ctrl, (x, y_ovos + 64), 10, BRANCO, "midtop")
+            ui.desenhar_texto(tela, t(ctrl), (x, y_ovos + 64), 10, BRANCO, "midtop")
         ui.desenhar_texto(tela, "VS", (LARGURA // 2, y_ovos), 32, AMARELO, "center")
         y = y_ovos + 92
         for linha in self.INSTRUCOES:
-            for sub in ui.quebrar_linhas(linha, 10, caixa.w - 50):
+            for sub in ui.quebrar_linhas(t(linha), 10, caixa.w - 50):
                 ui.desenhar_texto(tela, sub, (LARGURA // 2, y), 10, BRANCO, "midtop")
                 y += 16
             y += 3
         v = self.vitorias()
         y_rec = self.menu_inicio.botoes[0].rect.y - 30
-        ui.desenhar_texto(tela, f"VITÓRIAS  J1 {v[0]} × {v[1]} J2", (LARGURA // 2, y_rec),
+        ui.desenhar_texto(tela, t("VITÓRIAS  J1 {a} × {b} J2", a=v[0], b=v[1]), (LARGURA // 2, y_rec),
                           12, AMARELO, "midtop")
         self.menu_inicio.desenhar(tela)

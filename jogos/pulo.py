@@ -5,6 +5,7 @@ import pygame
 
 from settings import *
 from core import ui
+from core.idioma import t
 from jogos.base import MiniJogo
 
 # ============================================================
@@ -429,9 +430,9 @@ class PuloNuvens(MiniJogo):
             self.vy += GRAVIDADE * dt
             self.y += self.vy * dt
             if self.tempo_morto > 0.5:
-                self.terminar(linhas=[f"ALTURA: {self.metros} m",
-                                      f"LIMÕES: {self.limoes}",
-                                      f"PONTOS: {self.pontos}"])
+                self.terminar(linhas=[t("ALTURA: {n} m", n=self.metros),
+                                      t("LIMÕES: {n}", n=self.limoes),
+                                      t("PONTOS: {n}", n=self.pontos)])
             return
 
         # --- Movimento para os lados ---

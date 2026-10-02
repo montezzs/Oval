@@ -5,6 +5,8 @@ import random
 import pygame
 
 from settings import *
+from core.idioma import t
+from core import idioma
 from core import ceu, perfis, ui
 from core import fachada_desenho as fd
 from core.cena import Cena, tecla_voltar
@@ -252,7 +254,7 @@ class CenaVizinhanca(Cena):
         if self._mudanca is not None and self.perfis[self._mudanca].ocupado:
             p = self.perfis[self._mudanca]
             self.brotar[self._mudanca] = 0.0
-            self.boas_vindas = (f"BEM-VINDO, {p.nome.upper()}!", 2.5)
+            self.boas_vindas = (t("BEM-VINDO, {nome}!", nome=p.nome.upper()), 2.5)
             (ax, ay), s = CASAS[self._mudanca]
             self.particulas.explodir((ax, ay - 90 * s), [p.cor, AMARELO, BRANCO], 50, 380)
             self.som("acerto")
@@ -299,15 +301,16 @@ class CenaVizinhanca(Cena):
                             and isinstance(de.save.recorde(j.ID), (int, float)) and de.save.recorde(j.ID) > 0]
             if jogos_feitos:
                 j, v = rnd.choice(jogos_feitos)
-                modelos.append(f"OI! AQUI É {de.nome.upper()} DA CASA {de.slot + 1}. FIZ "
-                               f"{j.formatar(v)} NA {(j.TITULO_CURTO or j.TITULO).upper()}! DUVIDO VOCÊ PASSAR!")
+                modelos.append(t("OI! AQUI É {nome} DA CASA {casa}. FIZ {valor} NA {jogo}! DUVIDO VOCÊ PASSAR!",
+                                 nome=de.nome.upper(), casa=de.slot + 1, valor=j.formatar(v),
+                                 jogo=t(j.TITULO_CURTO or j.TITULO).upper()))
             if de.save["pet"] in getattr(pets, "CATALOGO", {}):
                 nome_pet = pets.CATALOGO[de.save["pet"]]["nome"]
-                modelos.append(f"OI! AQUI É {de.nome.upper()}. ADOTEI UM PET: {nome_pet}! VEM VER!")
+                modelos.append(t("OI! AQUI É {nome}. ADOTEI UM PET: {pet}! VEM VER!", nome=de.nome.upper(), pet=t(nome_pet)))
             cor = PALETA_PAREDE[de.casa["cor_parede"]][0]
-            modelos.append(f"OI! {de.nome.upper()} PINTOU A CASA DE {cor}. FICOU LINDA!")
-            modelos.append(f"OI, VIZINHO! AQUI É {de.nome.upper()} DA CASA {de.slot + 1}. "
-                           "VAMOS JOGAR JUNTOS NO MODO 2 JOGADORES?")
+            modelos.append(t("OI! {nome} PINTOU A CASA DE {cor}. FICOU LINDA!", nome=de.nome.upper(), cor=t(cor)))
+            modelos.append(t("OI, VIZINHO! AQUI É {nome} DA CASA {casa}. VAMOS JOGAR JUNTOS NO MODO 2 JOGADORES?",
+                             nome=de.nome.upper(), casa=de.slot + 1))
             texto = rnd.choice(modelos)
             carta = {"de": de.slot, "nome": de.nome, "texto": texto, "dia": hoje, "lida": False,
                      "apar": list(de.jogador.aparencia())}
@@ -387,7 +390,7 @@ class CenaVizinhanca(Cena):
         if perfis.apagar_ovo(slot, self.app.config):
             self.murchar = (slot, 0.0)
             (ax, ay), s = CASAS[slot]
-            self.textos.adicionar("TCHAU!", (ax, ay - 200 * s), BRANCO, 16)
+            self.textos.adicionar(t("TCHAU!"), (ax, ay - 200 * s), BRANCO, 16)
             self.som("perder", 0.6)
         else:
             self._avisar("NÃO DEU PARA APAGAR")
@@ -396,7 +399,7 @@ class CenaVizinhanca(Cena):
         self.segurar = 0.0
 
     def _avisar(self, msg):
-        self.aviso = msg
+        self.aviso = t(msg)
         self.tempo_aviso = 2.5
 
     def _acao_principal(self):
@@ -549,7 +552,7 @@ class CenaVizinhanca(Cena):
         for v in self.veiculos:
             if not v.buzinou and v.rect().collidepoint(pos):
                 v.buzinou = True
-                self.textos.adicionar("BI-BI!", v.pos(), AMARELO, 12)
+                self.textos.adicionar(t("BI-BI!"), v.pos(), AMARELO, 12)
                 self.som("bater")
                 return
 
@@ -882,10 +885,10 @@ class CenaVizinhanca(Cena):
         placa.center = (512, 626)
         pygame.draw.rect(tela, (120, 80, 45), placa, border_radius=6)
         pygame.draw.rect(tela, (80, 50, 25), placa, 2, border_radius=6)
-        ui.desenhar_texto(tela, f"VILA NÍVEL {nv}", placa.center, 8, (255, 240, 200), "center")
+        ui.desenhar_texto(tela, idioma.t("VILA NÍVEL {n}", n=nv), placa.center, 8, (255, 240, 200), "center")
         proximo = next((m for m in self.MARCOS_VILA if m[0] > nv), None)
         if proximo and pygame.Rect(placa).inflate(20, 20).collidepoint(pygame.mouse.get_pos()):
-            ui.desenhar_texto(tela, f"NÍVEL {proximo[0]}: {proximo[1]}", (512, 604), 8, AMARELO, "midbottom")
+            ui.desenhar_texto(tela, idioma.t("NÍVEL {n}: {marco}", n=proximo[0], marco=idioma.t(proximo[1])), (512, 604), 8, AMARELO, "midbottom")
 
     def _desenhar_fonte(self, tela):
         pygame.draw.ellipse(tela, (110, 190, 250), (424, 556, 176, 40))
@@ -1128,10 +1131,10 @@ class CenaVizinhanca(Cena):
             x, y = self._pos_placa(i)
             sel = (i == self.sel and not self.modal)
             if p.estado == "vazio":
-                ui.desenhar_texto(tela, f"CASA {i + 1} • LIVRE", (x, y), 8, (70, 100, 70), "center", False)
+                ui.desenhar_texto(tela, t("CASA {n} • LIVRE", n=i + 1), (x, y), 8, (70, 100, 70), "center", False)
                 continue
             if p.estado == "corrompido":
-                ui.desenhar_texto(tela, "EM OBRAS", (x, y), 10, (200, 120, 30), "center", False)
+                ui.desenhar_texto(tela, t("EM OBRAS"), (x, y), 10, (200, 120, 30), "center", False)
                 continue
             tam = 12 if sel else 10
             nome = ui.texto(p.nome, tam, (60, 40, 30), sombra=False)
@@ -1184,7 +1187,7 @@ class CenaVizinhanca(Cena):
                 for k in (-3, 0, 3):
                     pygame.draw.line(tela, cor, (cx + k, cy - 3), (cx + k, cy + 7), 1)
             else:
-                ui.desenhar_texto(tela, txt, b.center, tam, BRANCO, "center")
+                ui.desenhar_texto(tela, t(txt), b.center, tam, BRANCO, "center")
             ui.desenhar_texto(tela, dica, (b.centerx, b.bottom + 11), 8, (230, 230, 240), "center")
 
     def _desenhar_tooltip(self, tela, i):
@@ -1192,10 +1195,10 @@ class CenaVizinhanca(Cena):
         (ax, ay), s = CASAS[i]
         px, py = self._pos_placa(i)
         if p.estado == "vazio":
-            linhas = ui.quebrar_linhas("CASA LIVRE! CLIQUE EM +NOVO PARA TER UM OVO AQUI.", 8, 200)
+            linhas = ui.quebrar_linhas(t("CASA LIVRE! CLIQUE EM +NOVO PARA TER UM OVO AQUI."), 8, 200)
             r = pygame.Rect(0, 0, 220, 20 + 14 * len(linhas))
         elif p.estado == "corrompido":
-            linhas = ui.quebrar_linhas("ESTA CASA ESTÁ EM OBRAS (O ARQUIVO DO OVO ESTÁ ESTRAGADO).", 8, 200)
+            linhas = ui.quebrar_linhas(t("ESTA CASA ESTÁ EM OBRAS (O ARQUIVO DO OVO ESTÁ ESTRAGADO)."), 8, 200)
             r = pygame.Rect(0, 0, 220, 20 + 14 * len(linhas))
         else:
             linhas = None
@@ -1219,27 +1222,27 @@ class CenaVizinhanca(Cena):
             from core import pets
             nome_pet = pets.CATALOGO.get(p.save["pet"], {}).get("nome", "")
             if nome_pet:
-                ui.desenhar_texto(tela, "PET: " + nome_pet, (r.right - 10, r.y + 36), 8,
+                ui.desenhar_texto(tela, t("PET: ") + t(nome_pet), (r.right - 10, r.y + 36), 8,
                                   (230, 230, 240), "topright")
         from core.necessidades import ROTULOS
         for k, (nome, v) in enumerate(p.necessidades.items()):
             x = r.x + 12 + (k % 2) * 124
             y = r.y + 70 + (k // 2) * 18
-            ui.desenhar_texto(tela, ROTULOS[nome][:4], (x, y), 8, (230, 230, 240))
+            ui.desenhar_texto(tela, t(ROTULOS[nome])[:4], (x, y), 8, (230, 230, 240))
             cor = (230, 70, 70) if v < 30 else ((255, 200, 60) if v < 70 else (90, 200, 90))
             pygame.draw.rect(tela, (20, 24, 40), (x + 44, y, 60, 8), border_radius=3)
             pygame.draw.rect(tela, cor, (x + 44, y, round(60 * v / 100), 8), border_radius=3)
         txt, cor, _ = p.status
-        ui.desenhar_texto(tela, txt, (r.centerx, r.bottom - 14), 8, cor, "center")
+        ui.desenhar_texto(tela, t(txt), (r.centerx, r.bottom - 14), 8, cor, "center")
 
     def _desenhar_hud(self, tela):
         mouse = pygame.mouse.get_pos()
         hover = self.bt_inicio.collidepoint(mouse)
         ui.painel(tela, self.bt_inicio, (70, 80, 130) if hover else (30, 36, 60), BRANCO, 12, 3)
-        ui.desenhar_texto(tela, "← INÍCIO", self.bt_inicio.center, 12, BRANCO, "center")
+        ui.desenhar_texto(tela, t("← INÍCIO"), self.bt_inicio.center, 12, BRANCO, "center")
         titulo = pygame.Rect(362, 12, 300, 46)
         ui.painel(tela, titulo, (30, 36, 60), BRANCO, 14, 3)
-        ui.desenhar_texto(tela, "RUA DOS OVOS", titulo.center, 16, AMARELO, "center")
+        ui.desenhar_texto(tela, t("RUA DOS OVOS"), titulo.center, 16, AMARELO, "center")
         hover = self.bt_pausa.collidepoint(mouse)
         ui.painel(tela, self.bt_pausa, (70, 80, 130) if hover else (30, 36, 60), BRANCO, 12, 3)
         cx, cy = self.bt_pausa.center
@@ -1249,10 +1252,10 @@ class CenaVizinhanca(Cena):
         fundo = pygame.Surface(ajuda.size, pygame.SRCALPHA)
         pygame.draw.rect(fundo, (20, 24, 40, 200), fundo.get_rect(), border_radius=12)
         tela.blit(fundo, ajuda)
-        ui.desenhar_texto(tela, AJUDA, ajuda.center, 8, BRANCO, "center")
+        ui.desenhar_texto(tela, t(AJUDA), ajuda.center, 8, BRANCO, "center")
 
     def _desenhar_banner(self, tela):
-        msg = "BEM-VINDO À RUA DOS OVOS! SUA CASA É A 1. CLIQUE EM +NOVO PARA TER MAIS OVOS."
+        msg = t("BEM-VINDO À RUA DOS OVOS! SUA CASA É A 1. CLIQUE EM +NOVO PARA TER MAIS OVOS.")
         linhas = ui.quebrar_linhas(msg, 10, 700)
         r = pygame.Rect(0, 0, 740, 20 + 18 * len(linhas))
         r.midtop = (LARGURA // 2, 72)
@@ -1268,7 +1271,7 @@ class CenaVizinhanca(Cena):
             caixa = pygame.Rect(0, 0, 440, 330)
             caixa.midtop = (LARGURA // 2, 160)
             ui.painel(tela, caixa, (30, 34, 60), BRANCO, 20, 4)
-            ui.desenhar_texto(tela, "PAUSADO", (LARGURA // 2, 190), 24, AMARELO, "midtop")
+            ui.desenhar_texto(tela, t("PAUSADO"), (LARGURA // 2, 190), 24, AMARELO, "midtop")
             self.menu_pausa.desenhar(tela)
             return
         if self.modal == "carta":
@@ -1285,12 +1288,12 @@ class CenaVizinhanca(Cena):
             apar = list(p.jogador.aparencia())
             apar[3] = BOCA_TRISTE
             p.jogador.desenhar(tela, (caixa.x + 100, caixa.centery + balanco), 90, aparencia=tuple(apar))
-        nome = (p.nome or "ESTE OVO").upper()
+        nome = (p.nome or t("ESTE OVO")).upper()
         if self.modal == "apagar1":
-            ui.desenhar_texto(tela, "APAGAR ESTE OVO?", (caixa.centerx + 60, caixa.y + 30), 20,
+            ui.desenhar_texto(tela, t("APAGAR ESTE OVO?"), (caixa.centerx + 60, caixa.y + 30), 20,
                               (255, 120, 120), "midtop")
-            msg = (f"{nome} VAI SE MUDAR PARA SEMPRE. AS OVOEDAS, ROUPAS, PETS, "
-                   "PLANTAS E RECORDES DELE VÃO JUNTO.")
+            msg = t("{nome} VAI SE MUDAR PARA SEMPRE. AS OVOEDAS, ROUPAS, PETS, "
+                    "PLANTAS E RECORDES DELE VÃO JUNTO.", nome=nome)
             for k, l in enumerate(ui.quebrar_linhas(msg, 10, 380)):
                 ui.desenhar_texto(tela, l, (caixa.x + 200, caixa.y + 84 + k * 20), 10, BRANCO)
             self.ap_nao.topleft = (caixa.x + 200, caixa.bottom - 88)
@@ -1299,14 +1302,14 @@ class CenaVizinhanca(Cena):
                                            (self.ap_sim, "SIM, APAGAR", (170, 60, 60), 10, self.ap_foco == 1)):
                 pygame.draw.rect(tela, ui.clarear(cor, 30) if foco else cor, r, border_radius=12)
                 pygame.draw.rect(tela, AMARELO if foco else BRANCO, r, 3, border_radius=12)
-                ui.desenhar_texto(tela, txt, r.center, tam, BRANCO, "center")
-            ui.desenhar_texto(tela, "ESC = NÃO", (caixa.centerx + 60, caixa.bottom - 22), 8,
+                ui.desenhar_texto(tela, t(txt), r.center, tam, BRANCO, "center")
+            ui.desenhar_texto(tela, t("ESC = NÃO"), (caixa.centerx + 60, caixa.bottom - 22), 8,
                               (230, 230, 240), "center")
         else:
-            ui.desenhar_texto(tela, "TEM CERTEZA MESMO?", (caixa.centerx + 60, caixa.y + 30), 20,
+            ui.desenhar_texto(tela, t("TEM CERTEZA MESMO?"), (caixa.centerx + 60, caixa.y + 30), 20,
                               (255, 120, 120), "midtop")
-            msg = ("SE VOCÊ NÃO É O DONO DESTE OVO, PEÇA PARA UM ADULTO. "
-                   "SEGURE O BOTÃO VERMELHO POR 3 SEGUNDOS.")
+            msg = t("SE VOCÊ NÃO É O DONO DESTE OVO, PEÇA PARA UM ADULTO. "
+                    "SEGURE O BOTÃO VERMELHO POR 3 SEGUNDOS.")
             for k, l in enumerate(ui.quebrar_linhas(msg, 10, 380)):
                 ui.desenhar_texto(tela, l, (caixa.x + 200, caixa.y + 84 + k * 20), 10, BRANCO)
             self.ap_segurar.topleft = (caixa.x + 200, caixa.bottom - 150)
@@ -1317,11 +1320,11 @@ class CenaVizinhanca(Cena):
             if f > 0:
                 pygame.draw.rect(tela, (255, 120, 120), (r.x, r.y, round(r.w * f), r.h), border_radius=12)
             pygame.draw.rect(tela, BRANCO, r, 3, border_radius=12)
-            ui.desenhar_texto(tela, "SEGURE PARA APAGAR", r.center, 12, BRANCO, "center")
+            ui.desenhar_texto(tela, t("SEGURE PARA APAGAR"), r.center, 12, BRANCO, "center")
             r = self.ap_cancelar
             pygame.draw.rect(tela, (70, 170, 90), r, border_radius=12)
             pygame.draw.rect(tela, BRANCO, r, 3, border_radius=12)
-            ui.desenhar_texto(tela, "CANCELAR", r.center, 12, BRANCO, "center")
+            ui.desenhar_texto(tela, t("CANCELAR"), r.center, 12, BRANCO, "center")
 
     def _desenhar_carta(self, tela):
         c = self.carta
@@ -1331,7 +1334,7 @@ class CenaVizinhanca(Cena):
         pygame.draw.rect(tela, (255, 250, 235), papel, border_radius=6)
         for y in range(papel.y + 70, papel.bottom - 30, 22):
             pygame.draw.line(tela, (225, 215, 195), (papel.x + 20, y), (papel.right - 20, y), 1)
-        ui.desenhar_texto(tela, "CARTA DE " + c.get("nome", "").upper(), (papel.x + 24, papel.y + 22), 12,
+        ui.desenhar_texto(tela, t("CARTA DE ") + c.get("nome", "").upper(), (papel.x + 24, papel.y + 22), 12,
                           (120, 60, 30), sombra=False)
         # Selo com o mini avatar do remetente
         selo = pygame.Rect(papel.right - 84, papel.y + 14, 64, 72)
@@ -1340,7 +1343,7 @@ class CenaVizinhanca(Cena):
         apar = c.get("apar")
         if isinstance(apar, list) and len(apar) == 4 and self.perfis[self.sel].jogador:
             self.perfis[self.sel].jogador.desenhar(tela, selo.center, 34, aparencia=tuple(apar))
-        for k, l in enumerate(ui.quebrar_linhas(c.get("texto", ""), 10, 400)):
+        for k, l in enumerate(ui.quebrar_linhas(t(c.get("texto", "")), 10, 400)):
             ui.desenhar_texto(tela, l, (papel.x + 24, papel.y + 96 + k * 22), 10, (60, 40, 30), sombra=False)
-        ui.desenhar_texto(tela, "CLIQUE PARA FECHAR", (papel.centerx, papel.bottom - 16), 8,
+        ui.desenhar_texto(tela, t("CLIQUE PARA FECHAR"), (papel.centerx, papel.bottom - 16), 8,
                           (150, 120, 90), "center", False)

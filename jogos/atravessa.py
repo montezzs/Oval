@@ -5,6 +5,7 @@ import pygame
 
 from settings import *
 from core import ui
+from core.idioma import t
 from jogos.base import MiniJogo
 
 # ============================================================
@@ -618,7 +619,7 @@ class Atravessa(MiniJogo):
                 e.buzinou = True
                 self.buzina = 1.2
                 self.som("bater", 0.25)
-                self.textos.adicionar("BI-BI!", (e.x + e.largura / 2, _y_faixa(f) - 34), BRANCO, 10)
+                self.textos.adicionar(t("BI-BI!"), (e.x + e.largura / 2, _y_faixa(f) - 34), BRANCO, 10)
         # Libera a buzina dos carros que já passaram
         for e in faixa.ents:
             if e.buzinou and (e.x > LARGURA or e.x + e.largura < 0):
@@ -646,7 +647,7 @@ class Atravessa(MiniJogo):
             if p and p["estado"] == "tronco" and p["ent"] is plataforma \
                     and abs(plataforma.x + p["dx"] - self.x) < 70:
                 p["estado"] = "carregado"
-                self.textos.adicionar("PINTINHO!", (self.x, _y_faixa(f1) - 40), AMARELO, 14)
+                self.textos.adicionar(t("PINTINHO!"), (self.x, _y_faixa(f1) - 40), AMARELO, 14)
                 self.som("ponto", 0.8)
 
         # Faixa nova nesta travessia
@@ -679,7 +680,7 @@ class Atravessa(MiniJogo):
         if self.pintinho and self.pintinho["estado"] == "carregado":
             self.pontos += 300
             self.pintinhos += 1
-            self.textos.adicionar("PINTINHO SALVO! +300", (LARGURA / 2, 200), AMARELO, 16)
+            self.textos.adicionar(t("PINTINHO SALVO! +300"), (LARGURA / 2, 200), AMARELO, 16)
             self.pintinho = None
             self.proximo_pintinho = random.uniform(10, 16)
         self.estado_ovo = "ninho"
@@ -688,7 +689,7 @@ class Atravessa(MiniJogo):
         if all(self.ninhos):
             self.pontos += 1000
             self.nivel += 1
-            self.banner = f"NÍVEL {self.nivel}!  +1000"
+            self.banner = t("NÍVEL {n}!  +1000", n=self.nivel)
             self.tempo_banner = 2.2
             self.particulas.explodir((LARGURA / 2, 200), [AMARELO, BRANCO, self.jogador.cor], 60, 400, 1.2)
             self.tremer(0.2)
@@ -705,19 +706,19 @@ class Atravessa(MiniJogo):
         if como == "frito":
             self.som("explosao", 0.5)
             self.tremer(0.25)
-            self.textos.adicionar("OVO FRITO!", (pos[0], pos[1] - 44), AMARELO, 16)
+            self.textos.adicionar(t("OVO FRITO!"), (pos[0], pos[1] - 44), AMARELO, 16)
             self.particulas.explodir(pos, [BRANCO, AMARELO, (255, 240, 200)], 20, 220, 0.6)
         elif como == "afogado":
             self.som("bater", 0.6)
-            self.textos.adicionar("GLUB!", (pos[0], pos[1] - 44), (200, 240, 255), 16)
+            self.textos.adicionar(t("GLUB!"), (pos[0], pos[1] - 44), (200, 240, 255), 16)
             self.particulas.explodir(pos, [(120, 200, 255), (220, 245, 255)], 24, 240, 0.7)
         else:
             self.som("erro", 0.7)
-            self.banner = "ACABOU O TEMPO!"
+            self.banner = t("ACABOU O TEMPO!")
             self.tempo_banner = 1.4
         if self.pintinho and self.pintinho["estado"] == "carregado":
             self.particulas.explodir(pos, [AMARELO, (255, 240, 150)], 12, 150, 0.6)
-            self.textos.adicionar("PIU!", (pos[0] + 30, pos[1] - 20), AMARELO, 10)
+            self.textos.adicionar(t("PIU!"), (pos[0] + 30, pos[1] - 20), AMARELO, 10)
             self.pintinho = None
             self.proximo_pintinho = random.uniform(8, 14)
 
@@ -736,9 +737,9 @@ class Atravessa(MiniJogo):
             self.vidas -= 1
             if self.vidas <= 0:
                 self.vidas = 0
-                self.terminar(linhas=[f"PONTOS: {self.pontos}",
-                                      f"NÍVEL: {self.nivel}   NINHOS: {self.total_ninhos}",
-                                      f"PINTINHOS SALVOS: {self.pintinhos}"])
+                self.terminar(linhas=[t("PONTOS: {n}", n=self.pontos),
+                                      t("NÍVEL: {n}   NINHOS: {ninhos}", n=self.nivel, ninhos=self.total_ninhos),
+                                      t("PINTINHOS SALVOS: {n}", n=self.pintinhos)])
             else:
                 self._nascer()
 
@@ -936,7 +937,7 @@ class Atravessa(MiniJogo):
             if -20 < px < LARGURA + 20:
                 self._desenhar_pintinho(tela, px, _y_faixa(p["faixa"]) - 8)
                 if p["tempo"] > 0 and int(self.tempo * 3) % 2 == 0:
-                    ui.desenhar_texto(tela, "PIU!", (int(px), _y_faixa(p["faixa"]) - 36), 10,
+                    ui.desenhar_texto(tela, t("PIU!"), (int(px), _y_faixa(p["faixa"]) - 36), 10,
                                       AMARELO, "center")
 
         # Ovo frito fica embaixo dos carros
@@ -964,7 +965,7 @@ class Atravessa(MiniJogo):
 
         caixa = pygame.Rect(12, 8, 300, 44)
         ui.painel(tela, caixa, (20, 24, 40), BRANCO, 12, 3, sombra=False)
-        ui.desenhar_texto(tela, f"PONTOS: {self.pontos}", (caixa.x + 14, caixa.centery), 14,
+        ui.desenhar_texto(tela, t("PONTOS: {n}", n=self.pontos), (caixa.x + 14, caixa.centery), 14,
                           AMARELO, "midleft")
 
         caixa = pygame.Rect(320, 8, 136, 44)
@@ -975,7 +976,7 @@ class Atravessa(MiniJogo):
 
         caixa = pygame.Rect(464, 8, 480, 44)
         ui.painel(tela, caixa, (20, 24, 40), BRANCO, 12, 3, sombra=False)
-        ui.desenhar_texto(tela, f"NÍVEL {self.nivel}", (caixa.x + 14, caixa.centery), 12,
+        ui.desenhar_texto(tela, t("NÍVEL {n}", n=self.nivel), (caixa.x + 14, caixa.centery), 12,
                           (180, 220, 255), "midleft")
         barra = pygame.Rect(caixa.x + 130, caixa.y + 14, caixa.w - 150, 16)
         pygame.draw.rect(tela, (50, 54, 80), barra, border_radius=8)
@@ -987,4 +988,4 @@ class Atravessa(MiniJogo):
         pygame.draw.rect(tela, BRANCO, barra, 2, border_radius=8)
         rec = self.recorde()
         if rec is not None and self.estado in ("contagem",):
-            ui.desenhar_texto(tela, f"RECORDE: {rec}", (LARGURA // 2, _y_faixa(5)), 14, AMARELO, "center")
+            ui.desenhar_texto(tela, t("RECORDE: {n}", n=rec), (LARGURA // 2, _y_faixa(5)), 14, AMARELO, "center")

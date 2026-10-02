@@ -5,6 +5,7 @@ import pygame
 
 from settings import *
 from core import ui
+from core.idioma import t
 from jogos.base import MiniJogo
 
 # ============================================================
@@ -279,11 +280,11 @@ class Lanchonete(MiniJogo):
         c = pygame.Rect(700, 146, 290, 140)
         pygame.draw.rect(sup, (40, 40, 50), c, border_radius=8)
         pygame.draw.rect(sup, (170, 120, 70), c, 6, border_radius=8)
-        titulo = ui.texto("CARDÁPIO", 14, (255, 220, 120), sombra=False)
+        titulo = ui.texto(t("CARDÁPIO"), 14, (255, 220, 120), sombra=False)
         sup.blit(titulo, titulo.get_rect(midtop=(c.centerx, c.y + 14)))
         for k, (nome, preco) in enumerate((("X-OVO", "5"), ("X-SALADA", "7"), ("SUCO LIMÃO", "3"))):
             y = c.y + 46 + k * 28
-            n = ui.texto(nome, 10, (240, 240, 240), sombra=False)
+            n = ui.texto(t(nome), 10, (240, 240, 240), sombra=False)
             p = ui.texto(preco, 10, (255, 220, 120), sombra=False)
             sup.blit(n, (c.x + 20, y))
             ui.moeda(sup, (c.right - 44, y + 5), 7)
@@ -491,12 +492,12 @@ class Lanchonete(MiniJogo):
     def _colocar(self, ingr):
         c = self.atual
         if c is None or self.entregando:
-            self._avisar("ESPERE O CLIENTE!")
+            self._avisar(t("ESPERE O CLIENTE!"))
             return
         if self.errado:
             self.tremer_pilha = 0.4
             self.som("erro", 0.5)
-            self._avisar("JOGUE FORA! (↑)")
+            self._avisar(t("JOGUE FORA! (↑)"))
             return
         if len(self.pilha) >= 9:
             return
@@ -515,7 +516,7 @@ class Lanchonete(MiniJogo):
             self.tremer_pilha = 0.5
             self.chef_nao = 0.6
             self.som("erro", 0.8)
-            self._avisar("ERROU! JOGUE FORA (↑)")
+            self._avisar(t("ERROU! JOGUE FORA (↑)"))
             return
 
         self._talvez_entregar()
@@ -523,11 +524,11 @@ class Lanchonete(MiniJogo):
     def _dar_suco(self):
         c = self.atual
         if c is None or self.entregando:
-            self._avisar("ESPERE O CLIENTE!")
+            self._avisar(t("ESPERE O CLIENTE!"))
             return
         if not c.suco:
             self.som("erro", 0.5)
-            self._avisar("NÃO PEDIU SUCO!")
+            self._avisar(t("NÃO PEDIU SUCO!"))
             return
         if self.suco_pronto:
             return
@@ -543,7 +544,7 @@ class Lanchonete(MiniJogo):
         if len(self.pilha) != len(c.pedido):
             return
         if c.suco and not self.suco_pronto:
-            self._avisar("FALTA O SUCO! (7)")
+            self._avisar(t("FALTA O SUCO! (7)"))
             return
         self._entregar(c)
 
@@ -567,7 +568,7 @@ class Lanchonete(MiniJogo):
         ganho = 10 + 5 * n + bonus
         self.pontos += ganho
         self.atendidos += 1
-        msg = f"+{ganho} RÁPIDO!" if bonus >= 14 else f"+{ganho}"
+        msg = t("+{n} RÁPIDO!", n=ganho) if bonus >= 14 else f"+{ganho}"
         self.textos.adicionar(msg, (c.x, 250), AMARELO if bonus >= 14 else BRANCO, 20 if bonus >= 14 else 16)
         self.som("acerto")
         self.entregando = [[p[0] for p in self.pilha], self.suco_pronto, 0.0]
@@ -583,7 +584,7 @@ class Lanchonete(MiniJogo):
         self.estrela_quebrando = 1.0
         self.tremer(0.25)
         self.som("perder", 0.7)
-        self.textos.adicionar("HMPF!", (c.x, 280), (255, 110, 110), 20)
+        self.textos.adicionar(t("HMPF!"), (c.x, 280), (255, 110, 110), 20)
         if era_balcao:
             # A pilha desse cliente vai para o lixo
             if self.pilha:
@@ -615,7 +616,7 @@ class Lanchonete(MiniJogo):
             self.fim_motivo = "tempo"
             self.acabando = 1.0
             self.som("bandeira")
-            self.textos.adicionar("FIM DO EXPEDIENTE!", (LARGURA // 2, 250), AMARELO, 24)
+            self.textos.adicionar(t("FIM DO EXPEDIENTE!"), (LARGURA // 2, 250), AMARELO, 24)
             return
 
         # Chegada de clientes
@@ -692,14 +693,14 @@ class Lanchonete(MiniJogo):
         self.aviso = (msg, max(0.0, t - dt))
 
     def _fim(self):
-        linhas = [f"PONTOS: {self.pontos}",
-                  f"CLIENTES: {self.atendidos}  •  ESTRELAS: {self.estrelas}/{ESTRELAS}"]
+        linhas = [t("PONTOS: {n}", n=self.pontos),
+                  t("CLIENTES: {n}  •  ESTRELAS: {e}/{total}", n=self.atendidos, e=self.estrelas, total=ESTRELAS)]
         if self.fim_motivo == "estrelas":
-            self.terminar(titulo="LANCHONETE FECHADA!", linhas=linhas)
+            self.terminar(titulo=t("LANCHONETE FECHADA!"), linhas=linhas)
         elif self.estrelas == ESTRELAS:
-            self.terminar(venceu=True, titulo="EXPEDIENTE PERFEITO!", linhas=linhas)
+            self.terminar(venceu=True, titulo=t("EXPEDIENTE PERFEITO!"), linhas=linhas)
         else:
-            self.terminar(titulo="FIM DO EXPEDIENTE!", linhas=linhas)
+            self.terminar(titulo=t("FIM DO EXPEDIENTE!"), linhas=linhas)
 
     # --------------------------------------------------------
     # DESENHO
@@ -734,7 +735,7 @@ class Lanchonete(MiniJogo):
 
     def _desenhar_letreiro(self, tela):
         nome = (self.jogador.nome or "OVO").upper()
-        texto = f"LANCHONETE DO {nome}"
+        texto = t("LANCHONETE DO {nome}", nome=nome)
         if self._placa_nome is None or self._placa_nome[0] != texto:
             tam = 20
             while tam > 12 and ui.texto(texto, tam).get_width() > 600:
@@ -930,7 +931,7 @@ class Lanchonete(MiniJogo):
                 tela.blit(s, s.get_rect(center=(x, corpo.y + 42)))
             pygame.draw.line(tela, (255, 255, 255), (corpo.x + 10, corpo.y + 8), (corpo.x + 10, corpo.bottom - 10), 3)
             # Etiqueta com o nome
-            nome = NOMES[INGREDIENTES[i]]
+            nome = t(NOMES[INGREDIENTES[i]])
             etq = pygame.Rect(0, 0, POTE_W - 12, 18)
             etq.midbottom = (x, corpo.bottom - 6)
             pygame.draw.rect(tela, (255, 250, 235), etq, border_radius=4)
@@ -971,7 +972,7 @@ class Lanchonete(MiniJogo):
             pygame.draw.circle(tela, (120, 170, 40), (int(lx), int(ly)), 8)
             pygame.draw.circle(tela, (240, 250, 150), (int(lx), int(ly)), 6)
         pygame.draw.rect(tela, (80, 90, 110), tanque, 3, border_radius=10)
-        ui.desenhar_texto(tela, "SUCO", (r.centerx, r.y + 18), 12, (60, 120, 40), "center", sombra=False)
+        ui.desenhar_texto(tela, t("SUCO"), (r.centerx, r.y + 18), 12, (60, 120, 40), "center", sombra=False)
         pygame.draw.rect(tela, (90, 90, 100), (r.centerx - 8, tanque.bottom, 16, 18))
         pygame.draw.rect(tela, (70, 80, 100), (r.x + 16, r.bottom - 24, r.w - 32, 8), border_radius=3)
         pygame.draw.circle(tela, (30, 30, 40), (r.centerx, r.bottom - 48), 12)
@@ -1072,7 +1073,7 @@ class Lanchonete(MiniJogo):
         ui.painel(tela, b, (255, 255, 255), (60, 60, 70), 18, 4)
         pygame.draw.polygon(tela, (255, 255, 255), [(b.right - 6, b.bottom - 90), (b.right - 6, b.bottom - 46),
                                                     ponta])
-        ui.desenhar_texto(tela, "PEDIDO", (b.x + 18, b.y + 16), 12, (180, 60, 60), "topleft", sombra=False)
+        ui.desenhar_texto(tela, t("PEDIDO"), (b.x + 18, b.y + 16), 12, (180, 60, 60), "topleft", sombra=False)
         y = b.bottom - 44
         for k, tipo in enumerate(itens):
             if tipo == "suco":
@@ -1096,7 +1097,7 @@ class Lanchonete(MiniJogo):
                 cor = (30, 30, 40)
             else:
                 cor = (140, 140, 150)
-            msg = f"{TECLA_DE[tipo]} {NOMES[tipo]}"
+            msg = f"{TECLA_DE[tipo]} {t(NOMES[tipo])}"
             ui.desenhar_texto(tela, msg, (b.x + 130, int(meio) + 1), 12, cor, "midleft", sombra=False)
             if proximo:
                 ui.desenhar_texto(tela, "▶", (b.x + 26, int(meio) + 1), 12, (230, 60, 60), "midleft", sombra=False)
@@ -1117,11 +1118,11 @@ class Lanchonete(MiniJogo):
     def desenhar_hud(self, tela):
         caixa = pygame.Rect(12, 12, 420, 48)
         ui.painel(tela, caixa, (20, 24, 40), BRANCO, 12, 3, sombra=False)
-        ui.desenhar_texto(tela, f"PONTOS: {self.pontos}", (caixa.x + 16, caixa.centery), 14,
+        ui.desenhar_texto(tela, t("PONTOS: {n}", n=self.pontos), (caixa.x + 16, caixa.centery), 14,
                           AMARELO, "midleft")
         rec = self.recorde()
         if rec is not None:
-            ui.desenhar_texto(tela, f"RECORDE: {rec}", (caixa.x + 236, caixa.centery), 12,
+            ui.desenhar_texto(tela, t("RECORDE: {n}", n=rec), (caixa.x + 236, caixa.centery), 12,
                               (180, 200, 255), "midleft")
 
         # Relógio do expediente

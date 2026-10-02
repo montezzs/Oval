@@ -69,6 +69,7 @@ CONFIG_PADRAO = {
     "tem_ovo": False,           # já criou o 1º ovo (senão: 1ª execução)
     "migrado": False,
     "banner_migracao": False,
+    "idioma": None,             # "pt" / "en" / "es" (None = perguntar na abertura)
 }
 
 # Chaves que moram no Config mesmo se alguém pedir ao save do ovo
@@ -84,6 +85,11 @@ def _validar(dados, padrao):
         if chave not in padrao:
             continue
         p = padrao[chave]
+        # Padrão None = "ainda não escolhido": aceita texto ou None
+        if p is None:
+            if valor is None or isinstance(valor, str):
+                saida[chave] = valor
+            continue
         # bool é subclasse de int: não deixa True virar número
         if isinstance(p, bool) != isinstance(valor, bool):
             continue

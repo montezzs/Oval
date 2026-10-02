@@ -3,6 +3,7 @@ import math
 import pygame
 
 from settings import *
+from core.idioma import t
 from core import ui
 from core.cena import Cena, tecla_voltar, tecla_confirmar
 from core.fundo_menu import FundoAnimado
@@ -142,7 +143,7 @@ class CenaMenuJogos(Cena):
                 progresso.liberar(self.app, jogo.ID)
                 progresso.contar(self.app, "moedas_gastas", preco)
                 self.som("vencer")
-                self.app.toasts.adicionar("JOGO LIBERADO!", jogo.TITULO, "", None)
+                self.app.toasts.adicionar(t("JOGO LIBERADO!"), t(jogo.TITULO), "", None)
                 self.ingresso = None
             else:
                 self.som("erro")
@@ -264,7 +265,7 @@ class CenaMenuJogos(Cena):
         self.fundo.desenhar(tela)
 
         y = 22 + math.sin(self.tempo * 2) * 3
-        ui.desenhar_texto(tela, "MINI JOGOS", (LARGURA // 2, y), 36, AMARELO, "midtop", True, True)
+        ui.desenhar_texto(tela, t("MINI JOGOS"), (LARGURA // 2, y), 36, AMARELO, "midtop", True, True)
         self.botao_voltar.desenhar(tela)
         self.botao_loja.desenhar(tela)
         ui.desenhar_moedas(tela, self.app.save["moedas"], (LARGURA - 16, 76), "topright")
@@ -277,7 +278,7 @@ class CenaMenuJogos(Cena):
                       if bool(getattr(j, "MULTI", False)) == multi or getattr(j, "HIBRIDO", False))
             pygame.draw.rect(tela, (90, 60, 150) if ativa else (40, 30, 70), r, border_radius=12)
             pygame.draw.rect(tela, AMARELO if ativa else (140, 120, 180), r, 3, border_radius=12)
-            ui.desenhar_texto(tela, f"{nome} ({qtd})", r.center, 14,
+            ui.desenhar_texto(tela, f"{t(nome)} ({qtd})", r.center, 14,
                               AMARELO if ativa else BRANCO, "center")
 
         # Cards (recortados na área de rolagem)
@@ -306,13 +307,13 @@ class CenaMenuJogos(Cena):
             jogo = jogos[min(self.indice, len(jogos) - 1)]
             caixa = pygame.Rect(40, ALTURA - 118, LARGURA - 80, 104)
             ui.painel(tela, caixa, (24, 20, 44), jogo.COR, 16, 4)
-            ui.desenhar_texto(tela, jogo.TITULO, (caixa.x + 20, caixa.y + 14), 16,
+            ui.desenhar_texto(tela, t(jogo.TITULO), (caixa.x + 20, caixa.y + 14), 16,
                               AMARELO, "topleft")
-            linhas = ui.quebrar_linhas(jogo.DESCRICAO, 12, caixa.w - 40)[:2]
+            linhas = ui.quebrar_linhas(t(jogo.DESCRICAO), 12, caixa.w - 40)[:2]
             for j, linha in enumerate(linhas):
                 ui.desenhar_texto(tela, linha, (caixa.x + 20, caixa.y + 42 + j * 20), 12,
                                   BRANCO, "topleft")
-            dica = "TAB troca de aba  •  ENTER joga  •  ESC volta"
+            dica = t("TAB troca de aba  •  ENTER joga  •  ESC volta")
             ui.desenhar_texto(tela, dica, (caixa.centerx, caixa.bottom - 12), 10,
                               (170, 160, 210), "midbottom")
 
@@ -326,11 +327,11 @@ class CenaMenuJogos(Cena):
         caixa = pygame.Rect(0, 0, 560, 300)
         caixa.center = (LARGURA // 2, ALTURA // 2)
         ui.painel(tela, caixa, (40, 30, 70), jogo.COR, 20, 5)
-        ui.desenhar_texto(tela, jogo.TITULO, (caixa.centerx, caixa.y + 24), 18, AMARELO, "midtop")
+        ui.desenhar_texto(tela, t(jogo.TITULO), (caixa.centerx, caixa.y + 24), 18, AMARELO, "midtop")
         nivel = progresso.nivel_para(jogo.ID)
-        ui.desenhar_texto(tela, f"LIBERA NO NÍVEL {nivel} (VOCÊ ESTÁ NO {self.app.save['nivel']})",
+        ui.desenhar_texto(tela, t("LIBERA NO NÍVEL {n} (VOCÊ ESTÁ NO {atual})", n=nivel, atual=self.app.save['nivel']),
                           (caixa.centerx, caixa.y + 70), 10, BRANCO, "midtop")
-        ui.desenhar_texto(tela, "OU COMPRE O INGRESSO AGORA:", (caixa.centerx, caixa.y + 100), 10,
+        ui.desenhar_texto(tela, t("OU COMPRE O INGRESSO AGORA:"), (caixa.centerx, caixa.y + 100), 10,
                           (200, 190, 240), "midtop")
         r = self._rect_comprar()
         preco = progresso.preco_ingresso(jogo.ID)
@@ -338,8 +339,8 @@ class CenaMenuJogos(Cena):
         pygame.draw.rect(tela, (60, 150, 80) if pode else (90, 80, 90), r, border_radius=14)
         pygame.draw.rect(tela, BRANCO, r, 3, border_radius=14)
         ui.moeda(tela, (r.x + 40, r.centery), 12)
-        ui.desenhar_texto(tela, f"{preco}  LIBERAR", (r.x + 62, r.centery), 14, BRANCO, "midleft")
-        ui.desenhar_texto(tela, "ENTER compra  •  ESC cancela", (caixa.centerx, caixa.bottom - 20), 10,
+        ui.desenhar_texto(tela, t("{n}  LIBERAR", n=preco), (r.x + 62, r.centery), 14, BRANCO, "midleft")
+        ui.desenhar_texto(tela, t("ENTER compra  •  ESC cancela"), (caixa.centerx, caixa.bottom - 20), 10,
                           (170, 160, 210), "midbottom")
 
     def _desenhar_card(self, tela, rect, jogo):
@@ -365,11 +366,11 @@ class CenaMenuJogos(Cena):
         pygame.draw.rect(tela, (20, 20, 30), (rect.x + 8, rect.y + 8, *mini.get_size()), 2,
                          border_radius=4)
 
-        ui.desenhar_texto(tela, jogo.TITULO_CURTO or jogo.TITULO, (rect.centerx, rect.y + 138),
+        ui.desenhar_texto(tela, t(jogo.TITULO_CURTO or jogo.TITULO), (rect.centerx, rect.y + 138),
                           14, UI_TEXTO, "midtop", True, True)
 
         rec = self._texto_recorde(jogo)
-        ui.desenhar_texto(tela, rec, (rect.centerx, rect.y + 168), 10,
+        ui.desenhar_texto(tela, t(rec), (rect.centerx, rect.y + 168), 10,
                           AMARELO if "★" in rec else (220, 220, 240), "midtop", True, True)
 
         borda = ui.misturar(BRANCO, AMARELO, anim)
@@ -393,9 +394,9 @@ class CenaMenuJogos(Cena):
         pygame.draw.rect(tela, (255, 200, 60), corpo, border_radius=6)
         pygame.draw.rect(tela, (150, 100, 20), corpo, 3, border_radius=6)
         pygame.draw.circle(tela, (120, 80, 10), (c[0], corpo.y + 16), 5)
-        ui.desenhar_texto(tela, f"NÍVEL {progresso.nivel_para(jogo.ID)}", (rect.centerx, rect.y + 138), 14,
+        ui.desenhar_texto(tela, t("NÍVEL {n}", n=progresso.nivel_para(jogo.ID)), (rect.centerx, rect.y + 138), 14,
                           AMARELO, "midtop")
-        ui.desenhar_texto(tela, f"OU {progresso.preco_ingresso(jogo.ID)} OVOEDAS", (rect.centerx, rect.y + 168),
+        ui.desenhar_texto(tela, t("OU {n} OVOEDAS", n=progresso.preco_ingresso(jogo.ID)), (rect.centerx, rect.y + 168),
                           10, (220, 220, 240), "midtop")
 
     def _status_jogos(self):
@@ -438,7 +439,7 @@ class CenaMenuJogos(Cena):
             r.center = (rect.centerx, int(y))
             pygame.draw.rect(tela, (230, 120, 30), r, border_radius=8)
             pygame.draw.rect(tela, AMARELO, r, 2, border_radius=8)
-            ui.desenhar_texto(tela, "! DESAFIO", r.center, 8, BRANCO, "center")
+            ui.desenhar_texto(tela, t("! DESAFIO"), r.center, 8, BRANCO, "center")
 
     def _texto_recorde(self, jogo):
         save = self.app.save
@@ -451,17 +452,17 @@ class CenaMenuJogos(Cena):
                 if isinstance(v, list) and len(v) == 2:
                     v1 += v[0]
                     v2 += v[1]
-            return f"★ J1 {v1} × {v2} J2" if v1 or v2 else "NOVO!"
+            return t("★ J1 {a} × {b} J2", a=v1, b=v2) if v1 or v2 else "NOVO!"
 
         if jogo.OPCOES:
             # Mostra o recorde da dificuldade mais alta já jogada
             for i in reversed(range(len(jogo.OPCOES))):
                 valor = save.recorde(f"{jogo.ID}_{i}")
                 if valor is not None:
-                    return f"★ {jogo.OPCOES[i]}: {jogo.formatar(valor)}"
+                    return f"★ {t(jogo.OPCOES[i])}: {jogo.formatar(valor)}"
             return "NOVO!"
 
         valor = save.recorde(jogo.ID)
         if valor is None:
             return "NOVO!"
-        return f"★ RECORDE: {jogo.formatar(valor)}"
+        return t("★ RECORDE: {valor}", valor=jogo.formatar(valor))

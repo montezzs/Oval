@@ -1,3 +1,4 @@
+from core.idioma import t
 import math
 import random
 
@@ -150,7 +151,7 @@ class Perfil:
     """Um lutador do elenco (visual + estilo) com os sprites em cache."""
 
     def __init__(self, nome, jogador, estilo):
-        self.nome = nome.strip().upper()[:12] or "OVO"
+        self.nome = nome.strip().upper()[:12] or t("OVO")
         self.jog = jogador
         self.apar = jogador.aparencia()
         self.estilo = estilo
@@ -416,7 +417,7 @@ class OvoKombat(MiniJogoHibrido):
     def _carregar_elenco(self):
         from core import perfis
         from core.save import Save
-        jogs = [(self.jogador.nome or "VOCÊ", self.jogador)]
+        jogs = [(self.jogador.nome or t("VOCÊ"), self.jogador)]
         try:
             slots = perfis.slots_ocupados()
         except Exception:
@@ -427,7 +428,7 @@ class OvoKombat(MiniJogoHibrido):
             save = perfis.ler_ovo(s)
             if save is not None:
                 j = Jogador(save)
-                jogs.append((j.nome or f"OVO {s + 1}", j))
+                jogs.append((j.nome or t("OVO {n}", n=s + 1), j))
         nomes = [n for n in NOMES_EXTRAS]
         random.shuffle(nomes)
         while len(jogs) < 5:
@@ -573,7 +574,7 @@ class OvoKombat(MiniJogoHibrido):
         self.fase = "intro"
         self.t_fase = 0.0
         self.acoes = [[], []]
-        self._banner_(f"ROUND {self.n_round}", AMARELO, 1.1)
+        self._banner_(t("ROUND {n}", n=self.n_round), AMARELO, 1.1)
         self.som("bandeira", 0.7)
 
     def _ko(self, vencedor, tempo_esgotado=False):
@@ -583,7 +584,7 @@ class OvoKombat(MiniJogoHibrido):
         if vencedor is not None:
             self.rounds[vencedor] += 1
             self._banner_("TEMPO!" if tempo_esgotado else "K.O.!", (255, 80, 60), 1.6,
-                          f"ROUND DE {self.lut[vencedor].p.nome}")
+                          t("ROUND DE {nome}", nome=self.lut[vencedor].p.nome))
         else:
             self._banner_("EMPATE!", AMARELO, 1.6)
         self.som("explosao" if not tempo_esgotado else "tic", 0.7)
@@ -626,9 +627,9 @@ class OvoKombat(MiniJogoHibrido):
         linhas = []
         if self.lut:
             linhas.append(f"{self.lut[0].p.nome} × {self.lut[1].p.nome}")
-            linhas.append(f"ROUNDS  {self.rounds[0]} × {self.rounds[1]}")
+            linhas.append(t("ROUNDS  {a} × {b}", a=self.rounds[0], b=self.rounds[1]))
         if self.fatal:
-            linhas.append("FATALOVO! OMELETE FOFINHO!")
+            linhas.append(t("FATALOVO! OMELETE FOFINHO!"))
         self.terminar_multi(v, linhas)
 
     # --------------------------------------------------------
@@ -713,7 +714,7 @@ class OvoKombat(MiniJogoHibrido):
         self.t_fase = 0.0
         w = self.lut[self.venc]
         w.mudar("vitoria")
-        self._banner_(f"{w.p.nome} VENCE!", AMARELO, 2.4, "FATALOVO!" if self.fatal else None)
+        self._banner_(t("{nome} VENCE!", nome=w.p.nome), AMARELO, 2.4, "FATALOVO!" if self.fatal else None)
         self.som("vencer")
 
     def _atualizar_fatal(self, dt):
@@ -934,7 +935,7 @@ class OvoKombat(MiniJogoHibrido):
                                      (3, 7), 300)
             self.textos.adicionar(str(int(round(dano))), (pos[0], pos[1] - 20), (255, 230, 120), 14)
             if A.combo >= 2:
-                self.textos.adicionar(f"{A.combo} GOLPES!", (A.x, A.y - 200), (255, 140, 60), 12)
+                self.textos.adicionar(t("{n} GOLPES!", n=A.combo), (A.x, A.y - 200), (255, 140, 60), 12)
             self.som("bater", 0.8)
         if B.vida <= 0:
             B.vida = 0
@@ -1115,7 +1116,7 @@ class OvoKombat(MiniJogoHibrido):
         self.textos.desenhar(tela)
         self._desenhar_banner(tela)
         if self.fase == "finalize" and not (self.venc == 1 and self.solo):
-            ui.desenhar_texto(tela, "FRENTE, FRENTE, BAIXO + CHUTE", (LARGURA // 2, 250), 12,
+            ui.desenhar_texto(tela, t("FRENTE, FRENTE, BAIXO + CHUTE"), (LARGURA // 2, 250), 12,
                               (255, 220, 120), "center")
 
     def _desenhar_lutador(self, tela, L):
@@ -1146,6 +1147,7 @@ class OvoKombat(MiniJogoHibrido):
         if not self.banner:
             return
         texto, cor, _, sub = self.banner
+        texto, sub = t(texto), t(sub)
         tam = 48 if len(texto) <= 10 else 32
         ui.desenhar_texto(tela, texto, (LARGURA // 2, 300), tam, cor, "center")
         if sub:
@@ -1153,7 +1155,7 @@ class OvoKombat(MiniJogoHibrido):
 
     def _desenhar_selecao(self, tela):
         ui.veu(tela, 110)
-        ui.desenhar_texto(tela, "ESCOLHA SEU LUTADOR", (LARGURA // 2, 70), 26, AMARELO, "center")
+        ui.desenhar_texto(tela, t("ESCOLHA SEU LUTADOR"), (LARGURA // 2, 70), 26, AMARELO, "center")
         n = len(self.elenco)
         for k, per in enumerate(self.elenco):
             r = pygame.Rect(0, 0, 176, 200)
@@ -1163,7 +1165,7 @@ class OvoKombat(MiniJogoHibrido):
             tela.blit(img, img.get_rect(center=(r.centerx, r.y + 80)))
             tam = ui.tamanho_que_cabe(per.nome, r.w - 16, (12, 10, 8))
             ui.desenhar_texto(tela, per.nome, (r.centerx, r.y + 150), tam, BRANCO, "center")
-            est = per.estilo["nome"]
+            est = t(per.estilo["nome"])
             ui.desenhar_texto(tela, est, (r.centerx, r.y + 176),
                               ui.tamanho_que_cabe(est, r.w - 14, (8, 6)), per.estilo["cor"],
                               "center")
@@ -1172,7 +1174,7 @@ class OvoKombat(MiniJogoHibrido):
                     cor = CORES_JOGADOR[i]
                     grossura = 6 if self.escolha[i] == k else 3
                     pygame.draw.rect(tela, cor, r.inflate(10 + i * 10, 10 + i * 10), grossura, 16)
-                    rot = "J1" if i == 0 else ("BOT" if self.solo else "J2")
+                    rot = t("J1") if i == 0 else ("BOT" if self.solo else t("J2"))
                     ui.desenhar_texto(tela, rot, (r.x + 8 if i == 0 else r.right - 8, r.y - 14),
                                       12, cor, "midleft" if i == 0 else "midright")
         # prévias grandes
@@ -1186,10 +1188,10 @@ class OvoKombat(MiniJogoHibrido):
             bx = x + (150 if i == 0 else -150)
             anc = "midleft" if i == 0 else "midright"
             ui.desenhar_texto(tela, per.nome, (bx, 440), 16, CORES_JOGADOR[i], anc)
-            ui.desenhar_texto(tela, "ESPECIAL:", (bx, 472), 10, BRANCO, anc)
-            ui.desenhar_texto(tela, e["nome"], (bx, 490), 10, e["cor"], anc)
-            for k, (rot, v) in enumerate((("VEL", e["vel"]), ("FOR", e["forca"]),
-                                          ("PULO", e["pulo"]))):
+            ui.desenhar_texto(tela, t("ESPECIAL:"), (bx, 472), 10, BRANCO, anc)
+            ui.desenhar_texto(tela, t(e["nome"]), (bx, 490), 10, e["cor"], anc)
+            for k, (rot, v) in enumerate(((t("VEL"), e["vel"]), (t("FOR"), e["forca"]),
+                                          (t("PULO"), e["pulo"]))):
                 y = 520 + k * 26
                 w = max(4, min(90, int(90 * (v - 0.7) / 0.5)))
                 if i == 0:
@@ -1200,7 +1202,7 @@ class OvoKombat(MiniJogoHibrido):
                     ui.desenhar_texto(tela, rot, (bx, y), 10, BRANCO, "midright")
                     pygame.draw.rect(tela, (60, 50, 70), (bx - 140, y - 6, 90, 12))
                     pygame.draw.rect(tela, e["cor"], (bx - 50 - w, y - 6, w, 12))
-        dica = "A/D + ESPAÇO" + ("" if self.solo else "   |   SETAS + ENTER")
+        dica = t("A/D + ESPAÇO") + ("" if self.solo else "   |   " + t("SETAS + ENTER"))
         ui.desenhar_texto(tela, dica, (LARGURA // 2, 690), 10, (220, 210, 240), "center")
 
     def desenhar_hud(self, tela):
@@ -1225,7 +1227,7 @@ class OvoKombat(MiniJogoHibrido):
             anc = "topleft" if i == 0 else "topright"
             px = r.x if i == 0 else r.right
             ui.desenhar_texto(tela, L.p.nome, (px, 54), 12, CORES_JOGADOR[i], anc)
-            tag = "J1" if i == 0 else ("BOT" if self.solo else "J2")
+            tag = t("J1") if i == 0 else ("BOT" if self.solo else t("J2"))
             ui.desenhar_texto(tela, tag, (px, 72), 8, BRANCO, anc)
             for k in range(2):
                 cx = (r.right - 12 - k * 24) if i == 0 else (r.x + 12 + k * 24)
@@ -1244,8 +1246,8 @@ class OvoKombat(MiniJogoHibrido):
         caixa = pygame.Rect(0, topo, 800, ALTURA - topo - 22)
         caixa.centerx = LARGURA // 2
         ui.painel(tela, caixa, (28, 20, 36), self.COR, 22, 5)
-        ui.desenhar_texto(tela, self.TITULO, (LARGURA // 2, topo + 18), 28, AMARELO, "midtop")
-        ui.desenhar_texto(tela, "VS BOT OU 2 JOGADORES", (LARGURA // 2, topo + 56), 12,
+        ui.desenhar_texto(tela, t(self.TITULO), (LARGURA // 2, topo + 18), 28, AMARELO, "midtop")
+        ui.desenhar_texto(tela, t("VS BOT OU 2 JOGADORES"), (LARGURA // 2, topo + 56), 12,
                           (255, 190, 170), "midtop")
         if self.elenco:
             n = len(self.elenco)
@@ -1258,12 +1260,12 @@ class OvoKombat(MiniJogoHibrido):
                                   ui.tamanho_que_cabe(per.nome, 112, (10, 8)), BRANCO, "midtop")
         y = topo + 200
         for linha in self.INSTRUCOES:
-            for sub in ui.quebrar_linhas(linha, 10, caixa.w - 60):
+            for sub in ui.quebrar_linhas(t(linha), 10, caixa.w - 60):
                 ui.desenhar_texto(tela, sub, (LARGURA // 2, y), 10, BRANCO, "midtop")
                 y += 16
             y += 4
         v = self.vitorias()
         y_rec = self.menu_inicio.botoes[0].rect.y - 30
-        ui.desenhar_texto(tela, f"VITÓRIAS  J1 {v[0]} × {v[1]} J2", (LARGURA // 2, y_rec),
+        ui.desenhar_texto(tela, t("VITÓRIAS  J1 {a} × {b} J2", a=v[0], b=v[1]), (LARGURA // 2, y_rec),
                           12, AMARELO, "midtop")
         self.menu_inicio.desenhar(tela)

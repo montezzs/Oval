@@ -1,6 +1,8 @@
 import datetime
 import os
 
+from core.idioma import t
+
 # ============================================================
 # EVENTOS DO CALENDÁRIO
 # ============================================================
@@ -77,9 +79,9 @@ def faixa():
     ev = sazonal()
     partes = []
     if ev:
-        partes.append(EVENTOS[ev]["nome"])
+        partes.append(t(EVENTOS[ev]["nome"]))
     if fim_de_semana():
-        partes.append("FIM DE SEMANA: OVOEDAS x1,2")
+        partes.append(t("FIM DE SEMANA: OVOEDAS x1,2"))
     return "  •  ".join(partes)
 
 
@@ -108,14 +110,14 @@ def entregar_presente(app):
     item = novos[0] if novos else None
     if novos:
         save["inventario"].extend(novos)
-        nome = " + ".join(cosmeticos.CATALOGO[i].get("nome", i.upper()) for i in novos)
+        nome = " + ".join(t(cosmeticos.CATALOGO[i].get("nome", i.upper())) for i in novos)
         premio = ""
     else:
         save.ganhar(100)
-        nome = "100 OVOEDAS"
+        nome = t("100 OVOEDAS")
         premio = "+100"
     save.salvar()
     toasts = getattr(app, "toasts", None)
     if toasts is not None:
-        toasts.adicionar("PRESENTE: " + EVENTOS[ev]["nome"], nome, premio, "levelup")
+        toasts.adicionar(t("PRESENTE: {nome}", nome=t(EVENTOS[ev]["nome"])), nome, premio, "levelup")
     return item

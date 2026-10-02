@@ -1,6 +1,7 @@
 import pygame
 
 from settings import *
+from core.idioma import t as tr
 from core import ui
 
 # ============================================================
@@ -28,15 +29,15 @@ class Jukebox:
         from jogos import JOGOS
         jogados = set(self.ctx.app.save["jogados"])
         ouvidos = set(self.ctx.app.config["temas_ouvidos"])
-        lista = [("casa", trilhas.NOMES_TEMAS["casa"], False, ""),
-                 ("ovein", trilhas.NOMES_TEMAS["ovein"], False, "")]
+        lista = [("casa", tr(trilhas.NOMES_TEMAS["casa"]), False, ""),
+                 ("ovein", tr(trilhas.NOMES_TEMAS["ovein"]), False, "")]
         for tid in trilhas.TEMAS:
             bloqueada = tid not in ouvidos
-            lista.append((tid, trilhas.NOMES_TEMAS.get(tid, tid.upper()), bloqueada,
-                          trilhas.DICAS_TEMAS.get(tid, "DICA: EXPLORE O JOGO")))
+            lista.append((tid, tr(trilhas.NOMES_TEMAS.get(tid, tid.upper())), bloqueada,
+                          tr(trilhas.DICAS_TEMAS.get(tid, "DICA: EXPLORE O JOGO"))))
         for jogo in JOGOS:
             if jogo.ID in jogados:
-                lista.append((jogo.ID, jogo.TITULO, False, ""))
+                lista.append((jogo.ID, tr(jogo.TITULO), False, ""))
         return lista
 
     def abrir(self):
@@ -93,7 +94,7 @@ class Jukebox:
         caixa = pygame.Rect(0, 0, 560, 520)
         caixa.center = (LARGURA // 2, ALTURA // 2)
         ui.painel(tela, caixa, (40, 24, 20), (230, 170, 90), 18, 4)
-        ui.desenhar_texto(tela, "♪ JUKEBOX ♪", (caixa.centerx, caixa.y + 18), 22, AMARELO, "midtop")
+        ui.desenhar_texto(tela, tr("♪ JUKEBOX ♪"), (caixa.centerx, caixa.y + 18), 22, AMARELO, "midtop")
         atual = self.ctx.faixa
         for k, (fid, nome, bloqueada, dica) in enumerate(lista[self.inicio:self.inicio + POR_PAGINA]):
             i = self.inicio + k
@@ -112,5 +113,5 @@ class Jukebox:
             ui.desenhar_texto(tela, ("▶ " if tocando else "   ") + nome, (r.x + 14, r.centery), tam,
                               AMARELO if tocando else BRANCO, "midleft")
         liberadas = sum(1 for f in lista if not f[2]) - 2
-        ui.desenhar_texto(tela, f"{liberadas} trilhas liberadas • jogue e explore para liberar mais!",
+        ui.desenhar_texto(tela, tr("{n} trilhas liberadas • jogue e explore para liberar mais!", n=liberadas),
                           (caixa.centerx, caixa.bottom - 28), 8, (230, 200, 160), "midtop")

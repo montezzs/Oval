@@ -4,6 +4,7 @@ import math
 import pygame
 
 from settings import *
+from core.idioma import t
 from core import ceu, ui
 from core import fachada as fc
 from core import fachada_desenho as fd
@@ -196,7 +197,7 @@ class CenaReforma(Cena):
             return
         preco = fc.CATALOGO[pid]["preco"]
         if self.save["moedas"] < preco:
-            self._avisar(f"FALTAM {preco - self.save['moedas']} OVOEDAS")
+            self._avisar(t("FALTAM {n} OVOEDAS", n=preco - self.save['moedas']))
             self.som("erro")
             return
         self.confirmar = pid
@@ -257,12 +258,12 @@ class CenaReforma(Cena):
         self.som("voltar")
         viz = CenaVizinhanca(self.app, reformada=self.slot)
         if tirou:
-            viz.aviso = "PEÇAS NÃO COMPRADAS FORAM TIRADAS"
+            viz.aviso = t("PEÇAS NÃO COMPRADAS FORAM TIRADAS")
             viz.tempo_aviso = 2.5
         self.app.trocar(viz)
 
     def _avisar(self, msg):
-        self.aviso = msg
+        self.aviso = t(msg)
         self.tempo_aviso = 2.0
 
     # --------------------------------------------------------
@@ -439,11 +440,11 @@ class CenaReforma(Cena):
         mouse = pygame.mouse.get_pos()
         hover = self.bt_voltar.collidepoint(mouse)
         ui.painel(tela, self.bt_voltar, (70, 80, 130) if hover else (30, 36, 60), BRANCO, 12, 3)
-        ui.desenhar_texto(tela, "← VOLTAR", self.bt_voltar.center, 12, BRANCO, "center")
+        ui.desenhar_texto(tela, t("← VOLTAR"), self.bt_voltar.center, 12, BRANCO, "center")
         titulo = pygame.Rect(362, 8, 300, 46)
         ui.painel(tela, titulo, (30, 36, 60), BRANCO, 14, 3)
-        ui.desenhar_texto(tela, "REFORMA", titulo.center, 16, AMARELO, "center")
-        ui.desenhar_texto(tela, "CASA DE " + self.app.jogador.nome.upper(), (512, 62), 10, BRANCO,
+        ui.desenhar_texto(tela, t("REFORMA"), titulo.center, 16, AMARELO, "center")
+        ui.desenhar_texto(tela, t("CASA DE ") + self.app.jogador.nome.upper(), (512, 62), 10, BRANCO,
                           "midtop")
         ui.desenhar_moedas(tela, self.save["moedas"], (1008, 24), "topright", 16)
 
@@ -492,7 +493,7 @@ class CenaReforma(Cena):
             pygame.draw.rect(tela, AMARELO, r, 3, border_radius=10)
 
         if self._provando():
-            sup = ui.texto("PROVANDO", 12, AMARELO)
+            sup = ui.texto(t("PROVANDO"), 12, AMARELO)
             tela.blit(sup, sup.get_rect(midtop=(PREVIA.centerx, PREVIA.y + 14)))
         tela.set_clip(None)
         pygame.draw.rect(tela, BRANCO, PREVIA, 3, border_radius=14)
@@ -502,7 +503,7 @@ class CenaReforma(Cena):
                             (self.bt_pronto, "PRONTO!", (70, 170, 90))):
             pygame.draw.rect(tela, ui.clarear(cor, 30) if r.collidepoint(mouse) else cor, r, border_radius=10)
             pygame.draw.rect(tela, BRANCO, r, 2, border_radius=10)
-            ui.desenhar_texto(tela, txt, r.center, 8 if r is self.bt_noite else 12, BRANCO, "center")
+            ui.desenhar_texto(tela, t(txt), r.center, 8 if r is self.bt_noite else 12, BRANCO, "center")
 
     def _desenhar_painel(self, tela):
         ui.painel(tela, PAINEL, (32, 36, 58), BRANCO, 14, 3)
@@ -515,14 +516,14 @@ class CenaReforma(Cena):
             pygame.draw.rect(tela, AMARELO if ativa else BRANCO, r, 2, border_radius=8)
             self._icone_aba(tela, aba[0], r.center)
         nome = self.dados_aba[0]
-        ui.desenhar_texto(tela, nome, (PAINEL.x + 14, 138), 14, AMARELO)
+        ui.desenhar_texto(tela, t(nome), (PAINEL.x + 14, 138), 14, AMARELO)
         ui.desenhar_texto(tela, "Q / E", (PAINEL.right - 14, 142), 8, (200, 200, 220), "topright")
 
         if self.dados_aba[2] == "chao":
             for lado, r in self._rects_lado().items():
                 ativo = lado == self.lado
                 pygame.draw.rect(tela, AMARELO if ativo else (60, 66, 100), r, border_radius=8)
-                ui.desenhar_texto(tela, "ESQUERDA" if lado == "esq" else "DIREITA", r.center, 10,
+                ui.desenhar_texto(tela, t("ESQUERDA") if lado == "esq" else t("DIREITA"), r.center, 10,
                                   (40, 30, 10) if ativo else BRANCO, "center", not ativo)
 
         cor_ovo = self.app.jogador.cor
@@ -537,7 +538,7 @@ class CenaReforma(Cena):
             pygame.draw.rect(tela, borda, r, 3 if (usando or foco) else 2, border_radius=10)
             self._miniatura(tela, pid, r, cor_ovo)
             d = fc.CATALOGO.get(pid)
-            nome_card = d["nome"] if d else "NADA"
+            nome_card = t(d["nome"]) if d else t("NADA")
             linhas = ui.quebrar_linhas(nome_card, 7, r.w - 10)[:2] \
                 if ui.tamanho_que_cabe(nome_card, r.w - 8, (8, 7)) < 8 or \
                 ui.texto(nome_card, 8).get_width() > r.w - 8 else [nome_card]
@@ -555,7 +556,7 @@ class CenaReforma(Cena):
             else:
                 etq, cor = None, None
             if etq is not None:
-                ui.desenhar_texto(tela, etq, (r.centerx, r.bottom - 12), 8, cor, "center")
+                ui.desenhar_texto(tela, t(etq), (r.centerx, r.bottom - 12), 8, cor, "center")
             else:
                 preco = d["preco"]
                 caro = preco > self.save["moedas"]
@@ -575,9 +576,9 @@ class CenaReforma(Cena):
             ui.desenhar_texto(tela, f"{self.pagina + 1}/{self._paginas()}", (798, 541), 10, BRANCO, "center")
 
         if self.tem_cor:
-            ui.desenhar_texto(tela, "COR", (PAINEL.x + 14, 372), 12,
+            ui.desenhar_texto(tela, t("COR"), (PAINEL.x + 14, 372), 12,
                               AMARELO if self.secao == 1 else BRANCO)
-            ui.desenhar_texto(tela, "TAB", (PAINEL.x + 70, 374), 8, (200, 200, 220))
+            ui.desenhar_texto(tela, "TAB", (PAINEL.x + max(70, 26 + ui.texto(t("COR"), 12).get_width()), 374), 8, (200, 200, 220))
             chave = self.dados_aba[3]
             for i, (nome_cor, cor) in enumerate(self.dados_aba[4]):
                 r = self._rect_cor(i)
@@ -585,7 +586,7 @@ class CenaReforma(Cena):
                 pygame.draw.circle(tela, c, r.center, 16)
                 pygame.draw.circle(tela, ui.escurecer(c, 70), r.center, 16, 2)
                 if cor is None:
-                    ui.desenhar_texto(tela, "OVO", r.center, 7, BRANCO, "center")
+                    ui.desenhar_texto(tela, t("OVO"), r.center, 7, BRANCO, "center")
                 if self.casa[chave] == i:
                     pygame.draw.circle(tela, BRANCO, r.center, 20, 3)
                     ui.estrela(tela, (r.right, r.y), 5, AMARELO)
@@ -595,7 +596,7 @@ class CenaReforma(Cena):
         if self.dados_aba[1] == "telhado":
             sem = self.casa["telhado"] in fc.TELHADOS_SEM_CHAMINE
             r = self.bt_chamine
-            txt = "CHAMINÉ: " + ("---" if sem else ("SIM" if self.casa["chamine"] else "NÃO"))
+            txt = t("CHAMINÉ: ") + ("---" if sem else (t("SIM") if self.casa["chamine"] else t("NÃO")))
             pygame.draw.rect(tela, (50, 54, 80) if sem else (70, 80, 125), r, border_radius=8)
             ui.desenhar_texto(tela, txt, r.center, 8, (150, 150, 160) if sem else BRANCO, "center")
 
@@ -606,13 +607,13 @@ class CenaReforma(Cena):
         pygame.draw.rect(tela, (24, 28, 46), barra, border_radius=10)
         if self.secao == 1 and self.tem_cor:
             nome_cor = self.dados_aba[4][self.foco_cor][0]
-            ui.desenhar_texto(tela, "COR: " + nome_cor, (barra.x + 12, barra.y + 12), 12, AMARELO)
-            ui.desenhar_texto(tela, "As cores são grátis!", (barra.x + 12, barra.y + 38), 8, BRANCO)
+            ui.desenhar_texto(tela, t("COR: ") + t(nome_cor), (barra.x + 12, barra.y + 12), 12, AMARELO)
+            ui.desenhar_texto(tela, t("As cores são grátis!"), (barra.x + 12, barra.y + 38), 8, BRANCO)
             return
         pid = self._item_foco()
         d = fc.CATALOGO.get(pid)
-        nome = d["nome"] if d else "NADA"
-        desc = d["desc"] if d else "Deixar este lugar vazio."
+        nome = t(d["nome"]) if d else t("NADA")
+        desc = t(d["desc"]) if d else t("Deixar este lugar vazio.")
         tam = ui.tamanho_que_cabe(nome, 220, (12, 10, 8))
         ui.desenhar_texto(tela, nome, (barra.x + 12, barra.y + 12), tam, AMARELO)
         for k, l in enumerate(ui.quebrar_linhas(desc, 8, 210)[:3]):
@@ -621,13 +622,13 @@ class CenaReforma(Cena):
         if not self.possui(pid):
             preco = d["preco"]
             if preco <= self.save["moedas"]:
-                txt, cor = f"COMPRAR POR {preco}", (70, 170, 90)
+                txt, cor = t("COMPRAR POR {n}", n=preco), (70, 170, 90)
             else:
-                txt, cor = f"FALTAM {preco - self.save['moedas']}", (90, 90, 100)
+                txt, cor = t("FALTAM {n}", n=preco - self.save['moedas']), (90, 90, 100)
         elif pid == self._atual():
-            txt, cor = "USANDO", (60, 66, 100)
+            txt, cor = t("USANDO"), (60, 66, 100)
         else:
-            txt, cor = "USAR", (70, 130, 200)
+            txt, cor = t("USAR"), (70, 130, 200)
         hover = r.collidepoint(pygame.mouse.get_pos())
         pygame.draw.rect(tela, ui.clarear(cor, 25) if hover else cor, r, border_radius=10)
         pygame.draw.rect(tela, BRANCO, r, 2, border_radius=10)
@@ -704,7 +705,7 @@ class CenaReforma(Cena):
         caixa = pygame.Rect(0, 0, 520, 220)
         caixa.center = (LARGURA // 2, ALTURA // 2)
         ui.painel(tela, caixa, (32, 36, 58), AMARELO, 18, 4)
-        msg = f"COMPRAR {d['nome']} POR {d['preco']}?"
+        msg = t("COMPRAR {nome} POR {n}?", nome=t(d['nome']), n=d['preco'])
         for k, l in enumerate(ui.quebrar_linhas(msg, 14, 460)):
             ui.desenhar_texto(tela, l, (caixa.centerx, caixa.y + 34 + k * 24), 14, BRANCO, "midtop")
         self.bt_sim.midbottom = (caixa.centerx - 90, caixa.bottom - 24)
@@ -713,4 +714,4 @@ class CenaReforma(Cena):
         for r, txt, cor in ((self.bt_sim, "SIM", (70, 170, 90)), (self.bt_nao, "NÃO", (170, 60, 60))):
             pygame.draw.rect(tela, ui.clarear(cor, 30) if r.collidepoint(mouse) else cor, r, border_radius=12)
             pygame.draw.rect(tela, BRANCO, r, 3, border_radius=12)
-            ui.desenhar_texto(tela, txt, r.center, 16, BRANCO, "center")
+            ui.desenhar_texto(tela, t(txt), r.center, 16, BRANCO, "center")

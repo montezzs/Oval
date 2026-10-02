@@ -5,6 +5,7 @@ import pygame
 
 from settings import *
 from core import ui
+from core.idioma import t as tr
 from jogos.base import MiniJogo
 
 # ============================================================
@@ -726,7 +727,7 @@ class OvoCorredor(MiniJogo):
             self.tempo_pulo = 0.0
             self.cortou = True
             self.som("boing")
-            self.textos.adicionar("UFA! CASCA!", (OVO_X, CHAO - 130), (120, 220, 255), 16)
+            self.textos.adicionar(tr("UFA! CASCA!"), (OVO_X, CHAO - 130), (120, 220, 255), 16)
             self._quebrar_casca()
             return
         self.no_buraco = buraco
@@ -850,13 +851,13 @@ class OvoCorredor(MiniJogo):
 
             if any(_elipse_rect(cx, cy, a, b, r) for r in rects):
                 if self.turbo > 0:
-                    self._derrubar(o, "POW!")
+                    self._derrubar(o, tr("POW!"))
                 elif invencivel:
                     continue
                 elif self.escudo:
                     self.escudo = False
                     self.pisca = TEMPO_PISCA
-                    self._derrubar(o, "CASCA!")
+                    self._derrubar(o, tr("CASCA!"))
                     self._quebrar_casca()
                 else:
                     self._morrer("TROMBOU!")
@@ -868,7 +869,7 @@ class OvoCorredor(MiniJogo):
                 if o.folga <= 12 and not invencivel:
                     self.bonus += 5
                     self.som("ponto", 0.6)
-                    self.textos.adicionar("UFA! +5", (OVO_X + 20, CHAO - OVO_ALT - 50),
+                    self.textos.adicionar(tr("UFA! +5"), (OVO_X + 20, CHAO - OVO_ALT - 50),
                                           (255, 240, 150), 14)
 
     def _derrubar(self, o, texto):
@@ -899,7 +900,7 @@ class OvoCorredor(MiniJogo):
                 self.limoes += 1
                 self.som("moeda", 0.6)
                 self.particulas.explodir((lim[0], lim[1]), [(250, 222, 40), (255, 248, 180)], 8, 150, 0.4)
-                self.textos.adicionar("+10", (lim[0], lim[1] - 20), AMARELO, 12)
+                self.textos.adicionar(tr("+10"), (lim[0], lim[1] - 20), AMARELO, 12)
                 continue
             vivos.append(lim)
         self.limoes_mundo = vivos
@@ -925,7 +926,7 @@ class OvoCorredor(MiniJogo):
         else:
             self.turbo = TEMPO_TURBO
             nome = "TURBO!"
-        self.textos.adicionar(nome, (pos[0], pos[1] - 60), (255, 240, 150), 20)
+        self.textos.adicionar(tr(nome), (pos[0], pos[1] - 60), (255, 240, 150), 20)
 
     # ---------------- Efeitos ----------------
 
@@ -1001,14 +1002,14 @@ class OvoCorredor(MiniJogo):
             if self.lambida <= 0:
                 self.lambida = 0.35
                 self.som("ponto", 0.3)
-                self.textos.adicionar("♥", (OVO_X - 30 + random.uniform(-10, 10), CHAO - 110),
+                self.textos.adicionar(tr("♥"), (OVO_X - 30 + random.uniform(-10, 10), CHAO - 110),
                                       (255, 110, 150), 16)
 
         if self.tempo_morto > 2.4:
             metros = int(self.dist / PX_METRO)
-            self.terminar(titulo=self.causa, linhas=[f"DISTÂNCIA: {metros} m",
-                                                    f"LIMÕES: {self.limoes}",
-                                                    f"PONTOS: {self.pontos}"])
+            self.terminar(titulo=tr(self.causa), linhas=[tr("DISTÂNCIA: {n} m", n=metros),
+                                                    tr("LIMÕES: {n}", n=self.limoes),
+                                                    tr("PONTOS: {n}", n=self.pontos)])
 
     # --------------------------------------------------------
     # DESENHO
@@ -1160,11 +1161,11 @@ class OvoCorredor(MiniJogo):
     def desenhar_hud(self, tela):
         caixa = pygame.Rect(12, 12, 420, 48)
         ui.painel(tela, caixa, (20, 24, 40), BRANCO, 12, 3, sombra=False)
-        ui.desenhar_texto(tela, f"PONTOS: {self.pontos}", (caixa.x + 16, caixa.centery), 14,
+        ui.desenhar_texto(tela, tr("PONTOS: {n}", n=self.pontos), (caixa.x + 16, caixa.centery), 14,
                           AMARELO, "midleft")
         rec = self.recorde()
         if rec is not None:
-            ui.desenhar_texto(tela, f"RECORDE: {rec}", (caixa.x + 236, caixa.centery), 12,
+            ui.desenhar_texto(tela, tr("RECORDE: {n}", n=rec), (caixa.x + 236, caixa.centery), 12,
                               (180, 200, 255), "midleft")
 
         # Metros, limões e power-ups ativos

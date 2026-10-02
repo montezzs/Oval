@@ -4,6 +4,7 @@ import random
 import pygame
 
 from settings import *
+from core.idioma import t as tr
 from core import eventos, progresso, ui
 
 # ============================================================
@@ -76,7 +77,7 @@ class CacaOvos:
                 self.ctx.som("acerto")
                 faltam = QTD_OVINHOS - len(d["pascoa_achados"])
                 if faltam:
-                    self.ctx.avisar(f"OVINHO DE PÁSCOA! Faltam {faltam} hoje.")
+                    self.ctx.avisar(tr("OVINHO DE PÁSCOA! Faltam {n} hoje.", n=faltam))
                 else:
                     self.ctx.avisar("ACHOU TODOS OS OVINHOS DE HOJE!")
                     progresso.definir(self.ctx.app, "pascoa", 1)

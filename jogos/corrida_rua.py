@@ -5,6 +5,7 @@ import pygame
 
 from settings import *
 from core import ui
+from core.idioma import t
 from jogos.base import TEMPO_CONTAGEM
 from jogos.base_multi import MiniJogoMulti, TECLAS_MOVER, TECLAS_ACAO, CORES_JOGADOR
 
@@ -546,7 +547,7 @@ class CorridaRua(MiniJogoMulti):
             pygame.draw.circle(sup, (105, 190, 95), (x - r // 3, y - r // 3), int(r * 0.35))
 
         # Plaquinha da rua
-        placa = ui.texto("RUA DOS OVOS", 10, (30, 40, 30), sombra=False)
+        placa = ui.texto(t("RUA DOS OVOS"), 10, (30, 40, 30), sombra=False)
         x, y = ponto_pista(N * 0.5, -(MEIA + CALCADA + 18))
         pr = placa.get_rect(center=(round(x), round(y))).inflate(14, 10)
         pr.clamp_ip(pygame.Rect(0, 84, LARGURA, ALTURA - 84))
@@ -709,7 +710,7 @@ class CorridaRua(MiniJogoMulti):
         k.vx += fx * 120
         k.vy += fy * 120
         self.som("asa", 0.8)
-        self.textos.adicionar("TURBO!", (k.x, k.y - 34), (255, 170, 60), 12)
+        self.textos.adicionar(t("TURBO!"), (k.x, k.y - 34), (255, 170, 60), 12)
 
     def usar_item(self, i):
         k = self.karts[i]
@@ -1035,11 +1036,11 @@ class CorridaRua(MiniJogoMulti):
         if k.voltas >= self.meta:
             self._cruzou_chegada(k)
         elif k.voltas == self.meta - 1:
-            self._banner(f"{self.nome(k.i)[:10].upper()}: ÚLTIMA VOLTA!", CORES_JOGADOR[k.i], 1.6, 16)
+            self._banner(t("{nome}: ÚLTIMA VOLTA!", nome=self.nome(k.i)[:10].upper()), CORES_JOGADOR[k.i], 1.6, 16)
             self.som("ponto", 0.8)
         else:
             self.som("moeda", 0.5)
-            self.textos.adicionar(f"VOLTA {k.voltas + 1}", (k.x, k.y - 36), CORES_JOGADOR[k.i], 12)
+            self.textos.adicionar(t("VOLTA {n}", n=k.voltas + 1), (k.x, k.y - 36), CORES_JOGADOR[k.i], 12)
 
     def _cruzou_chegada(self, k):
         k.chegou = self.tempo_corrida
@@ -1048,7 +1049,7 @@ class CorridaRua(MiniJogoMulti):
         self.fase = "chegada"
         self.tempo_fase = 0.0
         self.vencedor_corrida = k.i
-        self._banner("BANDEIRADA!", AMARELO, 1.8, 32)
+        self._banner(t("BANDEIRADA!"), AMARELO, 1.8, 32)
         self.som("ponto")
         self.som("explosao", 0.4)
         self.tremer(0.25)
@@ -1084,7 +1085,7 @@ class CorridaRua(MiniJogoMulti):
                 if k.i == b[2] and b[3] < 0.6:
                     continue          # quem jogou tem um tempinho para sair de perto
                 if abs(k.x - b[0]) < 20 and abs(k.y - b[1]) < 20:
-                    self._rodopiar(k, "ESCORREGOU!")
+                    self._rodopiar(k, t("ESCORREGOU!"))
                     if b in self.bananas:
                         self.bananas.remove(b)
                     break
@@ -1111,7 +1112,7 @@ class CorridaRua(MiniJogoMulti):
                 if k.i == f.dono and f.vida > VIDA_FOGUETE - 0.4:
                     continue
                 if abs(k.x - f.x) < 24 and abs(k.y - f.y) < 24:
-                    self._rodopiar(k, "LIMONADA!")
+                    self._rodopiar(k, t("LIMONADA!"))
                     self.som("explosao", 0.5)
                     acertou = True
                     break
@@ -1154,11 +1155,11 @@ class CorridaRua(MiniJogoMulti):
     def _acabar(self):
         v = self.vencedor_corrida
         k = self.karts[v]
-        linhas = [f"VOLTAS: {self.meta}   TEMPO: {self._fmt(k.chegou)}"]
+        linhas = [t("VOLTAS: {n}   TEMPO: {tempo}", n=self.meta, tempo=self._fmt(k.chegou))]
         melhores = [(kk.melhor_volta, kk.i) for kk in self.karts if kk.melhor_volta is not None]
         if melhores:
-            t, quem = min(melhores)
-            linhas.append(f"VOLTA MAIS RÁPIDA: J{quem + 1} {t:.1f} s".replace(".", ","))
+            tv, quem = min(melhores)
+            linhas.append(t("VOLTA MAIS RÁPIDA: J{j} {s} s", j=quem + 1, s=f"{tv:.1f}".replace(".", ",")))
         self.terminar_multi(v, linhas)
 
     @staticmethod
@@ -1207,7 +1208,7 @@ class CorridaRua(MiniJogoMulti):
 
         self._desenhar_banner(tela)
 
-    def _desenhar_kart(self, tela, k, t):
+    def _desenhar_kart(self, tela, k, tt):
         cx, cy = round(k.x), round(k.y)
         tela.blit(_sombra(22, 12), (cx - 20, cy - 6))
         ang = k.ang + k.giro_visual
@@ -1215,14 +1216,14 @@ class CorridaRua(MiniJogoMulti):
         kart = _kart_girado(k.i, CORES_JOGADOR[k.i], passo)
         tela.blit(kart, kart.get_rect(center=(cx, cy)))
         # Pisca quando está imune depois de rodar
-        if k.imune > 0 and k.rodar <= 0 and int(t * 12) % 2 == 0:
+        if k.imune > 0 and k.rodar <= 0 and int(tt * 12) % 2 == 0:
             return
         # Ovo em cima (sempre de pé; gira no rodopio)
         if k.rodar > 0:
             ovo = self._ovo_girado(k.i, k.giro_visual)
         else:
             ovo = self._ovos[k.i]
-        pulo = abs(math.sin(t * 14)) * 2 if k.vel > 60 and k.chao == "grama" else 0
+        pulo = abs(math.sin(tt * 14)) * 2 if k.vel > 60 and k.chao == "grama" else 0
         tela.blit(ovo, ovo.get_rect(center=(cx, round(cy - 10 - pulo))))
         # Etiqueta J1/J2 e contramão
         if k.pulou > 0.5:
@@ -1237,10 +1238,10 @@ class CorridaRua(MiniJogoMulti):
                     (px + dy * 10, py - dx * 10)]
             pygame.draw.polygon(tela, (255, 120, 120), seta)
             pygame.draw.polygon(tela, (90, 20, 20), seta, 2)
-            if int(t * 4) % 2 == 0:
-                ui.desenhar_texto(tela, "VOLTE!", (cx, cy - 44), 8, (255, 120, 120), "center")
-        elif k.contramao > 0.8 and int(t * 4) % 2 == 0:
-            ui.desenhar_texto(tela, "CONTRAMÃO!", (cx, cy - 44), 8, (255, 120, 120), "center")
+            if int(tt * 4) % 2 == 0:
+                ui.desenhar_texto(tela, t("VOLTE!"), (cx, cy - 44), 8, (255, 120, 120), "center")
+        elif k.contramao > 0.8 and int(tt * 4) % 2 == 0:
+            ui.desenhar_texto(tela, t("CONTRAMÃO!"), (cx, cy - 44), 8, (255, 120, 120), "center")
         elif self.fase == "corrida":
             o = self.karts[1 - k.i]
             if abs(o.x - k.x) > 44 or abs(o.y - k.y) > 56:
@@ -1281,7 +1282,7 @@ class CorridaRua(MiniJogoMulti):
                 tela.blit(_circulo_alpha(22, (80, 240, 90), 90), (c[0] - 23, c[1] - 23))
                 pygame.draw.circle(tela, (80, 240, 90), c, 16)
                 pygame.draw.circle(tela, (200, 255, 200), (c[0] - 5, c[1] - 5), 5)
-            ui.desenhar_texto(tela, "VAI!", (caixa.centerx, caixa.bottom + 30), 28, (120, 255, 130),
+            ui.desenhar_texto(tela, t("VAI!"), (caixa.centerx, caixa.bottom + 30), 28, (120, 255, 130),
                               "center")
 
     def _desenhar_contagem(self, tela):
@@ -1357,11 +1358,11 @@ class CorridaRua(MiniJogoMulti):
         ui.desenhar_texto(sup, f"{pos}º", (62, c.centery), 24, AMARELO if pos == 1 else (200, 200, 220),
                           "midleft")
         ui.desenhar_texto(sup, self.nome(i)[:10].upper(), (150, 12), 10, CORES_JOGADOR[i], "topleft")
-        ui.desenhar_texto(sup, f"VOLTA {volta}/{self.meta}", (150, 26), 8, BRANCO, "topleft")
+        ui.desenhar_texto(sup, t("VOLTA {n}/{total}", n=volta, total=self.meta), (150, 26), 8, BRANCO, "topleft")
         slot = pygame.Rect(c.right - 50, 11, 40, 40)
         pygame.draw.rect(sup, (40, 44, 64), slot, border_radius=8)
         pygame.draw.rect(sup, (150, 160, 200), slot, 2, border_radius=8)
-        ui.desenhar_texto(sup, "TURBO", (150 + 55, 55), 6, (200, 210, 240), "center")
+        ui.desenhar_texto(sup, t("TURBO"), (150 + 55, 55), 6, (200, 210, 240), "center")
         return sup
 
     # --------------------------------------------------------
@@ -1375,8 +1376,8 @@ class CorridaRua(MiniJogoMulti):
         caixa.centerx = LARGURA // 2
         ui.painel(tela, caixa, (28, 32, 56), self.COR, 22, 5)
 
-        ui.desenhar_texto(tela, self.TITULO, (LARGURA // 2, topo + 20), 28, AMARELO, "midtop")
-        ui.desenhar_texto(tela, "2 JOGADORES", (LARGURA // 2, topo + 58), 12,
+        ui.desenhar_texto(tela, t(self.TITULO), (LARGURA // 2, topo + 20), 28, AMARELO, "midtop")
+        ui.desenhar_texto(tela, t("2 JOGADORES"), (LARGURA // 2, topo + 58), 12,
                           (180, 200, 255), "midtop")
 
         y_ovos = topo + 130
@@ -1387,7 +1388,7 @@ class CorridaRua(MiniJogoMulti):
             self.desenhar_ovo(tela, i, (x, y_ovos + balanco - 8), 50, espelhar=(i == 1))
             ui.desenhar_texto(tela, self.nome(i), (x, y_ovos + 46), 14, CORES_JOGADOR[i], "midtop")
             ctrl = self.CONTROLES_J1 if i == 0 else self.CONTROLES_J2
-            ui.desenhar_texto(tela, ctrl, (x, y_ovos + 68), 10, BRANCO, "midtop")
+            ui.desenhar_texto(tela, t(ctrl), (x, y_ovos + 68), 10, BRANCO, "midtop")
         ui.desenhar_texto(tela, "VS", (LARGURA // 2, y_ovos), 32, AMARELO, "center")
 
         y = y_ovos + 96
@@ -1405,7 +1406,7 @@ class CorridaRua(MiniJogoMulti):
             x = x0 + n * 180
             ic = icone_item(item, 26)
             tela.blit(ic, ic.get_rect(center=(x, y + 12)))
-            ui.desenhar_texto(tela, nome, (x + 22, y + 12), 10, AMARELO, "midleft")
+            ui.desenhar_texto(tela, t(nome), (x + 22, y + 12), 10, AMARELO, "midleft")
 
         v = self.vitorias()
         y_rec = self.menu_inicio.botoes[0].rect.y - 32
@@ -1424,8 +1425,8 @@ class CorridaRua(MiniJogoMulti):
             tela.blit(self._previa, r)
             pygame.draw.rect(tela, self.COR, r.inflate(8, 8), 4, border_radius=8)
 
-        ui.desenhar_texto(tela, f"VITÓRIAS  J1 {v[0]} × {v[1]} J2", (LARGURA // 2, y_rec),
+        ui.desenhar_texto(tela, t("VITÓRIAS  J1 {a} × {b} J2", a=v[0], b=v[1]), (LARGURA // 2, y_rec),
                           14, AMARELO, "midtop")
-        ui.desenhar_texto(tela, "ESCOLHA O NÚMERO DE VOLTAS", (LARGURA // 2, y_rec - 24), 12,
+        ui.desenhar_texto(tela, t("ESCOLHA O NÚMERO DE VOLTAS"), (LARGURA // 2, y_rec - 24), 12,
                           (180, 200, 255), "midtop")
         self.menu_inicio.desenhar(tela)

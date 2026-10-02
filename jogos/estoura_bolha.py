@@ -1,3 +1,4 @@
+from core.idioma import t
 import math
 import random
 
@@ -538,8 +539,8 @@ class EstouraBolha(MiniJogo):
         if self.morto:
             self.tempo_morto += dt
             if self.tempo_morto > 1.8:
-                self.terminar(linhas=[f"PONTOS: {self.pontos}", f"FASE: {self.fase}",
-                                      f"PINTINHOS SALVOS: {self.salvos}"])
+                self.terminar(linhas=[t("PONTOS: {n}", n=self.pontos), t("FASE: {n}", n=self.fase),
+                                      t("PINTINHOS SALVOS: {n}", n=self.salvos)])
             return
 
         if self.transicao > 0:
@@ -778,13 +779,13 @@ class EstouraBolha(MiniJogo):
         """Texto flutuante sempre dentro da área do jogo (longe do HUD)."""
         x = max(X0 + 70, min(X1 - 70, pos[0]))
         y = max(130, min(LINHA_PERDE - 20, pos[1]))
-        self.textos.adicionar(msg, (x, y), cor, tamanho)
+        self.textos.adicionar(t(msg), (x, y), cor, tamanho)
 
     def _soltar_pintinho(self, x, y):
         self.salvos += 1
         self.pontos += PONTOS_PINTINHO
         self.pintinhos.append({"x0": x, "x": x, "y": y, "t": random.uniform(0, 3)})
-        self._texto("piu!", (x, y - 16), TXT_LARANJA, 14)
+        self._texto(t("piu!"), (x, y - 16), TXT_LARANJA, 14)
         self._texto(f"+{PONTOS_PINTINHO}", (x, y + 14), TXT_ROXO, 14)
         self.som("revelar", 0.7)
 
@@ -793,7 +794,7 @@ class EstouraBolha(MiniJogo):
         self.erros = 0
         self.tremer(0.15)
         self.som("bater", 0.9)
-        self._texto("O TETO DESCEU!", (LARGURA // 2, 440), TXT_ROSA, 20)
+        self._texto(t("O TETO DESCEU!"), (LARGURA // 2, 440), TXT_ROSA, 20)
 
     def _passou_da_linha(self):
         for (l, c) in self.grade:
@@ -803,7 +804,7 @@ class EstouraBolha(MiniJogo):
 
     def _fase_limpa(self):
         self.pontos += PONTOS_FASE
-        self._texto("FASE LIMPA!", (LARGURA // 2, 300), AMARELO, 32)
+        self._texto(t("FASE LIMPA!"), (LARGURA // 2, 300), AMARELO, 32)
         self._texto(f"+{PONTOS_FASE}", (LARGURA // 2, 350), TXT_LARANJA, 20)
         self.som("vencer", 0.8)
         self.particulas.explodir((LARGURA // 2, 320), [self.jogador.cor, self.jogador.cor_clara,
@@ -821,7 +822,7 @@ class EstouraBolha(MiniJogo):
         self.tempo_morto = 0.0
         self.tremer(0.35)
         self.som("erro", 0.9)
-        self._texto("AS BOLHAS CHEGARAM!", (LARGURA // 2, 400), TXT_ROSA, 20)
+        self._texto(t("AS BOLHAS CHEGARAM!"), (LARGURA // 2, 400), TXT_ROSA, 20)
         # Tudo despenca
         for cel, b in self.grade.items():
             x, y = _centro(cel[0], cel[1], self.teto)
@@ -1029,14 +1030,14 @@ class EstouraBolha(MiniJogo):
         pygame.draw.ellipse(tela, (230, 235, 255), (px - 30, py + 10, 60, 14))
         s = _bolha_escalada(self.proxima, DIAM * PROXIMA_ESCALA)
         tela.blit(s, s.get_rect(center=(px, py)))
-        ui.desenhar_texto(tela, "PRÓXIMA", (px, py - 36), 10, (90, 60, 120), "center", sombra=False)
+        ui.desenhar_texto(tela, t("PRÓXIMA"), (px, py - 36), 10, (90, 60, 120), "center", sombra=False)
 
         # Erros até o teto descer (bolinhas que vão se apagando)
         ex, ey = 620, 668
         restam = DISPAROS_TETO - self.erros
         perigo = restam == 1 and not self.morto
         cor_rot = (230, 60, 100) if perigo else (90, 60, 120)
-        ui.desenhar_texto(tela, "TETO", (ex + 35, ey - 36), 10, cor_rot, "center", sombra=False)
+        ui.desenhar_texto(tela, t("TETO"), (ex + 35, ey - 36), 10, cor_rot, "center", sombra=False)
         for i in range(DISPAROS_TETO):
             c = (ex + i * 14, ey)
             if i < restam:
@@ -1049,11 +1050,11 @@ class EstouraBolha(MiniJogo):
     def desenhar_hud(self, tela):
         caixa = pygame.Rect(12, 12, 420, 48)
         ui.painel(tela, caixa, (20, 24, 40), BRANCO, 12, 3, sombra=False)
-        ui.desenhar_texto(tela, f"PONTOS: {self.pontos}", (caixa.x + 16, caixa.centery), 14,
+        ui.desenhar_texto(tela, t("PONTOS: {n}", n=self.pontos), (caixa.x + 16, caixa.centery), 14,
                           AMARELO, "midleft")
         rec = self.recorde()
         if rec is not None:
-            ui.desenhar_texto(tela, f"RECORDE: {rec}", (caixa.x + 236, caixa.centery), 12,
+            ui.desenhar_texto(tela, t("RECORDE: {v}", v=rec), (caixa.x + 236, caixa.centery), 12,
                               (180, 200, 255), "midleft")
 
         # Fase e pintinhos presos (antes do botão de pausa)
@@ -1061,7 +1062,7 @@ class EstouraBolha(MiniJogo):
         caixa = pygame.Rect(0, 12, 250, 48)
         caixa.right = LARGURA - 76
         ui.painel(tela, caixa, (20, 24, 40), BRANCO, 12, 3, sombra=False)
-        ui.desenhar_texto(tela, f"FASE {self.fase}", (caixa.x + 16, caixa.centery), 12,
+        ui.desenhar_texto(tela, t("FASE {n}", n=self.fase), (caixa.x + 16, caixa.centery), 12,
                           BRANCO, "midleft")
         s = _sprite_pintinho(int(self.tempo * 4) % 2)
         tela.blit(s, s.get_rect(center=(caixa.right - 92, caixa.centery - 1)))

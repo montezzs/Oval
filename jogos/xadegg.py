@@ -6,6 +6,7 @@ import pygame
 
 from settings import *
 from core import ui
+from core.idioma import t as tr
 from jogos.base_multi import CORES_JOGADOR
 from jogos.jogo_velha import JogoTabuleiro, TECLAS_DIR, TECLAS_OK, fundo_mesa
 
@@ -513,7 +514,7 @@ class Xadegg(JogoTabuleiro):
                 cor = CLARA if (r + c) % 2 == 0 else ESCURA
                 pygame.draw.rect(sup, cor, (TAB.x + c * CEL, TAB.y + r * CEL, CEL, CEL))
         for k in range(8):
-            ui.desenhar_texto(sup, "abcdefgh"[k].upper(), (TAB.x + k * CEL + CEL // 2, TAB.bottom + 3),
+            ui.desenhar_texto(sup, tr("abcdefgh")[k].upper(), (TAB.x + k * CEL + CEL // 2, TAB.bottom + 3),
                               8, (240, 220, 190), "midtop", False)
             ui.desenhar_texto(sup, str(8 - k), (TAB.x - 9, TAB.y + k * CEL + CEL // 2), 8,
                               (240, 220, 190), "center", False)
@@ -580,21 +581,21 @@ class Xadegg(JogoTabuleiro):
         if not self.lista:
             if cheque:
                 self.aviso = "XEQUE-MATE!"
-                self.finalizar(antes.lado, ["XEQUE-MATE!", f"LANCES: {(self.n_lances + 1) // 2}"])
+                self.finalizar(antes.lado, [tr("XEQUE-MATE!"), tr("LANCES: {n}", n=(self.n_lances + 1) // 2)])
             else:
                 self.aviso = "AFOGADO!"
-                self.finalizar(None, ["AFOGAMENTO: EMPATE"])
+                self.finalizar(None, [tr("AFOGAMENTO: EMPATE")])
         elif self.pos.meio >= 100:
-            self.finalizar(None, ["50 LANCES SEM CAPTURA"])
+            self.finalizar(None, [tr("50 LANCES SEM CAPTURA")])
         elif material_insuficiente(self.pos.b):
-            self.finalizar(None, ["MATERIAL INSUFICIENTE"])
+            self.finalizar(None, [tr("MATERIAL INSUFICIENTE")])
         elif self.repeticoes[ch] >= 3:
-            self.finalizar(None, ["REPETIÇÃO TRIPLA"])
+            self.finalizar(None, [tr("REPETIÇÃO TRIPLA")])
         elif cheque:
             self.aviso = "XEQUE!"
             self.som("erro", 0.5)
         if f == 3:
-            self.textos.adicionar("PROMOÇÃO: RAINHA!", (casa_xy(t)[0] + CEL // 2, casa_xy(t)[1]),
+            self.textos.adicionar(tr("PROMOÇÃO: RAINHA!"), (casa_xy(t)[0] + CEL // 2, casa_xy(t)[1]),
                                   AMARELO, 12)
 
     # BOT -----------------------------------------------------
@@ -713,7 +714,7 @@ class Xadegg(JogoTabuleiro):
             self.desenhar_ovo(tela, i, (r.centerx, r.y + 46), 56)
             ui.desenhar_texto(tela, self.nome(i)[:12], (r.centerx, r.y + 84), 10,
                               CORES_JOGADOR[i], "midtop")
-            ui.desenhar_texto(tela, "BRANCAS" if i == 0 else "PRETAS", (r.centerx, r.y + 102), 8,
+            ui.desenhar_texto(tela, tr("BRANCAS") if i == 0 else tr("PRETAS"), (r.centerx, r.y + 102), 8,
                               BRANCO, "midtop")
             if ativo:
                 ui.desenhar_texto(tela, self.texto_vez(), (r.centerx, r.y + 120), 10, AMARELO,
@@ -724,7 +725,7 @@ class Xadegg(JogoTabuleiro):
                 y = r.y + 146 + (k // 5) * 40
                 tela.blit(sprite_peca(p if i == 1 else p.lower(), self.cor(1 - i), 34), (x, y))
         if self.aviso and (self.aviso != "XEQUE!" or int(self.tempo * 3) % 2 == 0):
-            ui.desenhar_texto(tela, self.aviso, (LARGURA // 2, 70), 22, (255, 110, 110), "center")
+            ui.desenhar_texto(tela, tr(self.aviso), (LARGURA // 2, 70), 22, (255, 110, 110), "center")
         elif self._fim is None:
-            ui.desenhar_texto(tela, f"LANCE {self.n_lances // 2 + 1}", (LARGURA // 2, 70), 10,
+            ui.desenhar_texto(tela, tr("LANCE {n}", n=self.n_lances // 2 + 1), (LARGURA // 2, 70), 10,
                               (240, 220, 190), "center")

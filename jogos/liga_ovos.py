@@ -1,3 +1,4 @@
+from core.idioma import t
 import heapq
 import math
 import random
@@ -476,7 +477,7 @@ class LigaOvos(MiniJogo):
         self.dica = None
         if not silencioso:
             self.som("virar", 0.8)
-            self.textos.adicionar("EMBARALHANDO!", (LARGURA // 2, Y0 + ALT_TAB // 2), (120, 90, 220), 20)
+            self.textos.adicionar(t("EMBARALHANDO!"), (LARGURA // 2, Y0 + ALT_TAB // 2), (120, 90, 220), 20)
 
     # --------------------------------------------------------
     # AÇÕES
@@ -546,7 +547,7 @@ class LigaOvos(MiniJogo):
                 return
             self.som("erro", 0.5)
             x, y = _centro(c, l)
-            self.textos.adicionar("SEM CAMINHO!", (x, y - 30), (230, 80, 80), 12)
+            self.textos.adicionar(t("SEM CAMINHO!"), (x, y - 30), (230, 80, 80), 12)
             self.selecionada = None
             return
         # Tipo diferente: passa a seleção para a nova peça
@@ -606,7 +607,7 @@ class LigaOvos(MiniJogo):
 
         meio = ((_centro(*a)[0] + _centro(*b)[0]) / 2, (_centro(*a)[1] + _centro(*b)[1]) / 2)
         if eh_voce:
-            self.textos.adicionar(f"VOCÊ! +{ganho}", (meio[0], meio[1] - 10), (230, 150, 0), 16)
+            self.textos.adicionar(t("VOCÊ! +{n}", n=ganho), (meio[0], meio[1] - 10), (230, 150, 0), 16)
             self.som("moeda", 0.8)
         else:
             self.textos.adicionar(f"+{ganho}", (meio[0], meio[1] - 10), (240, 100, 120), 14)
@@ -724,10 +725,10 @@ class LigaOvos(MiniJogo):
         elif self.fase == "acabou":
             self.t_fase += dt
             if self.t_fase >= DUR_FIM:
-                self.terminar(titulo="O TEMPO ACABOU!",
-                              linhas=[f"PONTOS: {self.pontos}",
-                                      f"NÍVEL: {self.nivel}  •  PARES: {self.pares}",
-                                      f"MAIOR COMBO: ×{self.maior_combo}"])
+                self.terminar(titulo=t("O TEMPO ACABOU!"),
+                              linhas=[t("PONTOS: {n}", n=self.pontos),
+                                      t("NÍVEL: {n}  •  PARES: {p}", n=self.nivel, p=self.pares),
+                                      t("MAIOR COMBO: ×{n}", n=self.maior_combo)])
 
     # --------------------------------------------------------
     # DESENHO
@@ -797,7 +798,7 @@ class LigaOvos(MiniJogo):
             self._desenhar_nivel(tela)
         elif self.fase == "acabou":
             ui.veu(tela, 90)
-            ui.desenhar_texto(tela, "O TEMPO ACABOU!", (LARGURA // 2, ALTURA // 2), 28, (255, 120, 120), "center")
+            ui.desenhar_texto(tela, t("O TEMPO ACABOU!"), (LARGURA // 2, ALTURA // 2), 28, (255, 120, 120), "center")
 
     def _desenhar_raios(self, tela):
         for pontos, cor, t0 in self.raios:
@@ -842,16 +843,16 @@ class LigaOvos(MiniJogo):
         caixa = pygame.Rect(0, 0, 640, 280)
         caixa.center = (LARGURA // 2, ALTURA // 2)
         ui.painel(tela, caixa, (28, 32, 56), AMARELO, 20, 4)
-        ui.desenhar_texto(tela, f"NÍVEL {self.nivel} COMPLETO!", (caixa.centerx, caixa.y + 28), 24,
+        ui.desenhar_texto(tela, t("NÍVEL {n} COMPLETO!", n=self.nivel), (caixa.centerx, caixa.y + 28), 24,
                           AMARELO, "midtop")
-        ui.desenhar_texto(tela, f"BÔNUS DE TEMPO: +{self.bonus_tempo}", (caixa.centerx, caixa.y + 78), 14,
+        ui.desenhar_texto(tela, t("BÔNUS DE TEMPO: +{n}", n=self.bonus_tempo), (caixa.centerx, caixa.y + 78), 14,
                           BRANCO, "midtop")
         dy = -abs(math.sin(self.t_fase * 6)) * 14
         self.jogador.desenhar(tela, (caixa.centerx, caixa.y + 150 + dy), 60)
         prox = self.nivel + 1
-        ui.desenhar_texto(tela, f"NÍVEL {prox}: {NOMES_MODOS[modo_do_nivel(prox)]}",
+        ui.desenhar_texto(tela, t("NÍVEL {n}: {modo}", n=prox, modo=t(NOMES_MODOS[modo_do_nivel(prox)])),
                           (caixa.centerx, caixa.y + 206), 12, (180, 220, 255), "midtop")
-        ui.desenhar_texto(tela, f"TEMPO: {_formatar_tempo(tempo_do_nivel(prox))}",
+        ui.desenhar_texto(tela, t("TEMPO: {v}", v=_formatar_tempo(tempo_do_nivel(prox))),
                           (caixa.centerx, caixa.y + 232), 12, (180, 220, 255), "midtop")
 
     def desenhar_hud(self, tela):
@@ -860,9 +861,9 @@ class LigaOvos(MiniJogo):
         # Pontos e recorde
         caixa = pygame.Rect(12, 12, 220, 48)
         ui.painel(tela, caixa, fundo, BRANCO, 12, 3, sombra=False)
-        ui.desenhar_texto(tela, f"PONTOS: {self.pontos}", (caixa.x + 12, caixa.y + 9), 12, AMARELO)
+        ui.desenhar_texto(tela, t("PONTOS: {n}", n=self.pontos), (caixa.x + 12, caixa.y + 9), 12, AMARELO)
         rec = self.recorde()
-        ui.desenhar_texto(tela, f"RECORDE: {rec if rec is not None else '--'}", (caixa.x + 12, caixa.y + 28),
+        ui.desenhar_texto(tela, t("RECORDE: {v}", v=rec if rec is not None else '--'), (caixa.x + 12, caixa.y + 28),
                           10, (180, 220, 255))
 
         # Tempo (relógio + barra)
@@ -888,7 +889,7 @@ class LigaOvos(MiniJogo):
         # Nível (com setinha do modo)
         caixa3 = pygame.Rect(caixa2.right + 12, 12, 150, 48)
         ui.painel(tela, caixa3, fundo, BRANCO, 12, 3, sombra=False)
-        ui.desenhar_texto(tela, "NÍVEL", (caixa3.x + 12, caixa3.y + 9), 10, (180, 220, 255))
+        ui.desenhar_texto(tela, t("NÍVEL"), (caixa3.x + 12, caixa3.y + 9), 10, (180, 220, 255))
         ui.desenhar_texto(tela, str(self.nivel), (caixa3.x + 12, caixa3.y + 26), 14, BRANCO)
         seta = {"fixo": "•", "baixo": "↓", "esquerda": "←", "centro": "→←"}[self.modo]
         ui.desenhar_texto(tela, seta, (caixa3.right - 14, caixa3.centery + 1), 14, AMARELO, "midright")
@@ -897,7 +898,7 @@ class LigaOvos(MiniJogo):
         r = self.r_dica
         hover = r.collidepoint(self.mouse) and self.dicas > 0 and self.fase == "jogando"
         ui.painel(tela, r, (60, 70, 120) if hover else fundo, AMARELO if hover else BRANCO, 12, 3, sombra=False)
-        ui.desenhar_texto(tela, "DICA (H)", (r.x + 12, r.centery + 1), 12,
+        ui.desenhar_texto(tela, t("DICA (H)"), (r.x + 12, r.centery + 1), 12,
                           BRANCO if self.dicas else (120, 120, 140), "midleft")
         for i in range(DICAS):
             cx = r.right - 44 + i * 14

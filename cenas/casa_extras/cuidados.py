@@ -4,6 +4,7 @@ import random
 import pygame
 
 from settings import *
+from core.idioma import t as tr
 from core import ui
 
 # ============================================================
@@ -154,7 +155,7 @@ class Bandeja:
 
         lista = self.comidas()
         if not lista:
-            ui.desenhar_texto(tela, "GELADEIRA VAZIA! COMPRE COMIDA NA LOJA", area.center, 12,
+            ui.desenhar_texto(tela, tr("GELADEIRA VAZIA! COMPRE COMIDA NA LOJA"), area.center, 12,
                               (80, 80, 110), "center", sombra=False)
         inicio = self.pagina * POR_PAGINA
         for k, (cid, q) in enumerate(lista[inicio:inicio + POR_PAGINA]):
@@ -181,7 +182,7 @@ class Bandeja:
         ui.desenhar_texto(tela, "×", self.fechar.center, 16, BRANCO, "center")
 
         if lista:
-            ui.desenhar_texto(tela, "ARRASTE ATÉ A BOCA DO OVO", (area.centerx, area.y - 16), 10,
+            ui.desenhar_texto(tela, tr("ARRASTE ATÉ A BOCA DO OVO"), (area.centerx, area.y - 16), 10,
                               BRANCO, "center")
 
     def desenhar_arraste(self, tela):
@@ -322,7 +323,7 @@ class Banho:
             for k in range(4):
                 pygame.draw.line(tela, (170, 220, 255), (r.centerx - 10 + k * 7, r.centery + 2),
                                  (r.centerx - 12 + k * 7, r.centery + 16), 2)
-            ui.desenhar_texto(tela, "CHUVEIRO!", (r.centerx, r.y - 12), 8, BRANCO, "center")
+            ui.desenhar_texto(tela, tr("CHUVEIRO!"), (r.centerx, r.y - 12), 8, BRANCO, "center")
 
         # Cursor de sabonete
         if self.ativo:
@@ -332,5 +333,5 @@ class Banho:
             pygame.draw.rect(tela, (255, 200, 230), sab, border_radius=10)
             pygame.draw.rect(tela, (220, 140, 190), sab, 2, border_radius=10)
             pygame.draw.line(tela, (255, 240, 250), (sab.x + 8, sab.y + 7), (sab.x + 22, sab.y + 7), 3)
-            ui.desenhar_texto(tela, "ESFREGUE NO OVO! (botão direito sai)", (LARGURA // 2, 130),
+            ui.desenhar_texto(tela, tr("ESFREGUE NO OVO! (botão direito sai)"), (LARGURA // 2, 130),
                               10, BRANCO, "center")

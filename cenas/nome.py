@@ -3,6 +3,7 @@ import math
 import pygame
 
 from settings import *
+from core.idioma import t
 from core import perfis, ui
 from core.cena import Cena, tecla_voltar
 from core.fundo_menu import FundoAnimado
@@ -67,7 +68,7 @@ class CenaNome(Cena):
 
         if perfis.normalizar_nome(nome) in perfis.nomes_em_uso(excluir=self.slot):
             self.tremer = 0.4
-            self.erro = f"JÁ TEM UM {nome.upper()} NA RUA!"
+            self.erro = t("JÁ TEM UM {nome} NA RUA!", nome=nome.upper())
             self.som("erro")
             return
 
@@ -119,19 +120,19 @@ class CenaNome(Cena):
 
         if self.modo == "inicial":
             y = 90 + math.sin(self.tempo * 2) * 6
-            ui.desenhar_texto(tela, "BEM-VINDO AO", (LARGURA // 2, y), 28,
+            ui.desenhar_texto(tela, t("BEM-VINDO AO"), (LARGURA // 2, y), 28,
                               BRANCO, "midtop")
             ui.desenhar_texto(tela, "OVAL!", (LARGURA // 2, y + 48), 56,
                               AMARELO, "midtop")
-            ui.centralizado(tela, "Como vai se chamar o seu ovo?", 240, 16)
+            ui.centralizado(tela, t("Como vai se chamar o seu ovo?"), 240, 16)
         elif self.modo == "novo":
             y = 100 + math.sin(self.tempo * 2) * 6
-            ui.desenhar_texto(tela, "NOME DO NOVO OVO", (LARGURA // 2, y), 36, AMARELO, "midtop")
-            ui.centralizado(tela, f"ELE VAI MORAR NA CASA {self.slot + 1}", 190, 12)
-            ui.centralizado(tela, "Como vai se chamar o novo ovo?", 240, 16)
+            ui.desenhar_texto(tela, t("NOME DO NOVO OVO"), (LARGURA // 2, y), 36, AMARELO, "midtop")
+            ui.centralizado(tela, t("ELE VAI MORAR NA CASA {n}", n=self.slot + 1), 190, 12)
+            ui.centralizado(tela, t("Como vai se chamar o novo ovo?"), 240, 16)
         else:
-            ui.centralizado(tela, "TROCAR NOME", 110, 40, AMARELO)
-            ui.centralizado(tela, "Digite o novo nome:", 240, 16)
+            ui.centralizado(tela, t("TROCAR NOME"), 110, 40, AMARELO)
+            ui.centralizado(tela, t("Digite o novo nome:"), 240, 16)
 
         # Caixa de texto (treme quando tenta confirmar vazio)
         caixa = self.caixa.move(int(math.sin(self.tempo * 60) * 8 * self.tremer / 0.4), 0)
@@ -156,6 +157,6 @@ class CenaNome(Cena):
 
         if self.pode_cancelar:
             self.botao_cancelar.desenhar(tela)
-            ui.centralizado(tela, "ENTER confirma  •  ESC cancela", 640, 12)
+            ui.centralizado(tela, t("ENTER confirma  •  ESC cancela"), 640, 12)
         else:
-            ui.centralizado(tela, "Aperte ENTER para continuar", 640, 12)
+            ui.centralizado(tela, t("Aperte ENTER para continuar"), 640, 12)

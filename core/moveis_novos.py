@@ -4,6 +4,7 @@ import pygame
 
 from core import moveis as M
 from core import ui
+from core.idioma import t
 from core.moveis import Movel, _blit_brilho, _blit_sprite, MADEIRA_ESCURA
 
 # ============================================================
@@ -98,7 +99,7 @@ class Cortinas(Movel):
         return True
 
     def dica(self, ctx):
-        return "CORTINAS: clique para abrir/fechar"
+        return t("CORTINAS: clique para abrir/fechar")
 
 
 # ============================================================
@@ -161,7 +162,7 @@ class QuadroVizinhanca(Movel):
             return False
         nomes = [s["nome"] for i, s in enumerate(self._perfis or [])
                  if s is not None and i != getattr(ctx.app, "slot", -1)]
-        ctx.avisar("VIZINHOS: " + ", ".join(nomes) if nomes else "NENHUM VIZINHO AINDA")
+        ctx.avisar(t("VIZINHOS: {lista}", lista=", ".join(nomes)) if nomes else t("NENHUM VIZINHO AINDA"))
         ctx.som("clique")
         return True
 
@@ -246,8 +247,8 @@ class Pipa(Movel):
 
     def dica(self, ctx):
         if getattr(ctx, "chovendo", False):
-            return "PIPA: guardada por causa da chuva"
-        return "PIPA: clique para dar um looping!"
+            return t("PIPA: guardada por causa da chuva")
+        return t("PIPA: clique para dar um looping!")
 
 
 # ============================================================
@@ -330,7 +331,7 @@ class Fogueira(Movel):
         if not self.rect.collidepoint(pos):
             return False
         if getattr(ctx, "chovendo", False):
-            ctx.avisar("A CHUVA APAGOU A FOGUEIRA!")
+            ctx.avisar(t("A CHUVA APAGOU A FOGUEIRA!"))
             ctx.som("erro")
             return True
         self.acesa_clique = 20.0
@@ -338,7 +339,7 @@ class Fogueira(Movel):
         return True
 
     def dica(self, ctx):
-        return "FOGUEIRA: fique pertinho para se divertir"
+        return t("FOGUEIRA: fique pertinho para se divertir")
 
 
 # ------------------------------------------------------------

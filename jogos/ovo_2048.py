@@ -5,6 +5,7 @@ import pygame
 
 from settings import *
 from core import ui
+from core.idioma import t
 from core import assets
 from core.jogador import Jogador
 from jogos.base import MiniJogo
@@ -786,8 +787,8 @@ class Ovo2048(MiniJogo):
                     self.descobertos.add(v)
                     maior_nova = max(maior_nova, v)
             if maior_nova:
-                nome = _estagio(maior_nova)[0]
-                self.textos.adicionar(f"NOVO: {nome}!", (LARGURA // 2, self.y0 + self.tam // 2),
+                nome = t(_estagio(maior_nova)[0])
+                self.textos.adicionar(t("NOVO: {nome}!", nome=nome), (LARGURA // 2, self.y0 + self.tam // 2),
                                       AMARELO, 16)
                 self.tremer(0.1)
                 self.som("acerto", 0.7)
@@ -852,11 +853,11 @@ class Ovo2048(MiniJogo):
             self._encerrar()
 
     def _encerrar(self):
-        nome = _estagio(self.maior)[0]
-        linhas = [f"PONTOS: {self.pontos}",
-                  f"MAIOR: {nome} ({self.maior})",
-                  f"JOGADAS: {self.jogadas}"]
-        titulo = "VOCÊ EVOLUIU!" if self.chegou_2048 else "SEM JOGADAS!"
+        nome = t(_estagio(self.maior)[0])
+        linhas = [t("PONTOS: {n}", n=self.pontos),
+                  t("MAIOR: {nome} ({n})", nome=nome, n=self.maior),
+                  t("JOGADAS: {n}", n=self.jogadas)]
+        titulo = t("VOCÊ EVOLUIU!") if self.chegou_2048 else t("SEM JOGADAS!")
         self.terminar(venceu=self.chegou_2048, titulo=titulo, linhas=linhas)
 
     def calcular_moedas(self, valor, venceu):
@@ -973,7 +974,7 @@ class Ovo2048(MiniJogo):
             cor = (100, 72, 48)
         pygame.draw.rect(tela, cor, miolo, border_radius=12)
         pygame.draw.rect(tela, AMARELO if hover else (190, 150, 100), miolo, 2, border_radius=12)
-        ui.desenhar_texto(tela, "DESFAZER", (r.centerx, r.y + 22), 12,
+        ui.desenhar_texto(tela, t("DESFAZER"), (r.centerx, r.y + 22), 12,
                           BRANCO if pode else (170, 150, 130), "midtop")
         # Setinha curva
         cx, cy = r.centerx - 44, r.y + 70
@@ -997,16 +998,16 @@ class Ovo2048(MiniJogo):
 
         # ----- Jogadas -----
         r = self.r_jogadas
-        ui.desenhar_texto(tela, "JOGADAS", (r.centerx, r.y + 14), 10, (230, 210, 175), "midtop")
+        ui.desenhar_texto(tela, t("JOGADAS"), (r.centerx, r.y + 14), 10, (230, 210, 175), "midtop")
         ui.desenhar_texto(tela, str(self.jogadas), (r.centerx, r.bottom - 12), 16, BRANCO, "midbottom")
 
         # ----- Maior ovo -----
         r = self.r_maior
-        ui.desenhar_texto(tela, "MAIOR OVO", (r.centerx, r.y + 14), 10, (230, 210, 175), "midtop")
+        ui.desenhar_texto(tela, t("MAIOR OVO"), (r.centerx, r.y + 14), 10, (230, 210, 175), "midtop")
         img = self.sprite(self.maior, 104, self.jogador)
         dy = math.sin(self.tempo * 2.5) * 3
         tela.blit(img, img.get_rect(center=(r.centerx, r.y + 92 + dy)))
-        nome = _estagio(self.maior)[0]
+        nome = t(_estagio(self.maior)[0])
         linhas = ui.quebrar_linhas(nome, 10, r.w - 20)
         y = r.bottom - 18 - (len(linhas) - 1) * 16
         for linha in linhas:
@@ -1015,7 +1016,7 @@ class Ovo2048(MiniJogo):
 
         # ----- Escada da evolução -----
         r = self.r_evolucao
-        ui.desenhar_texto(tela, "EVOLUÇÃO", (r.centerx, r.y + 16), 12, AMARELO, "midtop")
+        ui.desenhar_texto(tela, t("EVOLUÇÃO"), (r.centerx, r.y + 16), 12, AMARELO, "midtop")
         pulso = 0.5 + 0.5 * math.sin(self.tempo * 5)
         for i, valor in enumerate(ESCADA):
             x = r.x + 16 + (i % 2) * 80
@@ -1044,7 +1045,7 @@ class Ovo2048(MiniJogo):
 
     def _desenhar_evoluiu(self, tela):
         caixa = self._painel_central(tela, 330)
-        ui.desenhar_texto(tela, "VOCÊ EVOLUIU!", (caixa.centerx, caixa.y + 22), 20, AMARELO, "midtop")
+        ui.desenhar_texto(tela, t("VOCÊ EVOLUIU!"), (caixa.centerx, caixa.y + 22), 20, AMARELO, "midtop")
         dy = -abs(math.sin(self.t_fase * 5)) * 12
         ang = math.sin(self.t_fase * 4) * 10
         img = self.sprite(2048, 96, self.jogador)
@@ -1058,11 +1059,11 @@ class Ovo2048(MiniJogo):
         if self.menu_extra is None:
             # Sem desfazer: só um aviso rápido antes da tela de fim
             area = pygame.Rect(self.x0, self.y0, self.tam, self.tam)
-            ui.desenhar_texto(tela, "SEM JOGADAS!", area.center, 24, (255, 120, 120), "center")
+            ui.desenhar_texto(tela, t("SEM JOGADAS!"), area.center, 24, (255, 120, 120), "center")
             return
         caixa = self._painel_central(tela, 270)
-        ui.desenhar_texto(tela, "SEM JOGADAS!", (caixa.centerx, caixa.y + 24), 20, (255, 130, 130), "midtop")
-        ui.desenhar_texto(tela, f"DESFAZER RESTANTES: {self.desfazer_restantes}",
+        ui.desenhar_texto(tela, t("SEM JOGADAS!"), (caixa.centerx, caixa.y + 24), 20, (255, 130, 130), "midtop")
+        ui.desenhar_texto(tela, t("DESFAZER RESTANTES: {n}", n=self.desfazer_restantes),
                           (caixa.centerx, caixa.y + 70), 10, BRANCO, "midtop")
         for i, b in enumerate(self.menu_extra.botoes):
             b.rect.midtop = (caixa.centerx, caixa.y + 110 + i * 62)
@@ -1072,14 +1073,14 @@ class Ovo2048(MiniJogo):
         fundo = (20, 24, 40)
         caixa = pygame.Rect(12, 12, 250, 48)
         ui.painel(tela, caixa, fundo, BRANCO, 12, 3, sombra=False)
-        ui.desenhar_texto(tela, f"PONTOS: {self.pontos}", (caixa.x + 16, caixa.centery + 1), 14,
+        ui.desenhar_texto(tela, t("PONTOS: {n}", n=self.pontos), (caixa.x + 16, caixa.centery + 1), 14,
                           AMARELO, "midleft")
 
         caixa2 = pygame.Rect(caixa.right + 12, 12, 230, 48)
         ui.painel(tela, caixa2, fundo, BRANCO, 12, 3, sombra=False)
-        ui.desenhar_texto(tela, self.OPCOES[self.opcao], (caixa2.x + 14, caixa2.y + 9), 10, (180, 220, 255))
+        ui.desenhar_texto(tela, t(self.OPCOES[self.opcao]), (caixa2.x + 14, caixa2.y + 9), 10, (180, 220, 255))
         rec = self.recorde()
-        texto_rec = f"RECORDE: {rec}" if rec is not None else "RECORDE: --"
+        texto_rec = t("RECORDE: {n}", n=rec if rec is not None else "--")
         ui.desenhar_texto(tela, texto_rec, (caixa2.x + 14, caixa2.y + 26), 12, AMARELO)
 
 

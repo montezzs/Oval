@@ -1,3 +1,4 @@
+from core.idioma import t
 import math
 import random
 
@@ -108,6 +109,7 @@ def _desenhar_ovo(tela, jogador, centro, altura, angulo=0.0):
 
 def _palavra(msg, tam, cor):
     """Texto grosso com contorno escuro (a ORDEM gigante)."""
+    msg = t(msg)
     def criar():
         frente = ui.texto(msg, tam, cor, sombra=False)
         contorno = ui.texto(msg, tam, TINTA, sombra=False)
@@ -687,7 +689,7 @@ class Desvie(Micro):
                     p["vy"] = -760
                     p["vx"] = 320 if p["x"] > self.ox else -320
                     self.tonto = 99
-                    self.jogo.textos.adicionar("CLANG!", (self.ox, self.OY - 90), BRANCO, 20)
+                    self.jogo.textos.adicionar(t("CLANG!"), (self.ox, self.OY - 90), BRANCO, 20)
                     self.jogo.particulas.explodir((self.ox, self.OY - 50), [AMARELO, BRANCO], 16, 300, 0.5)
                     self.perder((self.ox, self.OY - 60))
                 elif p["estado"] == "caindo" and p["y"] >= self.CHAO - 12:
@@ -770,7 +772,7 @@ class Estoure(Micro):
                 self.bolhas.remove(b)
                 self.jogo.particulas.explodir((b[0], b[1]), [BRANCO, (200, 240, 255), (255, 190, 230)],
                                               14, 260, 0.45, (3, 6), 200)
-                self.jogo.textos.adicionar("POP!", (b[0], b[1] - 20), BRANCO, 12)
+                self.jogo.textos.adicionar(t("POP!"), (b[0], b[1] - 20), BRANCO, 12)
                 self.jogo.som("revelar")
                 if not self.bolhas:
                     self.ganhar(pos)
@@ -796,7 +798,7 @@ class Estoure(Micro):
             y = b[1] + math.sin(b[4] * 3) * 6
             tela.blit(img, img.get_rect(center=(int(b[0]), int(y))))
         if self.t > INTRO and self.bolhas:
-            ui.desenhar_texto(tela, f"FALTAM {len(self.bolhas)}", (LARGURA // 2, 680), 14, TINTA, "center",
+            ui.desenhar_texto(tela, t("FALTAM {n}", n=len(self.bolhas)), (LARGURA // 2, 680), 14, TINTA, "center",
                               sombra=False)
 
     def desenhar_cursor(self, tela, pos):
@@ -898,7 +900,7 @@ class Pule(Micro):
                 self.no_chao = False
                 self.vx = -240
                 self.vy = -650
-                self.jogo.textos.adicionar("TOING!", (self.ox, self.oy - 70), BRANCO, 18)
+                self.jogo.textos.adicionar(t("TOING!"), (self.ox, self.oy - 70), BRANCO, 18)
                 self.perder((self.ox, self.oy - 40))
                 return
         if all(x + 90 < self.ox - 40 for x in self.colheres):
@@ -1160,7 +1162,7 @@ class Pare(Micro):
         self.parado = True
         ponta = self._ponta(self.RAIO - 30)
         if abs(self.angulo - self.meio) <= self.meia:
-            self.jogo.textos.adicionar("NA MOSCA!", (ponta[0], ponta[1] - 30), VERDE_OK, 16)
+            self.jogo.textos.adicionar(t("NA MOSCA!"), (ponta[0], ponta[1] - 30), VERDE_OK, 16)
             self.ganhar(ponta)
         else:
             self.perder(ponta)
@@ -1338,7 +1340,7 @@ class Sopre(Micro):
             x, y = self.VELA
             self.jogo.particulas.explodir((x, y - 20), [(150, 150, 160), (200, 200, 210), (110, 110, 120)],
                                           18, 120, 1.0, (5, 10), -160)
-            self.jogo.textos.adicionar("PARABÉNS!", (x, y - 120), AMARELO, 18)
+            self.jogo.textos.adicionar(t("PARABÉNS!"), (x, y - 120), AMARELO, 18)
             self.ganhar((x, y - 40))
 
     def atualizar(self, dt):
@@ -1464,7 +1466,7 @@ class Guie(Micro):
             return
         if math.hypot(self.bx - self.fx, self.by - (self.fy - 20)) < 52:
             self.bx, self.by = self.fx, self.fy - 36
-            self.jogo.textos.adicionar("MEL!", (self.fx, self.fy - 90), AMARELO, 18)
+            self.jogo.textos.adicionar(t("MEL!"), (self.fx, self.fy - 90), AMARELO, 18)
             self.ganhar((self.fx, self.fy - 40))
             return
         for c in self.cactos:
@@ -1473,7 +1475,7 @@ class Guie(Micro):
                 self.tonto = True
                 self.bx += (self.bx - c[0]) / max(1, d) * 40
                 self.by += (self.by - c[1]) / max(1, d) * 40
-                self.jogo.textos.adicionar("AI!", (self.bx, self.by - 50), VERMELHO_ERRO, 18)
+                self.jogo.textos.adicionar(t("AI!"), (self.bx, self.by - 50), VERMELHO_ERRO, 18)
                 self.perder((self.bx, self.by))
                 return
 
@@ -1564,7 +1566,7 @@ class Acorde(Micro):
         self.tremor = 1.0
         self.jogo.som("virar", 0.5)
         if self.balancos >= self.precisa:
-            self.jogo.textos.adicionar("BOM DIA!", (self.OVO[0], self.OVO[1] - 160), AMARELO, 22)
+            self.jogo.textos.adicionar(t("BOM DIA!"), (self.OVO[0], self.OVO[1] - 160), AMARELO, 22)
             self.jogo.som("boing")
             self.ganhar((self.OVO[0], self.OVO[1] - 80))
 
@@ -1731,7 +1733,7 @@ class Conte(Micro):
                 pygame.draw.ellipse(tela, (160, 185, 90), (x - 18, y + 22, 36, 10))
                 tela.blit(img, img.get_rect(center=(int(x), int(y - pulo))))
             if self.resultado is not None:
-                ui.desenhar_texto(tela, f"ERAM {self.n}!", (LARGURA // 2, 230), 20, TINTA, "center",
+                ui.desenhar_texto(tela, t("ERAM {n}!", n=self.n), (LARGURA // 2, 230), 20, TINTA, "center",
                                   sombra=False)
         else:
             # Caixote caindo por cima dos pintinhos
@@ -1804,7 +1806,7 @@ class Encha(Micro):
             return
         self.enchendo = False
         if self._na_linha():
-            self.jogo.textos.adicionar("NA MEDIDA!", (self.COPO.centerx, self.COPO.y - 40), VERDE_OK, 16)
+            self.jogo.textos.adicionar(t("NA MEDIDA!"), (self.COPO.centerx, self.COPO.y - 40), VERDE_OK, 16)
             self.ganhar(self._superficie())
 
     def decidir(self):
@@ -1823,7 +1825,7 @@ class Encha(Micro):
             self.derramou = True
             x, y = self._superficie()
             self.jogo.particulas.explodir((x, y), [BRANCO, (235, 240, 255)], 16, 260, 0.6, (3, 7))
-            self.jogo.textos.adicionar("PASSOU!", (x, y - 40), VERMELHO_ERRO, 18)
+            self.jogo.textos.adicionar(t("PASSOU!"), (x, y - 40), VERMELHO_ERRO, 18)
             self.perder((x, y))
 
     def desenhar(self, tela):
@@ -1850,7 +1852,7 @@ class Encha(Micro):
                                           (c.right + 44, seta_y + 18)])
         pygame.draw.polygon(tela, (120, 230, 140), [(c.right + 20, seta_y), (c.right + 40, seta_y - 12),
                                                     (c.right + 40, seta_y + 12)])
-        ui.desenhar_texto(tela, "LINHA", (c.right + 52, seta_y), 12, TINTA, "midleft", sombra=False)
+        ui.desenhar_texto(tela, t("LINHA"), (c.right + 52, seta_y), 12, TINTA, "midleft", sombra=False)
         # Contorno do copo
         pygame.draw.rect(tela, TINTA, c.inflate(10, 6), 6, border_bottom_left_radius=22,
                          border_bottom_right_radius=22)
@@ -2027,14 +2029,14 @@ class MicroOvo(MiniJogo):
     def _fim(self):
         p = self.pontos
         if p >= 25:
-            titulo = "LENDA DOS MICROS!"
+            titulo = t("LENDA DOS MICROS!")
         elif p >= 15:
-            titulo = "MANDOU BEM!"
+            titulo = t("MANDOU BEM!")
         else:
-            titulo = "ACABARAM OS OVOS!"
-        linhas = [f"RODADAS VENCIDAS: {p}",
-                  f"RODADAS JOGADAS: {self.rodada}",
-                  f"VELOCIDADE MÁXIMA: {_fmt_vel(self.maior_vel)}"]
+            titulo = t("ACABARAM OS OVOS!")
+        linhas = [t("RODADAS VENCIDAS: {n}", n=p),
+                  t("RODADAS JOGADAS: {n}", n=self.rodada),
+                  t("VELOCIDADE MÁXIMA: {v}", v=_fmt_vel(self.maior_vel))]
         self.terminar(venceu=p >= 15, valor=p, titulo=titulo, linhas=linhas)
 
     # --------------------------------------------------------
@@ -2168,7 +2170,7 @@ class MicroOvo(MiniJogo):
             img = _palavra(m.PALAVRA, tam, m.COR)
             tela.blit(img, img.get_rect(center=(LARGURA // 2, 320)))
             if m.DICA:
-                sup = ui.texto(m.DICA, 16, BRANCO)
+                sup = ui.texto(t(m.DICA), 16, BRANCO)
                 caixa = sup.get_rect(center=(LARGURA // 2, 420)).inflate(36, 22)
                 ui.painel(tela, caixa, (30, 24, 50), m.COR, 14, 3, sombra=False)
                 tela.blit(sup, sup.get_rect(center=caixa.center))
@@ -2225,7 +2227,7 @@ class MicroOvo(MiniJogo):
         if self.vidas <= 0:
             titulo, cor = "FIM!", VERMELHO_ERRO
         else:
-            titulo, cor = f"RODADA {self.rodada + 1}", AMARELO
+            titulo, cor = t("RODADA {n}", n=self.rodada + 1), AMARELO
         img = _palavra(titulo, 36, cor)
         tela.blit(img, img.get_rect(center=(LARGURA // 2, 100)))
 
@@ -2256,7 +2258,7 @@ class MicroOvo(MiniJogo):
         # Vidas
         self._desenhar_vidas(tela, 560)
 
-        ui.desenhar_texto(tela, f"PONTOS: {self.pontos}    VELOCIDADE {_fmt_vel(self.vel)}",
+        ui.desenhar_texto(tela, t("PONTOS: {n}    VELOCIDADE {v}", n=self.pontos, v=_fmt_vel(self.vel)),
                           (LARGURA // 2, 640), 14, BRANCO, "center")
 
     def _desenhar_rapido(self, tela):
@@ -2275,7 +2277,7 @@ class MicroOvo(MiniJogo):
         for i in range(3):
             x = cx - 120 - i * 40
             pygame.draw.line(tela, BRANCO, (x, 330 + i * 30), (x - 60, 330 + i * 30), 6)
-        img = _palavra(f"VELOCIDADE {_fmt_vel(self.vel)}", 24, BRANCO)
+        img = _palavra(t("VELOCIDADE {v}", v=_fmt_vel(self.vel)), 24, BRANCO)
         tela.blit(img, img.get_rect(center=(LARGURA // 2, 520)))
         self._desenhar_vidas(tela, 610, 0.8, 70)
 
@@ -2284,6 +2286,6 @@ class MicroOvo(MiniJogo):
             return
         caixa = pygame.Rect(12, 12, 250, 48)
         ui.painel(tela, caixa, (26, 20, 40), BRANCO, 12, 3, sombra=False)
-        ui.desenhar_texto(tela, f"RODADA {self.rodada}", (caixa.x + 14, caixa.centery), 12, AMARELO, "midleft")
+        ui.desenhar_texto(tela, t("RODADA {n}", n=self.rodada), (caixa.x + 14, caixa.centery), 12, AMARELO, "midleft")
         for i in range(VIDAS):
             _ovinho_vida(tela, (caixa.right - 90 + i * 24, caixa.centery), i < self.vidas, 0.5)

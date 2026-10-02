@@ -5,6 +5,7 @@ import pygame
 
 from settings import *
 from core import ui
+from core.idioma import t, t as _t
 from core.itens import COMIDAS, icone_comida
 from jogos.base import MiniJogo
 
@@ -71,7 +72,7 @@ NOMES_CURTOS = {"abobora": "ABÓBORA", "pao_queijo": "PÃO QUEIJO", "suco_limao"
 
 
 def _nome(ing):
-    return NOMES_CURTOS.get(ing) or COMIDAS.get(ing, {}).get("nome", ing.upper())
+    return t(NOMES_CURTOS.get(ing) or COMIDAS.get(ing, {}).get("nome", ing.upper()))
 
 
 # ------------------------------------------------------------
@@ -431,7 +432,7 @@ class OvoCozinheiro(MiniJogo):
         for x in range(l.x + 26, l.right - 10, 34):
             pygame.draw.circle(sup, (60, 50, 50), (x, l.y - 2), 7)
             pygame.draw.circle(sup, (200, 200, 210), (x, l.y - 2), 7, 3)
-        ui.desenhar_texto(sup, "LIVRO DE RECEITAS", (l.centerx, l.y + 22), 12, BRANCO, "center")
+        ui.desenhar_texto(sup, t("LIVRO DE RECEITAS"), (l.centerx, l.y + 22), 12, BRANCO, "center")
 
         # Bancada: tampo de mármore + armário de madeira
         pygame.draw.rect(sup, (230, 230, 236), (0, BANCADA_Y, LARGURA, 34))
@@ -455,7 +456,7 @@ class OvoCozinheiro(MiniJogo):
         # Plaquinha de entrega (onde o prato vai)
         pygame.draw.ellipse(sup, (200, 200, 210), (ENTREGA[0] - 64, ENTREGA[1] + 6, 128, 26))
         pygame.draw.ellipse(sup, (245, 245, 250), (ENTREGA[0] - 60, ENTREGA[1] + 4, 120, 22))
-        ui.desenhar_texto(sup, "ENTREGA", (ENTREGA[0], ENTREGA[1] + 44), 8, (120, 70, 40), "center",
+        ui.desenhar_texto(sup, t("ENTREGA"), (ENTREGA[0], ENTREGA[1] + 44), 8, (120, 70, 40), "center",
                           sombra=False)
         return sup
 
@@ -614,7 +615,7 @@ class OvoCozinheiro(MiniJogo):
     def _escolher(self, k):
         if self.fase != "montar":
             if self.fase == "mexer":
-                self.textos.adicionar("MEXA A PANELA!", (PANELA[0], PANELA[1] - 150), BRANCO, 12)
+                self.textos.adicionar(t("MEXA A PANELA!"), (PANELA[0], PANELA[1] - 150), BRANCO, 12)
             return
         if self.bloqueio > 0 or self.pote_pop[k] < 0.6:
             return
@@ -644,7 +645,7 @@ class OvoCozinheiro(MiniJogo):
             self.som("erro")
             self.voando.append(dict(ing=ing, x0=origem[0], y0=origem[1], t=0.0, dur=0.3,
                                     errado=True, ang=random.uniform(-40, 40)))
-            self.textos.adicionar(f"ECA! -{pena:g}s", (PANELA[0], PANELA[1] - 110), (255, 110, 100), 16)
+            self.textos.adicionar(t("ECA! -{n}s", n=f"{pena:g}"), (PANELA[0], PANELA[1] - 110), (255, 110, 100), 16)
 
     def _mexer_mouse(self, pos):
         dx = pos[0] - PANELA[0]
@@ -710,9 +711,9 @@ class OvoCozinheiro(MiniJogo):
         x, y = PANELA[0], PANELA[1] - 70
         self.textos.adicionar(f"+{total}", (x, y), AMARELO, 20)
         if rapidez >= base * 0.35:
-            self.textos.adicionar("RAPIDINHO!", (x - 110, y + 36), (140, 230, 255), 12)
+            self.textos.adicionar(t("RAPIDINHO!"), (x - 110, y + 36), (140, 230, 255), 12)
         if perfeita:
-            self.textos.adicionar("PERFEITA!", (x + 110, y + 36), (150, 255, 150), 12)
+            self.textos.adicionar(t("PERFEITA!"), (x + 110, y + 36), (150, 255, 150), 12)
 
         rid = self.receita["id"]
         if rid not in self.descobertas:
@@ -744,7 +745,7 @@ class OvoCozinheiro(MiniJogo):
         self.chef_susto = 1.2
         self.tremer(0.4)
         self.som("explosao", 0.8)
-        self.textos.adicionar("QUEIMOU!", (PANELA[0], PANELA[1] - 120), (255, 110, 90), 24)
+        self.textos.adicionar(t("QUEIMOU!"), (PANELA[0], PANELA[1] - 120), (255, 110, 90), 24)
         self.cor_alvo = (60, 45, 40)
         for _ in range(16):
             self._soltar_fumaca(True, forte=True)
@@ -782,7 +783,7 @@ class OvoCozinheiro(MiniJogo):
             if self.tempo_restante <= 0:
                 self.acabou = True
                 self.t_fim = 0.0
-                self.textos.adicionar("TEMPO!", (LARGURA // 2, 250), AMARELO, 28)
+                self.textos.adicionar(t("TEMPO!"), (LARGURA // 2, 250), AMARELO, 28)
                 self.som("bandeira")
                 return
         else:
@@ -892,12 +893,12 @@ class OvoCozinheiro(MiniJogo):
         meta = META[self.opcao]
         venceu = self.pontos >= meta
         total = len(self._pool())
-        linhas = [f"PONTOS: {self.pontos}  (META {meta})",
-                  f"RECEITAS: {self.feitas}   PERFEITAS: {self.perfeitas}",
-                  f"DESCOBERTAS: {len(self.descobertas)}/{total}"]
+        linhas = [t("PONTOS: {n}  (META {meta})", n=self.pontos, meta=meta),
+                  t("RECEITAS: {a}   PERFEITAS: {b}", a=self.feitas, b=self.perfeitas),
+                  t("DESCOBERTAS: {a}/{b}", a=len(self.descobertas), b=total)]
         if self.queimadas:
-            linhas.append(f"QUEIMADAS: {self.queimadas}")
-        self.terminar(venceu=venceu, titulo="CHEF ESTRELADO!" if venceu else "FIM DO EXPEDIENTE!",
+            linhas.append(t("QUEIMADAS: {n}", n=self.queimadas))
+        self.terminar(venceu=venceu, titulo=t("CHEF ESTRELADO!") if venceu else t("FIM DO EXPEDIENTE!"),
                       linhas=linhas)
 
     # --------------------------------------------------------
@@ -925,18 +926,18 @@ class OvoCozinheiro(MiniJogo):
         l = LIVRO
         r = self.receita
         ings = r["ingredientes"]
-        ui.desenhar_texto(tela, f"RECEITA {self.numero}", (l.x + 42, l.y + 52), 8, (170, 110, 80),
+        ui.desenhar_texto(tela, t("RECEITA {n}", n=self.numero), (l.x + 42, l.y + 52), 8, (170, 110, 80),
                           "midleft", sombra=False)
         nova = r["id"] not in self.descobertas
         if nova:
-            ui.desenhar_texto(tela, "NOVA!", (l.right - 16, l.y + 52), 8, (220, 80, 60), "midright",
+            ui.desenhar_texto(tela, t("NOVA!"), (l.right - 16, l.y + 52), 8, (220, 80, 60), "midright",
                               sombra=False)
 
         # Nome com "pop" quando a receita chega
-        tam = ui.tamanho_que_cabe(r["nome"], l.w - 60, (18, 16, 14, 12, 10))
+        tam = ui.tamanho_que_cabe(t(r["nome"]), l.w - 60, (18, 16, 14, 12, 10))
         k = self.nome_pop
         pulo = int(math.sin(min(1.0, k) * math.pi) * 8)
-        ui.desenhar_texto(tela, r["nome"], (l.centerx + 12, l.y + 80 - pulo), tam, (200, 70, 50),
+        ui.desenhar_texto(tela, t(r["nome"]), (l.centerx + 12, l.y + 80 - pulo), tam, (200, 70, 50),
                           "center", sombra=False)
 
         # Ingredientes na ordem
@@ -978,19 +979,19 @@ class OvoCozinheiro(MiniJogo):
 
         # O que fazer agora
         if self.fase == "montar":
-            dica = f"PEGUE: {_nome(ings[self.passo])}"
+            dica = t("PEGUE: {nome}", nome=_nome(ings[self.passo]))
             cor = (60, 120, 60)
         elif self.fase == "mexer":
-            dica = "MEXA A PANELA!"
+            dica = t("MEXA A PANELA!")
             cor = (200, 110, 30)
         elif self.fase == "servir":
-            dica = "SIRVA O PRATO!"
+            dica = t("SIRVA O PRATO!")
             cor = (60, 120, 60)
         elif self.fase == "queimou":
-            dica = "QUEIMOU... PRÓXIMA!"
+            dica = t("QUEIMOU... PRÓXIMA!")
             cor = (200, 60, 50)
         else:
-            dica = "DELÍCIA!"
+            dica = t("DELÍCIA!")
             cor = (60, 120, 60)
         ui.desenhar_texto(tela, dica, (l.centerx + 12, l.bottom - 50), 10, cor, "center", sombra=False)
 
@@ -1016,7 +1017,7 @@ class OvoCozinheiro(MiniJogo):
 
         # Coleção logo abaixo do livro
         total = len(self._pool())
-        ui.desenhar_texto(tela, f"DESCOBERTAS: {len(self.descobertas)}/{total}",
+        ui.desenhar_texto(tela, t("DESCOBERTAS: {a}/{b}", a=len(self.descobertas), b=total),
                           (l.x + 6, l.bottom + 14), 10, (120, 60, 40), "topleft", sombra=False)
 
     # --- fogo e panela -------------------------------------
@@ -1088,7 +1089,7 @@ class OvoCozinheiro(MiniJogo):
             return
         b = BARRA_MEXER
         ui.painel(tela, b.inflate(16, 38).move(0, -8), (40, 30, 30), BRANCO, 12, 3, sombra=False)
-        rotulo = "MEXA!" if self.fase == "mexer" else "PRONTO!"
+        rotulo = t("MEXA!") if self.fase == "mexer" else t("PRONTO!")
         ui.desenhar_texto(tela, rotulo, (b.centerx, b.y - 12), 10, AMARELO, "center")
         pygame.draw.rect(tela, (70, 60, 60), b, border_radius=10)
         cor = (255, 170, 60) if self.fase == "mexer" else (120, 230, 100)
@@ -1211,7 +1212,7 @@ class OvoCozinheiro(MiniJogo):
             ui.desenhar_texto(tela, _nome(self.potes[k]), (px, POTE_TOPO + POTE_H + 30), 8,
                               (255, 240, 210), "center")
         if self.bloqueio > 0 and self.fase == "montar":
-            ui.desenhar_texto(tela, "ESPERE A FUMAÇA...", (LARGURA // 2, POTE_TOPO - 16), 8,
+            ui.desenhar_texto(tela, t("ESPERE A FUMAÇA..."), (LARGURA // 2, POTE_TOPO - 16), 8,
                               (255, 180, 160), "center")
 
     def _desenhar_voando(self, tela):
@@ -1241,12 +1242,12 @@ class OvoCozinheiro(MiniJogo):
                 caixa = pygame.Rect(0, 0, 300, 50)
                 caixa.center = (PANELA[0], y)
                 ui.painel(tela, caixa, (200, 70, 50), AMARELO, 14, 3, sombra=True)
-                ui.desenhar_texto(tela, "RECEITA NOVA!", caixa.center, 16, AMARELO, "center")
+                ui.desenhar_texto(tela, _t("RECEITA NOVA!"), caixa.center, 16, AMARELO, "center")
                 ui.estrela(tela, (caixa.x + 18, caixa.centery), 9, AMARELO, self.tempo * 3)
                 ui.estrela(tela, (caixa.right - 18, caixa.centery), 9, AMARELO, -self.tempo * 3)
         if self.fase == "servir" and not self.acabou:
             if int(self.tempo * 4) % 2 == 0:
-                ui.desenhar_texto(tela, "CLIQUE OU ESPAÇO PARA SERVIR!", (PANELA[0], BANCADA_Y + 50), 10,
+                ui.desenhar_texto(tela, _t("CLIQUE OU ESPAÇO PARA SERVIR!"), (PANELA[0], BANCADA_Y + 50), 10,
                                   AMARELO, "center")
 
     # --- HUD -----------------------------------------------
@@ -1255,7 +1256,7 @@ class OvoCozinheiro(MiniJogo):
         fundo = (50, 28, 20)
         caixa = pygame.Rect(12, 12, 300, 48)
         ui.painel(tela, caixa, fundo, BRANCO, 12, 3, sombra=False)
-        ui.desenhar_texto(tela, f"PONTOS: {self.pontos}", (caixa.x + 16, caixa.centery), 14,
+        ui.desenhar_texto(tela, t("PONTOS: {n}", n=self.pontos), (caixa.x + 16, caixa.centery), 14,
                           AMARELO, "midleft")
 
         relogio = pygame.Rect(0, 12, 150, 48)
@@ -1281,16 +1282,16 @@ class OvoCozinheiro(MiniJogo):
         caixa.x = relogio.right + 20
         ui.painel(tela, caixa, fundo, BRANCO, 12, 3, sombra=False)
         ok = self.pontos >= meta
-        ui.desenhar_texto(tela, f"META: {meta}", (caixa.x + 12, caixa.y + 9),
+        ui.desenhar_texto(tela, t("META: {n}", n=meta), (caixa.x + 12, caixa.y + 9),
                           10, (150, 240, 120) if ok else (255, 220, 190))
         rec = self.recorde()
-        ui.desenhar_texto(tela, f"RECORDE: {rec if rec is not None else '--'}",
+        ui.desenhar_texto(tela, t("RECORDE: {n}", n=rec if rec is not None else '--'),
                           (caixa.x + 12, caixa.y + 27), 10, AMARELO)
         if ok:
             ui.estrela(tela, (caixa.right - 20, caixa.centery), 10, AMARELO, self.tempo)
 
         if self.seq >= 2:
-            texto = f"SEQUÊNCIA {self.seq}"
+            texto = t("SEQUÊNCIA {n}", n=self.seq)
             sup = ui.texto(texto, 10, LARANJA)
             c2 = pygame.Rect(caixa.x, 66, sup.get_width() + 28, 26)
             ui.painel(tela, c2, fundo, LARANJA, 10, 2, sombra=False)

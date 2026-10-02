@@ -1,4 +1,5 @@
 from settings import *
+from core.idioma import t
 from jogos.base_multi import MiniJogoMulti
 
 # ============================================================
@@ -37,7 +38,7 @@ class MiniJogoHibrido(MiniJogoMulti):
 
     def nome(self, i):
         if i == 1 and self.solo:
-            return NOMES_BOT[self.dificuldade]
+            return t(NOMES_BOT[self.dificuldade])
         return super().nome(i)
 
     def partida_valida(self):

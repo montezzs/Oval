@@ -5,6 +5,7 @@ import time
 import pygame
 
 from settings import *
+from core.idioma import t
 from core import assets, progresso, ui
 from core.cena import Cena, tecla_voltar
 from cenas.casa_extras.clima import Clima, POTE
@@ -266,7 +267,7 @@ class CenaCasa(Cena):
         return t.tm_hour, t.tm_min
 
     def avisar(self, msg):
-        self.aviso = msg
+        self.aviso = t(msg)
         self.tempo_aviso = 3.0
 
     def andar_ate(self, x):
@@ -299,7 +300,7 @@ class CenaCasa(Cena):
             buff = dados.get("buff")
             if buff:
                 progresso.ativar_buff(self.app, *buff)
-                self.avisar(f"{dados['nome']}: {dados.get('descricao', '')}")
+                self.avisar(f"{t(dados['nome'])}: {t(dados.get('descricao', ''))}")
             self.particulas.explodir(self.rect_corpo().center, [dados.get("cor", BRANCO), BRANCO],
                                      30, 260)
         else:
@@ -323,13 +324,13 @@ class CenaCasa(Cena):
         corpo = self.rect_corpo()
         self.particulas.explodir(corpo.center, [AMARELO, (120, 220, 255), (255, 90, 140), BRANCO],
                                  70, 420, 1.2, (3, 7), 380)
-        self.textos.adicionar(f"NÍVEL {nivel}!", (corpo.centerx, corpo.y - 40), (120, 220, 255), 20)
+        self.textos.adicionar(t("NÍVEL {n}!", n=nivel), (corpo.centerx, corpo.y - 40), (120, 220, 255), 20)
         if self.pulo <= 0 and not self.dormindo:
             self.pulo = 1.0
 
     def recusar(self):
         self.recusa = 1.0
-        self.textos.adicionar("NÃO! TÔ CHEIO!", (self.x, self.ovo_chao - ALTURA_OVO - 30),
+        self.textos.adicionar(t("NÃO! TÔ CHEIO!"), (self.x, self.ovo_chao - ALTURA_OVO - 30),
                               (255, 150, 150), 12)
         self.som("erro", 0.5)
 
@@ -354,7 +355,7 @@ class CenaCasa(Cena):
 
     def _acordar(self):
         if self.dormindo:
-            self.textos.adicionar("BOM DIA!", (self.x, self.ovo_chao - ALTURA_OVO - 20), AMARELO, 12)
+            self.textos.adicionar(t("BOM DIA!"), (self.x, self.ovo_chao - ALTURA_OVO - 20), AMARELO, 12)
         self.dormindo = False
         self.luz_apagada = False
         if self.ovo_ocupado is not None and getattr(self.ovo_ocupado, "id", "") == "cama":
@@ -898,13 +899,13 @@ class CenaCasa(Cena):
         caixa = pygame.Rect(0, 0, 560, 90 + len(self.resumo) * 30)
         caixa.center = (LARGURA // 2, ALTURA // 2)
         ui.painel(tela, caixa, (30, 34, 60), AMARELO, 18, 4)
-        ui.desenhar_texto(tela, "ENQUANTO VOCÊ ESTAVA FORA...", (caixa.centerx, caixa.y + 18), 14,
+        ui.desenhar_texto(tela, t("ENQUANTO VOCÊ ESTAVA FORA..."), (caixa.centerx, caixa.y + 18), 14,
                           AMARELO, "midtop")
         for i, linha in enumerate(self.resumo):
             cor = BRANCO if i else (180, 220, 255)
-            ui.desenhar_texto(tela, linha, (caixa.centerx, caixa.y + 52 + i * 30), 10, cor, "midtop")
+            ui.desenhar_texto(tela, t(linha), (caixa.centerx, caixa.y + 52 + i * 30), 10, cor, "midtop")
         if int(self.tempo * 2) % 2 == 0:
-            ui.desenhar_texto(tela, "clique para continuar", (caixa.centerx, caixa.bottom - 14), 8,
+            ui.desenhar_texto(tela, t("clique para continuar"), (caixa.centerx, caixa.bottom - 14), 8,
                               (170, 170, 200), "midbottom")
 
     def _seguro(self, funcao, tela):
@@ -947,7 +948,7 @@ class CenaCasa(Cena):
             self._cache_sup[chave] = anel
         tela.blit(anel, anel.get_rect(center=(752, 446)))
         self.botao_jogar.desenhar(tela)
-        ui.desenhar_texto(tela, "Clique na bola para jogar!", (790, 588), 12, BRANCO, "center")
+        ui.desenhar_texto(tela, t("Clique na bola para jogar!"), (790, 588), 12, BRANCO, "center")
 
     def _desenhar_ovo(self, tela, dx=0):
         chao = self.ovo_chao
@@ -1010,7 +1011,7 @@ class CenaCasa(Cena):
                                 0, 3.14, 2)
 
         if self.frio > 0:
-            ui.desenhar_texto(tela, "BRRR!", (corpo.centerx, corpo.y - 24), 12, (180, 220, 255),
+            ui.desenhar_texto(tela, t("BRRR!"), (corpo.centerx, corpo.y - 24), 12, (180, 220, 255),
                               "center")
 
         self.banho.desenhar_no_ovo(tela)
@@ -1033,7 +1034,7 @@ class CenaCasa(Cena):
         if self.dormindo:
             balao = None
         elif self.necessidade("fome") < 25:
-            balao = "RONC!"
+            balao = t("RONC!")
         elif self.necessidade("diversao") < 25:
             balao = "..."
         if balao and int(self.tempo / 3) % 2 == 0:
@@ -1052,7 +1053,7 @@ class CenaCasa(Cena):
                 except Exception:
                     dica = None
                 if dica:
-                    sup = ui.texto(dica, 10)
+                    sup = ui.texto(t(dica), 10)
                     r = sup.get_rect(midbottom=(mouse[0], mouse[1] - 14)).inflate(16, 12)
                     r.clamp_ip(tela.get_rect())
                     ui.painel(tela, r, (20, 24, 40), BRANCO, 8, 2, sombra=False)
@@ -1067,7 +1068,7 @@ class CenaCasa(Cena):
         self.jogador.desenhar(tela, (48, 48), 38)
         tela.blit(nome, nome.get_rect(midleft=(78, 36)))
         nivel, xp, meta = progresso.progresso(self.app.save)
-        ui.desenhar_texto(tela, f"NV {nivel}", (78, 59), 8, (120, 220, 255), "midleft")
+        ui.desenhar_texto(tela, t("NV {n}", n=nivel), (78, 59), 8, (120, 220, 255), "midleft")
         barra = pygame.Rect(118, 55, painel.right - 132, 8)
         pygame.draw.rect(tela, (60, 60, 90), barra, border_radius=4)
         pygame.draw.rect(tela, (120, 220, 255), (barra.x, barra.y, max(3, int(barra.w * xp / meta)),
@@ -1094,7 +1095,9 @@ class CenaCasa(Cena):
         pygame.draw.rect(tela, (255, 150, 60), sacola, border_radius=6)
         pygame.draw.arc(tela, BRANCO, (sacola.x + 5, sacola.y - 10, 16, 20), 0, 3.14, 3)
         pygame.draw.ellipse(tela, BRANCO, (sacola.x + 9, sacola.y + 8, 8, 11))
-        ui.desenhar_texto(tela, "LOJA", (loja.x + 76, loja.centery), 14,
+        rotulo_loja = t("LOJA")
+        ui.desenhar_texto(tela, rotulo_loja, (loja.x + 78, loja.centery),
+                          ui.tamanho_que_cabe(rotulo_loja, 66, (14, 12, 10, 8)),
                           UI_TEXTO, "center", True, True)
         ui.desenhar_moedas(tela, int(self.moedas_hud), (LARGURA - 16, 86), "topright",
                            16 + (4 if self.pop_moedas > 0 else 0))
@@ -1132,7 +1135,7 @@ class CenaCasa(Cena):
             r = ui.botao_base(tela, r, (30, 36, 60), (90, 100, 160), hover,
                               AMARELO if ativo else None, 14, destaque=ativo)
             self._icone_ferramenta(tela, nome, (r.centerx, r.centery - 6))
-            ui.desenhar_texto(tela, ROTULOS_FERRAMENTA[nome], (r.centerx, r.bottom - 10), 8,
+            ui.desenhar_texto(tela, t(ROTULOS_FERRAMENTA[nome]), (r.centerx, r.bottom - 10), 8,
                               UI_TEXTO, "center", True, True)
 
         # Aviso
@@ -1144,7 +1147,7 @@ class CenaCasa(Cena):
 
         if self.dica > 0 and self.comodo != "BRINCAR":
             alpha = min(1.0, self.dica)
-            sup = ui.texto("← → troca de cômodo  •  vá ao BRINCAR para jogar!", 12)
+            sup = ui.texto(t("← → troca de cômodo  •  vá ao BRINCAR para jogar!"), 12)
             caixa = sup.get_rect(center=(LARGURA // 2 + 60, ALTURA - 40)).inflate(32, 24)
             degrau = int(alpha * 10)
             fundo = self._cache_sup.get(("dica", degrau))
@@ -1166,12 +1169,12 @@ class CenaCasa(Cena):
         pygame.draw.rect(tela, (255, 230, 160), (cx - 12, cy - 4, 24, 16))
         pygame.draw.polygon(tela, (230, 90, 70), [(cx - 16, cy - 3), (cx, cy - 15), (cx + 16, cy - 3)])
         pygame.draw.rect(tela, (120, 70, 40), (cx - 4, cy + 3, 8, 9))
-        ui.desenhar_texto(tela, "RUA", (r.centerx, r.bottom - 11), 8, BRANCO, "center")
+        ui.desenhar_texto(tela, t("RUA"), (r.centerx, r.bottom - 11), 8, BRANCO, "center")
 
         # Dica para quem ainda não conhece a rua
         if not self.app.config["viu_rua"] and (self.tempo > 120 or self.app.jogou_partida):
             s = 1 + 0.06 * math.sin(self.tempo * 6)
-            sup = ui.texto("NOVO! VEJA SUA RUA", 10, (40, 30, 10), sombra=False)
+            sup = ui.texto(t("NOVO! VEJA SUA RUA"), 10, (40, 30, 10), sombra=False)
             caixa = sup.get_rect(midtop=(r.centerx, r.bottom + 14)).inflate(20, 14)
             caixa = caixa.inflate(int(caixa.w * (s - 1)), int(caixa.h * (s - 1)))
             caixa.clamp_ip(pygame.Rect(8, 0, LARGURA - 16, ALTURA))
@@ -1240,11 +1243,11 @@ class CenaCasa(Cena):
             pygame.draw.circle(tela, AMARELO, (r.x + 15, r.centery), 9)
             pygame.draw.arc(tela, (120, 80, 0), (r.x + 9, r.centery - 4, 12, 9), 3.4, 6.0, 2)
             mult = progresso.mult_feliz(self.app.save)
-            ui.desenhar_texto(tela, f"FELIZ x{mult:.2f}".replace(".", ","), (r.x + 30, r.centery), 8,
+            ui.desenhar_texto(tela, t("FELIZ x{m:.2f}", m=mult).replace(".", ","), (r.x + 30, r.centery), 8,
                               AMARELO, "midleft")
         # Reforços das poções
         for i, texto in enumerate(progresso.buffs_ativos(self.app.save)):
-            sup = ui.texto(texto, 8, (230, 210, 255))
+            sup = ui.texto(t(texto), 8, (230, 210, 255))
             r = sup.get_rect(topleft=(x0 + 8 + i * 150, y0 + 40)).inflate(16, 10)
             pygame.draw.rect(tela, (60, 40, 100), r, border_radius=8)
             pygame.draw.rect(tela, (170, 120, 255), r, 2, border_radius=8)

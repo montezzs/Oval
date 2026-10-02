@@ -4,13 +4,21 @@ Oval its a cozy game developed by me (Samuel Montez) where the main goal is to t
 
 Inspired in Pou (mobile game)
 
+## ⬇️ [Download Oval.exe](https://github.com/montezzs/Oval/releases/latest/download/Oval.exe)
+
+**PT:** Clique no link acima, abra o `Oval.exe` e jogue — não precisa instalar nada.
+**EN:** Click the link above, open `Oval.exe` and play — no install needed.
+**ES:** Haz clic en el enlace, abre `Oval.exe` y juega — no necesitas instalar nada.
+
+> Windows SmartScreen: *Mais informações / More info / Más información → Executar assim mesmo / Run anyway / Ejecutar de todas formas*.
+
 Um ovinho de estimação na RUA DOS OVOS: até 5 ovos, cada um na sua casa, com
 necessidades, jardim, pets, loja, reforma da fachada e dezenas de mini jogos
 (solo e para 2 jogadores no mesmo teclado).
 
 ## Jogar
 
-- **Sem instalar nada:** baixe o `Oval.exe` nas Releases do GitHub e dê dois cliques.
+- **Sem instalar nada:** baixe o [`Oval.exe`](https://github.com/montezzs/Oval/releases/latest/download/Oval.exe) e dê dois cliques.
 - **Pelo Python:** `pip install pygame` e depois `python main.py`.
 
 Os saves ficam na pasta `saves/` (ao lado do `main.py`; no `.exe`, em `%APPDATA%\Oval\saves`):

@@ -5,6 +5,7 @@ import pygame
 
 from settings import *
 from core import ui
+from core.idioma import t
 from jogos.base import MiniJogo
 
 # ============================================================
@@ -680,7 +681,7 @@ class Pescaria(MiniJogo):
                 p.estado, p.tempo = "inflado", 0.0
                 p.dir = 1 if dx > 0 else -1
                 self.som("boing", 0.6)
-                self.textos.adicionar("PUFF!", (p.x, p.y - 36), (255, 230, 140), 14)
+                self.textos.adicionar(t("PUFF!"), (p.x, p.y - 36), (255, 230, 140), 14)
                 continue
             if not p.pode_fisgar():
                 continue
@@ -694,14 +695,14 @@ class Pescaria(MiniJogo):
         self.segura = TEMPO_POLVO if p.tipo == "polvo" else 0.0
         self.som("pulo", 0.6)
         if p.tipo == "bota":
-            self.textos.adicionar("ECA!", (p.x, p.y - 30), (190, 230, 160), 16)
+            self.textos.adicionar(t("ECA!"), (p.x, p.y - 30), (190, 230, 160), 16)
         elif p.tipo == "bau":
-            self.textos.adicionar("O BAÚ!", (p.x, p.y - 40), AMARELO, 20)
+            self.textos.adicionar(t("O BAÚ!"), (p.x, p.y - 40), AMARELO, 20)
             self.tremer(0.2)
         elif p.tipo == "polvo":
-            self.textos.adicionar("SEGURA!", (p.x, p.y - 34), (255, 170, 210), 14)
+            self.textos.adicionar(t("SEGURA!"), (p.x, p.y - 34), (255, 170, 210), 14)
         else:
-            self.textos.adicionar("FISGOU!", (p.x, p.y - 30), BRANCO, 14)
+            self.textos.adicionar(t("FISGOU!"), (p.x, p.y - 30), BRANCO, 14)
         self.particulas.explodir((self.ax, self.ay), [(200, 230, 255), BRANCO], 8, 120, 0.4, (2, 4), gravidade=-100)
 
     def _levar_choque(self, a):
@@ -723,9 +724,9 @@ class Pescaria(MiniJogo):
                 p.x, p.y0 = self.ax, self.ay
                 p.estado, p.tempo = "fugindo", 0.0
                 p.dir = random.choice((-1, 1))
-            self.textos.adicionar("CHOQUE! FUGIU!", (self.ax, self.ay - 40), (140, 220, 255), 16)
+            self.textos.adicionar(t("CHOQUE! FUGIU!"), (self.ax, self.ay - 40), (140, 220, 255), 16)
         else:
-            self.textos.adicionar("CHOQUE!", (self.ax, self.ay - 40), (140, 220, 255), 16)
+            self.textos.adicionar(t("CHOQUE!"), (self.ax, self.ay - 40), (140, 220, 255), 16)
 
     def _pescar(self):
         p = self.fisgado
@@ -744,11 +745,11 @@ class Pescaria(MiniJogo):
         if p.tipo == "bota":
             self.sequencia = 0
             self.ultimo_tipo = None
-            texto, cor = "ECA! +0", (190, 230, 160)
+            texto, cor = t("ECA! +0"), (190, 230, 160)
             self.som("erro", 0.5)
         elif p.tipo == "bau":
             self.bau_pescado = True
-            texto, cor = f"TESOURO! +{ganho}", AMARELO
+            texto, cor = t("TESOURO! +{n}", n=ganho), AMARELO
             self.som("vencer", 0.7)
             self.tremer(0.2)
             self.particulas.explodir(pos, [AMARELO, (255, 240, 150), BRANCO], 40, 320, 1.0, (3, 7))
@@ -809,11 +810,11 @@ class Pescaria(MiniJogo):
                 g[1] = random.uniform(30, 120)
 
     def _fim(self):
-        linhas = [f"PONTOS: {self.pontos}",
-                  f"PEIXES: {self.pescados}  •  COMBO: {self.maior_sequencia}"]
+        linhas = [t("PONTOS: {n}", n=self.pontos),
+                  t("PEIXES: {n}  •  COMBO: {c}", n=self.pescados, c=self.maior_sequencia)]
         if self.bau_pescado:
-            linhas.append("★ ACHOU O BAÚ! ★")
-        self.terminar(titulo="FIM DA PESCARIA!", linhas=linhas)
+            linhas.append(t("★ ACHOU O BAÚ! ★"))
+        self.terminar(titulo=t("FIM DA PESCARIA!"), linhas=linhas)
 
     # --------------------------------------------------------
     # DESENHO
@@ -821,11 +822,11 @@ class Pescaria(MiniJogo):
 
     def desenhar_jogo(self, tela):
         tela.blit(self.fundo(self.jogador), (0, 0))
-        t = self.tempo
+        tt = self.tempo
 
         # Gaivotas
         for x, y, _ in self.gaivotas:
-            bate = math.sin(t * 6 + x * 0.01) * 4
+            bate = math.sin(tt * 6 + x * 0.01) * 4
             pygame.draw.lines(tela, (60, 50, 60), False, [(x - 14, y - 7 + bate), (x - 6, y - 4), (x, y),
                                                           (x + 6, y - 4), (x + 14, y - 7 + bate)], 3)
 
@@ -834,7 +835,7 @@ class Pescaria(MiniJogo):
             pts = []
             for k in range(8):
                 f = k / 7
-                pts.append((x + math.sin(t * 1.6 + fase + f * 3) * 10 * f, AREIA_Y + 6 - h * f))
+                pts.append((x + math.sin(tt * 1.6 + fase + f * 3) * 10 * f, AREIA_Y + 6 - h * f))
             pygame.draw.lines(tela, (30, 120, 70), False, pts, 6)
             pygame.draw.lines(tela, (40, 160, 90), False, pts, 4)
 
@@ -863,7 +864,7 @@ class Pescaria(MiniJogo):
             tela.blit(s, s.get_rect(center=(int(x), int(y))))
 
         # Onda da superfície
-        pts = [(x, SUPERFICIE + math.sin(x * 0.03 + t * 2) * 3) for x in range(0, LARGURA + 16, 16)]
+        pts = [(x, SUPERFICIE + math.sin(x * 0.03 + tt * 2) * 3) for x in range(0, LARGURA + 16, 16)]
         pygame.draw.lines(tela, (170, 220, 255), False, pts, 3)
 
         self.particulas.desenhar(tela)
@@ -879,8 +880,8 @@ class Pescaria(MiniJogo):
             ui.veu(tela, int(self.flash / 0.25 * 110), (80, 200, 255))
 
         if self.estado == "jogando" and self.aviso_combo > 0 and self.ultimo_tipo:
-            nome = ESPECIES[self.ultimo_tipo]["nome"]
-            ui.desenhar_texto(tela, f"COMBO {nome} x1.5!", (LARGURA // 2, 216), 16, (255, 180, 70), "center")
+            nome = t(ESPECIES[self.ultimo_tipo]["nome"])
+            ui.desenhar_texto(tela, t("COMBO {nome} x1.5!", nome=nome), (LARGURA // 2, 216), 16, (255, 180, 70), "center")
 
     def _desenhar_peixe(self, tela, p):
         if p.tipo == "baiacu" and p.estado == "inflado":
@@ -1013,11 +1014,11 @@ class Pescaria(MiniJogo):
         caixa = pygame.Rect(12, 12, 420, 48)
         borda = AMARELO if self.pulso_hud > 0 else BRANCO
         ui.painel(tela, caixa, (20, 24, 40), borda, 12, 3, sombra=False)
-        ui.desenhar_texto(tela, f"PONTOS: {self.pontos}", (caixa.x + 16, caixa.centery), 14,
+        ui.desenhar_texto(tela, t("PONTOS: {n}", n=self.pontos), (caixa.x + 16, caixa.centery), 14,
                           AMARELO, "midleft")
         rec = self.recorde()
         if rec is not None:
-            ui.desenhar_texto(tela, f"RECORDE: {rec}", (caixa.x + 236, caixa.centery), 12,
+            ui.desenhar_texto(tela, t("RECORDE: {n}", n=rec), (caixa.x + 236, caixa.centery), 12,
                               (180, 200, 255), "midleft")
 
         # Relógio antes do botão de pausa
@@ -1035,8 +1036,8 @@ class Pescaria(MiniJogo):
 
         # Sequência da mesma espécie
         if self.sequencia >= 1 and self.ultimo_tipo:
-            nome = ESPECIES[self.ultimo_tipo]["nome"]
-            msg = f"ÚLTIMO: {nome}" if self.sequencia < 2 else f"{nome} x{self.sequencia}  (x1.5)"
+            nome = t(ESPECIES[self.ultimo_tipo]["nome"])
+            msg = t("ÚLTIMO: {nome}", nome=nome) if self.sequencia < 2 else f"{nome} x{self.sequencia}  (x1.5)"
             sup = ui.texto(msg, 10, (255, 200, 120))
             caixa = pygame.Rect(12, 68, sup.get_width() + 26, 28)
             ui.painel(tela, caixa, (20, 24, 40), (255, 200, 120), 10, 2, sombra=False)

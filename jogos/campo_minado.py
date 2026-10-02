@@ -6,6 +6,7 @@ import pygame
 
 from settings import *
 from core import ui
+from core.idioma import t
 from jogos.base import MiniJogo
 
 # ============================================================
@@ -569,9 +570,9 @@ class CampoMinado(MiniJogo):
 
     def _linhas_fim(self):
         seguras = self.linhas * self.cols - self.qtd_minas
-        return [f"TEMPO: {_formatar_tempo(self.cronometro)}",
-                f"CASAS ABERTAS: {self.qtd_abertas}/{seguras}",
-                f"NÍVEL: {self.OPCOES[self.opcao]}"]
+        return [t("TEMPO: {n}", n=_formatar_tempo(self.cronometro)),
+                t("CASAS ABERTAS: {a}/{b}", a=self.qtd_abertas, b=seguras),
+                t("NÍVEL: {n}", n=t(self.OPCOES[self.opcao]))]
 
     # --------------------------------------------------------
     # LÓGICA
@@ -604,8 +605,8 @@ class CampoMinado(MiniJogo):
                     self.som("revelar", 0.3)
             fim = ESPERA_EXPLOSAO + len(self.minas_mostradas) * self.intervalo_minas + ESPERA_FIM
             if not self.fila_minas and self.t_fase >= fim:
-                self.terminar(venceu=False, registrar=False, titulo="KABUM!",
-                              linhas=["ERA UM OVO-BOMBA!"] + self._linhas_fim()[:2])
+                self.terminar(venceu=False, registrar=False, titulo=t("KABUM!"),
+                              linhas=[t("ERA UM OVO-BOMBA!")] + self._linhas_fim()[:2])
 
         elif self.fase == "venceu":
             self.t_fase += dt
@@ -781,7 +782,7 @@ class CampoMinado(MiniJogo):
         caixa3 = pygame.Rect(caixa2.right + 12, 12, 210, 48)
         ui.painel(tela, caixa3, (20, 24, 40), BRANCO, 12, 3, sombra=False)
         x = caixa3.x + 14
-        ui.desenhar_texto(tela, self.OPCOES[self.opcao], (x, caixa3.y + 9), 10, (180, 220, 255))
+        ui.desenhar_texto(tela, t(self.OPCOES[self.opcao]), (x, caixa3.y + 9), 10, (180, 220, 255))
         rec = self.recorde()
-        texto_rec = f"RECORDE: {self.formatar(rec)}" if rec is not None else "RECORDE: --"
+        texto_rec = t("RECORDE: {n}", n=self.formatar(rec) if rec is not None else "--")
         ui.desenhar_texto(tela, texto_rec, (x, caixa3.y + 26), 12, AMARELO)

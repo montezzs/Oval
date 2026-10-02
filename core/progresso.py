@@ -1,5 +1,7 @@
 import time
 
+from core.idioma import t
+
 # ============================================================
 # PROGRESSO DO OVO: NÍVEL (XP) + CONQUISTAS
 # ============================================================
@@ -112,11 +114,11 @@ def _verificar(app, chave):
             continue
         feitas.append(cid)
         save.ganhar(premio)
-        _toast(app, "CONQUISTA!", nome, f"+{premio}", "conquista")
+        _toast(app, t("CONQUISTA!"), t(nome), f"+{premio}", "conquista")
         item = ITEM_CONQUISTA.get(cid)
         if item and item not in save["inventario"]:
             save["inventario"].append(item)
-            _toast(app, "ITEM EXCLUSIVO!", "VEJA NA LOJA (JÁ É SEU)", "", "levelup")
+            _toast(app, t("ITEM EXCLUSIVO!"), t("VEJA NA LOJA (JÁ É SEU)"), "", "levelup")
     save.salvar()
 
 
@@ -162,7 +164,7 @@ def ganhar_xp(app, qtd):
     for n in subiu:
         premio = premio_nivel(n)
         save.ganhar(premio)
-        _toast(app, f"NÍVEL {n}!", f"{save['nome'] or 'SEU OVO'} CRESCEU!", f"+{premio}", "levelup")
+        _toast(app, t("NÍVEL {n}!", n=n), t("{nome} CRESCEU!", nome=save['nome'] or t("SEU OVO")), f"+{premio}", "levelup")
     save.salvar()
     if subiu:
         _avisar_jogos_novos(app, nivel_antes, nivel)
@@ -259,7 +261,7 @@ def buffs_ativos(save):
     b = _buffs(save)
     saida = []
     if int(b.get("sorte", 0)) > 0:
-        saida.append("SORTE " + str(b["sorte"]))
+        saida.append(t("SORTE {n}", n=b["sorte"]))
     resta = float(b.get("xp_ate", 0)) - time.time()
     if resta > 0:
         saida.append("XP x2 %d:%02d" % (int(resta) // 60, int(resta) % 60))
@@ -327,12 +329,12 @@ def colecionar(app, nome, item_id):
     lista.append(item_id)
     total = len(catalogo_colecao(nome))
     rotulo = {"peixes": "PEIXE NOVO!", "receitas": "RECEITA NOVA!"}.get(nome, "ITEM NOVO!")
-    _toast(app, rotulo, "COLEÇÃO %d/%s" % (len(lista), total or "?"), "", "revelar")
+    _toast(app, t(rotulo), t("COLEÇÃO {n}/{total}", n=len(lista), total=total or "?"), "", "revelar")
     marca = "colecao_" + nome
     if total and len(lista) >= total and marca not in save["conquistas"]:
         save["conquistas"].append(marca)
         save.ganhar(PREMIO_COLECAO)
-        _toast(app, "COLEÇÃO COMPLETA!", nome.upper(), "+%d" % PREMIO_COLECAO, "levelup")
+        _toast(app, t("COLEÇÃO COMPLETA!"), t(dict(COLECOES).get(nome, nome.upper())), "+%d" % PREMIO_COLECAO, "levelup")
     save.salvar()
     return True
 
@@ -402,7 +404,7 @@ def _avisar_jogos_novos(app, nivel_antes, nivel_depois):
     for j in JOGOS:
         n = nivel_para(j.ID)
         if nivel_antes < n <= nivel_depois and j.ID not in save["stats"]["liberados"]:
-            _toast(app, "JOGO NOVO LIBERADO!", j.TITULO, "", "revelar")
+            _toast(app, t("JOGO NOVO LIBERADO!"), t(j.TITULO), "", "revelar")
 
 
 # ============================================================
@@ -430,7 +432,7 @@ def registrar_feliz(app, dt):
         seq = int(d.get("feliz_seq", 0)) + 1 if d.get("feliz_ultimo") == ontem else 1
         d["feliz_seq"] = seq
         d["feliz_ultimo"] = hoje
-        _toast(app, "DIA FELIZ!", "%d DIA(S) SEGUIDOS DE OVO FELIZ" % seq, "", "acerto")
+        _toast(app, t("DIA FELIZ!"), t("{n} DIA(S) SEGUIDOS DE OVO FELIZ", n=seq), "", "acerto")
         definir(app, "dias_feliz", seq)
         save.salvar()
 
@@ -461,6 +463,6 @@ def afeicao(app, pet_id, n=1):
     antes = af.get(pet_id, 0)
     af[pet_id] = min(100, antes + n)
     if antes < 100 <= af[pet_id]:
-        _toast(app, "MELHORES AMIGOS!", "O CORAÇÃO DO PET ENCHEU!", "", "levelup")
+        _toast(app, t("MELHORES AMIGOS!"), t("O CORAÇÃO DO PET ENCHEU!"), "", "levelup")
     definir(app, "pet_max", af[pet_id])
     return af[pet_id]

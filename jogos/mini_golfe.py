@@ -1,3 +1,4 @@
+from core.idioma import t
 import math
 import random
 
@@ -1017,7 +1018,7 @@ class MiniGolfe(MiniJogo):
             if self.tempo_fase > 1.1:
                 self.tacadas += 1
                 self.pontos = sum(self.placar) + self.tacadas
-                self.textos.adicionar("+1 TACADA", (self.ultima_parada[0], self.ultima_parada[1] - 30),
+                self.textos.adicionar(t("+1 TACADA"), (self.ultima_parada[0], self.ultima_parada[1] - 30),
                                       (200, 235, 255), 12)
                 self.mesa.colocar(self.ultima_parada)
                 self._parou()
@@ -1060,11 +1061,11 @@ class MiniGolfe(MiniJogo):
                     self.particulas.explodir(p, [(190, 120, 255), (120, 220, 255), BRANCO], 18, 200, 0.6)
             elif tipo == "espirrou":
                 self.som("erro", 0.5)
-                self.textos.adicionar("RÁPIDO DEMAIS!", (m.alvo[0], m.alvo[1] - 40), (255, 200, 120), 12)
+                self.textos.adicionar(t("RÁPIDO DEMAIS!"), (m.alvo[0], m.alvo[1] - 40), (255, 200, 120), 12)
             elif tipo == "agua":
                 self._mudar_fase("agua")
                 self.som("bater", 0.7)
-                self.textos.adicionar("GLUB!", (m.x, m.y - 36), (200, 235, 255), 18)
+                self.textos.adicionar(t("GLUB!"), (m.x, m.y - 36), (200, 235, 255), 18)
                 self.particulas.explodir((m.x, m.y), [(120, 200, 255), (220, 245, 255), AGUA], 26, 240, 0.7)
                 m.vx = m.vy = 0.0
                 return
@@ -1118,8 +1119,8 @@ class MiniGolfe(MiniJogo):
         self.pontos = sum(self.placar)
         if len(self.placar) >= len(BURACOS):
             total = self.pontos
-            self.terminar(venceu=True, valor=total, titulo="CURSO COMPLETO!",
-                          linhas=[f"TOTAL: {total}   (PAR {PAR_TOTAL})", "", "", "", ""])
+            self.terminar(venceu=True, valor=total, titulo=t("CURSO COMPLETO!"),
+                          linhas=[t("TOTAL: {n}   (PAR {par})", n=total, par=PAR_TOTAL), "", "", "", ""])
             return
         self._carregar_buraco(len(self.placar))
 
@@ -1316,33 +1317,33 @@ class MiniGolfe(MiniJogo):
             self._desenhar_banner(tela)
         elif self.fase == "festa" and self.resultado:
             cor = AMARELO if self.tacadas <= self.mesa.par else BRANCO
-            ui.desenhar_texto(tela, self.resultado, (LARGURA // 2, Y0 + 40), 28, cor, "midtop")
-            ui.desenhar_texto(tela, f"{self.tacadas} TACADA{'S' if self.tacadas > 1 else ''}",
+            ui.desenhar_texto(tela, t(self.resultado), (LARGURA // 2, Y0 + 40), 28, cor, "midtop")
+            ui.desenhar_texto(tela, t("{n} TACADAS" if self.tacadas > 1 else "{n} TACADA", n=self.tacadas),
                               (LARGURA // 2, Y0 + 84), 14, BRANCO, "midtop")
 
     def _desenhar_banner(self, tela):
         caixa = pygame.Rect(0, 0, 420, 110)
         caixa.center = (LARGURA // 2, ALTURA // 2)
         ui.painel(tela, caixa, (20, 24, 40), self.COR, 16, 4)
-        ui.desenhar_texto(tela, f"BURACO {self.buraco + 1}", (caixa.centerx, caixa.y + 20), 28, AMARELO, "midtop")
-        ui.desenhar_texto(tela, f"PAR {self.mesa.par}", (caixa.centerx, caixa.y + 66), 16, BRANCO, "midtop")
+        ui.desenhar_texto(tela, t("BURACO {n}", n=self.buraco + 1), (caixa.centerx, caixa.y + 20), 28, AMARELO, "midtop")
+        ui.desenhar_texto(tela, t("PAR {n}", n=self.mesa.par), (caixa.centerx, caixa.y + 66), 16, BRANCO, "midtop")
 
     def desenhar_hud(self, tela):
         caixa = pygame.Rect(12, 12, 330, 48)
         ui.painel(tela, caixa, (20, 24, 40), BRANCO, 12, 3, sombra=False)
-        ui.desenhar_texto(tela, f"BURACO {self.buraco + 1}/{len(BURACOS)}", (caixa.x + 16, caixa.centery), 14,
+        ui.desenhar_texto(tela, t("BURACO {n}/{total}", n=self.buraco + 1, total=len(BURACOS)), (caixa.x + 16, caixa.centery), 14,
                           AMARELO, "midleft")
-        ui.desenhar_texto(tela, f"PAR {self.mesa.par}", (caixa.right - 16, caixa.centery), 12,
+        ui.desenhar_texto(tela, t("PAR {n}", n=self.mesa.par), (caixa.right - 16, caixa.centery), 12,
                           (180, 220, 255), "midright")
 
         caixa = pygame.Rect(354, 12, 580, 48)
         ui.painel(tela, caixa, (20, 24, 40), BRANCO, 12, 3, sombra=False)
         cor = BRANCO if self.tacadas < MAX_TACADAS - 1 else (255, 150, 120)
-        ui.desenhar_texto(tela, f"TACADAS: {self.tacadas}", (caixa.x + 16, caixa.centery), 12, cor, "midleft")
-        ui.desenhar_texto(tela, f"TOTAL: {self.pontos}", (caixa.x + 206, caixa.centery), 12, AMARELO, "midleft")
+        ui.desenhar_texto(tela, t("TACADAS: {n}", n=self.tacadas), (caixa.x + 16, caixa.centery), 12, cor, "midleft")
+        ui.desenhar_texto(tela, t("TOTAL: {n}", n=self.pontos), (caixa.x + 206, caixa.centery), 12, AMARELO, "midleft")
         rec = self.recorde()
         if rec is not None:
-            ui.desenhar_texto(tela, f"RECORDE: {rec}", (caixa.right - 16, caixa.centery), 12,
+            ui.desenhar_texto(tela, t("RECORDE: {v}", v=rec), (caixa.right - 16, caixa.centery), 12,
                               (180, 200, 255), "midright")
 
     # --------------------------------------------------------
@@ -1361,7 +1362,7 @@ class MiniGolfe(MiniJogo):
                   ("TACADAS", [str(v) for v in self.placar], AMARELO)]
         for k, (rotulo, valores, cor) in enumerate(linhas):
             y = y0 + k * 26
-            ui.desenhar_texto(tela, rotulo, (x0, y), 10, cor, "midleft")
+            ui.desenhar_texto(tela, t(rotulo), (x0, y), 10, cor, "midleft")
             for i, v in enumerate(valores):
                 ui.desenhar_texto(tela, v, (x0 + 118 + i * col, y), 12, cor, "center")
         y = y0 + 3 * 26 + 4

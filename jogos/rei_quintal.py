@@ -1,3 +1,4 @@
+from core.idioma import t
 import math
 import random
 
@@ -584,7 +585,7 @@ class ReiQuintal(MiniJogoHibrido):
             atac.dash = 0.0
             atac.empurroes += 1
             self._pancada(alvo.x, alvo.y, 0.3)
-            self.textos.adicionar("POW!", (alvo.x, alvo.y - 60), AMARELO, 16)
+            self.textos.adicionar(t("POW!"), (alvo.x, alvo.y - 60), AMARELO, 16)
         else:
             j = vrel * 0.9 + 60
             a.vx -= j * nx
@@ -623,7 +624,7 @@ class ReiQuintal(MiniJogoHibrido):
                         o.dash = 0.0
                         o.vx, o.vy = o.vx / v * max(v, 320), o.vy / v * max(v, 320)
                         self.som("erro", 0.7)
-                        self.textos.adicionar("ESCORREGOU!", (o.x, o.y - 60), (255, 230, 100), 12)
+                        self.textos.adicionar(t("ESCORREGOU!"), (o.x, o.y - 60), (255, 230, 100), 12)
                     else:
                         o.voo = 0.8
                         o.dash = 0.0
@@ -631,14 +632,14 @@ class ReiQuintal(MiniJogoHibrido):
                         ang = math.atan2(o.vy, o.vx) + random.uniform(-0.6, 0.6)
                         o.vx, o.vy = math.cos(ang) * 520, math.sin(ang) * 520
                         self.som("mola")
-                        self.textos.adicionar("BOING!", (o.x, o.y - 60), (180, 220, 255), 14)
+                        self.textos.adicionar(t("BOING!"), (o.x, o.y - 60), (180, 220, 255), 14)
 
     def _fim(self, vencedor):
         p = [int(o.pontos) for o in self.ovos]
-        linhas = [f"PONTOS  {p[0]} × {p[1]}",
-                  f"EMPURRÕES  {self.ovos[0].empurroes} × {self.ovos[1].empurroes}"]
+        linhas = [t("PONTOS  {a} × {b}", a=p[0], b=p[1]),
+                  t("EMPURRÕES  {a} × {b}", a=self.ovos[0].empurroes, b=self.ovos[1].empurroes)]
         if max(p) >= META:
-            linhas.insert(0, f"COROA COM {META} PONTOS!")
+            linhas.insert(0, t("COROA COM {n} PONTOS!", n=META))
         self.terminar_multi(vencedor, linhas)
 
     # --------------------------------------------------------
@@ -699,10 +700,10 @@ class ReiQuintal(MiniJogoHibrido):
         self.particulas.desenhar(tela)
         self.textos.desenhar(tela)
         if self.banner:
-            ui.desenhar_texto(tela, self.banner[0], (LARGURA // 2, ALTURA // 2 - 120), 28, self.banner[1],
+            ui.desenhar_texto(tela, t(self.banner[0]), (LARGURA // 2, ALTURA // 2 - 120), 28, self.banner[1],
                               "center")
         elif getattr(self, "disputa", False):
-            ui.desenhar_texto(tela, "DISPUTA!", (zx, zy - ZONA_R - 16), 12, (255, 140, 120), "center")
+            ui.desenhar_texto(tela, t("DISPUTA!"), (zx, zy - ZONA_R - 16), 12, (255, 140, 120), "center")
 
     def desenhar_hud(self, tela):
         caixa = pygame.Rect(12, 8, LARGURA - 96, 74)
@@ -710,7 +711,7 @@ class ReiQuintal(MiniJogoHibrido):
         seg = max(0, int(math.ceil(self.relogio)))
         cor_t = (255, 120, 100) if seg <= 10 else BRANCO
         ui.desenhar_texto(tela, f"{seg // 60}:{seg % 60:02d}", (caixa.centerx, caixa.y + 14), 20, cor_t, "midtop")
-        ui.desenhar_texto(tela, f"META {META}", (caixa.centerx, caixa.y + 46), 8, (180, 200, 255), "midtop")
+        ui.desenhar_texto(tela, t("META {n}", n=META), (caixa.centerx, caixa.y + 46), 8, (180, 200, 255), "midtop")
         for i in (0, 1):
             o = self.ovos[i]
             w = 300

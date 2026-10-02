@@ -5,6 +5,7 @@ import pygame
 
 from settings import *
 from core import ui
+from core.idioma import t
 from jogos.base import MiniJogo
 
 # ============================================================
@@ -491,7 +492,7 @@ class OvoColher(MiniJogo):
             self.proximo_check += METROS_CHECKPOINT * PX_POR_METRO
             self.festa = 1.6
             self.som("bandeira")
-            self.textos.adicionar(f"{self.checkpoints * METROS_CHECKPOINT} m! +{BONUS_CHECKPOINT}",
+            self.textos.adicionar(t("{m} m! +{b}", m=self.checkpoints * METROS_CHECKPOINT, b=BONUS_CHECKPOINT),
                                   (LARGURA // 2, 250), AMARELO, 24)
             for x in range(80, LARGURA, 160):
                 self.particulas.explodir((x, 120), CORES_BANDEIRA + [BRANCO], 10, 260, 1.2, (3, 6))
@@ -650,7 +651,7 @@ class OvoColher(MiniJogo):
             self.poca_fase = 0.0
             self.som("boing", 0.5)
             self.particulas.explodir((X_PE, c.y), [(120, 180, 255), (200, 230, 255)], 12, 160, 0.5, (2, 5))
-            self.textos.adicionar("ESCORREGOU!", (PIVO[0], PIVO[1] - 150), (150, 210, 255), 14)
+            self.textos.adicionar(t("ESCORREGOU!"), (PIVO[0], PIVO[1] - 150), (150, 210, 255), 14)
 
     def _atualizar_borboleta(self, dt):
         b = self.borboleta
@@ -665,7 +666,7 @@ class OvoColher(MiniJogo):
             b["y"] = b["y0"] + (alvo[1] - b["y0"]) * k + math.sin(k * math.pi * 3) * 30
             if k >= 1:
                 b["fase"], b["t"] = "pousada", 0.0
-                self.textos.adicionar("HIHI!", (alvo[0] + 40, alvo[1] - 20), (255, 180, 230), 14)
+                self.textos.adicionar(t("HIHI!"), (alvo[0] + 40, alvo[1] - 20), (255, 180, 230), 14)
         elif b["fase"] == "pousada":
             x, y = self._pos_ovo()
             b["x"], b["y"] = x, y - ALTURA_OVO / 2 - 6
@@ -692,7 +693,7 @@ class OvoColher(MiniJogo):
             if k >= 1:
                 p["fase"], p["t"] = "pousado", 0.0
                 self.som("asa", 0.5)
-                self.textos.adicionar("PIU!", (ponta[0] + 20, ponta[1] - 40), BRANCO, 14)
+                self.textos.adicionar(t("PIU!"), (ponta[0] + 20, ponta[1] - 40), BRANCO, 14)
         elif p["fase"] == "pousado":
             p["x"], p["y"] = ponta
             if p["t"] >= TEMPO_PASSARINHO or self.caindo or self.quebrado:
@@ -721,7 +722,7 @@ class OvoColher(MiniJogo):
         self.ovo_ang = self._angulo_ovo()
         self.ovo_giro = -lado * 260
         self.som("pulo", 0.6)
-        self.textos.adicionar("NÃÃÃO!", (x, y - 60), (255, 140, 140), 16)
+        self.textos.adicionar(t("NÃÃÃO!"), (x, y - 60), (255, 140, 140), 16)
 
     def _atualizar_queda(self, dt):
         self.tempo_queda += dt
@@ -740,8 +741,8 @@ class OvoColher(MiniJogo):
             x, y = self.ovo_pos
             self.ovo_pos = (x - self.vel * dt, y)
             if self.tempo_queda > 1.8:
-                self.terminar(linhas=[f"DISTÂNCIA: {self.metros} m",
-                                      f"CHECKPOINTS: {self.checkpoints}  •  PONTOS: {self.pontos}"])
+                self.terminar(linhas=[t("DISTÂNCIA: {n} m", n=self.metros),
+                                      t("CHECKPOINTS: {a}  •  PONTOS: {b}", a=self.checkpoints, b=self.pontos)])
 
     def _quebrar(self):
         self.caindo = False
@@ -754,7 +755,7 @@ class OvoColher(MiniJogo):
         self.som("perder", 0.4)
         self.oooh = 2.0
         self.festa = 0.0
-        self.textos.adicionar("CRACK!", (x, 560), (255, 240, 200), 32)
+        self.textos.adicionar(t("CRACK!"), (x, 560), (255, 240, 200), 32)
         self.particulas.explodir((x, 670), [(200, 160, 110), (230, 200, 160), (170, 130, 90)],
                                  24, 220, 0.8, (3, 7))
         self.particulas.explodir((x, 660), [self.jogador.cor, BRANCO, (255, 220, 60)], 16, 260, 0.9, (3, 6))
@@ -885,7 +886,7 @@ class OvoColher(MiniJogo):
                     pygame.draw.line(tela, (60, 50, 60), (bx, pe - altura * 0.5 + dy),
                                      (bx + lado * 8, pe - altura - 4 + dy), 3)
             if self.oooh > 0 and i % 2 == 0:
-                ui.desenhar_texto(tela, "OOOH!", (int(x), int(pe - altura - 22)), 10, BRANCO, "center")
+                ui.desenhar_texto(tela, t("OOOH!"), (int(x), int(pe - altura - 22)), 10, BRANCO, "center")
 
     def _desenhar_chao(self, tela):
         pista = _ladrilho_pista()
@@ -1135,7 +1136,7 @@ class OvoColher(MiniJogo):
             if self.aviso_vento > 0 and int(self.tempo * 8) % 2 == 1:
                 return
             seta = "→" if self.dir_vento > 0 else "←"
-            msg = f"VENTO {seta}" if self.dir_vento > 0 else f"{seta} VENTO"
+            msg = t("VENTO") + " " + seta if self.dir_vento > 0 else seta + " " + t("VENTO")
             caixa = pygame.Rect(0, 0, 220, 40)
             caixa.midtop = (LARGURA // 2, 74)
             ui.painel(tela, caixa, (20, 24, 40), (150, 210, 255), 12, 3, sombra=False)
@@ -1153,11 +1154,11 @@ class OvoColher(MiniJogo):
     def desenhar_hud(self, tela):
         caixa = pygame.Rect(12, 12, 420, 48)
         ui.painel(tela, caixa, (20, 24, 40), BRANCO, 12, 3, sombra=False)
-        ui.desenhar_texto(tela, f"PONTOS: {self.pontos}", (caixa.x + 16, caixa.centery), 14,
+        ui.desenhar_texto(tela, t("PONTOS: {n}", n=self.pontos), (caixa.x + 16, caixa.centery), 14,
                           AMARELO, "midleft")
         rec = self.recorde()
         if rec is not None:
-            ui.desenhar_texto(tela, f"RECORDE: {rec}", (caixa.x + 236, caixa.centery), 12,
+            ui.desenhar_texto(tela, t("RECORDE: {n}", n=rec), (caixa.x + 236, caixa.centery), 12,
                               (180, 200, 255), "midleft")
 
         # Distância e próximo checkpoint
@@ -1172,7 +1173,7 @@ class OvoColher(MiniJogo):
         caixa = pygame.Rect(0, 12, 210, 48)
         caixa.right = LARGURA - 76
         ui.painel(tela, caixa, (20, 24, 40), BRANCO, 12, 3, sombra=False)
-        ui.desenhar_texto(tela, "VEL", (caixa.x + 14, caixa.centery + 1), 12, BRANCO, "midleft")
+        ui.desenhar_texto(tela, t("VEL"), (caixa.x + 14, caixa.centery + 1), 12, BRANCO, "midleft")
         frac = (self.vel - VEL_MIN) / (VEL_MAX - VEL_MIN)
         n = 8
         for i in range(n):

@@ -5,6 +5,7 @@ import pygame
 
 from settings import *
 from core import ui
+from core.idioma import t
 from jogos.base import MiniJogo
 
 # ============================================================
@@ -477,8 +478,8 @@ class PinballOvo(MiniJogo):
             pygame.draw.polygon(sup, cor, pts)
         for k in range(3):
             seta(706, 380 - k * 26, -math.pi / 2, (90 + k * 50, 200, 255))
-        ui.desenhar_texto(sup, "RAMPA", (706, 410), 8, (150, 220, 255), "center")
-        ui.desenhar_texto(sup, "NINHO", (NINHO[0], NINHO[1] + 30), 8, (255, 210, 150), "center")
+        ui.desenhar_texto(sup, t("RAMPA"), (706, 410), 8, (150, 220, 255), "center")
+        ui.desenhar_texto(sup, t("NINHO"), (NINHO[0], NINHO[1] + 30), 8, (255, 210, 150), "center")
         seta(CENTRO_X, 560, -math.pi / 2, (255, 200, 80))
 
         # Canal da mola
@@ -522,25 +523,25 @@ class PinballOvo(MiniJogo):
         esq = pygame.Rect(14, 76, 196, 628)
         for rot, y in (("PONTOS", 94), ("RECORDE", 160), ("BOLA", 214), ("MULTIPLICADOR", 296),
                        ("BÔNUS", 378), ("LUZES", 442), ("LIMÕES", 522)):
-            ui.desenhar_texto(sup, rot, (esq.centerx, y), 10, (190, 160, 255), "midtop")
+            ui.desenhar_texto(sup, t(rot), (esq.centerx, y), 10, (190, 160, 255), "midtop")
 
         dir_ = pygame.Rect(814, 76, 196, 628)
         ui.desenhar_texto(sup, "PINBALL", (dir_.centerx, 100), 20, AMARELO, "midtop")
-        ui.desenhar_texto(sup, "OVO", (dir_.centerx, 130), 28, (255, 140, 200), "midtop")
+        ui.desenhar_texto(sup, t("OVO"), (dir_.centerx, 130), 28, (255, 140, 200), "midtop")
         linhas = [("FLIPPER ESQ.", "← A Z"), ("FLIPPER DIR.", "→ D /"),
                   ("MOLA (SEGURE)", "ESPAÇO ↓")]
         y = 420
         for titulo, teclas in linhas:
-            ui.desenhar_texto(sup, titulo, (dir_.centerx, y), 8, (190, 160, 255), "midtop")
-            ui.desenhar_texto(sup, teclas, (dir_.centerx, y + 16), 12, BRANCO, "midtop")
+            ui.desenhar_texto(sup, t(titulo), (dir_.centerx, y), 8, (190, 160, 255), "midtop")
+            ui.desenhar_texto(sup, t(teclas), (dir_.centerx, y + 16), 12, BRANCO, "midtop")
             y += 52
-        ui.desenhar_texto(sup, "PANELA", (dir_.x + 60, 590), 8, (255, 200, 150), "midleft")
+        ui.desenhar_texto(sup, t("PANELA"), (dir_.x + 60, 590), 8, (255, 200, 150), "midleft")
         ui.desenhar_texto(sup, f"{PTS_PANELA}", (dir_.right - 20, 590), 8, BRANCO, "midright")
-        ui.desenhar_texto(sup, "RAMPA", (dir_.x + 60, 614), 8, (150, 220, 255), "midleft")
+        ui.desenhar_texto(sup, t("RAMPA"), (dir_.x + 60, 614), 8, (150, 220, 255), "midleft")
         ui.desenhar_texto(sup, f"{PTS_RAMPA}", (dir_.right - 20, 614), 8, BRANCO, "midright")
-        ui.desenhar_texto(sup, "NINHO", (dir_.x + 60, 638), 8, (255, 210, 150), "midleft")
+        ui.desenhar_texto(sup, t("NINHO"), (dir_.x + 60, 638), 8, (255, 210, 150), "midleft")
         ui.desenhar_texto(sup, f"{PTS_NINHO}", (dir_.right - 20, 638), 8, BRANCO, "midright")
-        ui.desenhar_texto(sup, "LIMÃO", (dir_.x + 60, 662), 8, AMARELO, "midleft")
+        ui.desenhar_texto(sup, t("LIMÃO"), (dir_.x + 60, 662), 8, AMARELO, "midleft")
         ui.desenhar_texto(sup, f"{PTS_ALVO}", (dir_.right - 20, 662), 8, BRANCO, "midright")
         pygame.draw.circle(sup, CORES_PANELA[0], (dir_.x + 40, 590), 9)
         pygame.draw.circle(sup, (200, 205, 220), (dir_.x + 40, 590), 6)
@@ -768,7 +769,7 @@ class PinballOvo(MiniJogo):
                 b.vx = random.choice((-1, 1)) * random.uniform(120, 220)
                 b.vy = -random.uniform(250, 380)
                 self.tremer(0.2)
-                self.textos.adicionar("SACODE!", (b.x, b.y - 30), (255, 180, 120), 12)
+                self.textos.adicionar(t("SACODE!"), (b.x, b.y - 30), (255, 180, 120), 12)
                 self._som("bater", 0.6)
         else:
             b.parado = 0.0
@@ -947,7 +948,7 @@ class PinballOvo(MiniJogo):
             self.mult = min(MULT_MAX, self.mult + 1)
             self._pontuar(PTS_ALVOS_TODOS, (CENTRO_X, 450), AMARELO, 16, bonus=200)
             self.alvos_piscar = 1.2
-            self._banner(f"MULTIPLICADOR ×{self.mult}!", AMARELO, 1.6, 20)
+            self._banner(t("MULTIPLICADOR ×{n}!", n=self.mult), AMARELO, 1.6, 20)
             self._som("conquista", 0.8, 0.3)
             self.tremer(0.2)
             for ax, ay in ALVOS:
@@ -1028,7 +1029,7 @@ class PinballOvo(MiniJogo):
                 if all(self.luzes):
                     self._pontuar(PTS_LIMAO, (CENTRO_X, 170), AMARELO, 16, bonus=500)
                     self.luzes_piscar = 1.6
-                    self._banner("LIMÃO COMPLETO!", (180, 255, 120), 1.6, 20)
+                    self._banner(t("LIMÃO COMPLETO!"), (180, 255, 120), 1.6, 20)
                     self._som("levelup", 0.8, 0.3)
                     self.tremer(0.15)
                 return
@@ -1043,7 +1044,7 @@ class PinballOvo(MiniJogo):
         self.ultima_rampa = self.tempo
         pts = PTS_RAMPA * (2 if combo else 1)
         self._pontuar(pts, (706, 260), (150, 220, 255), 14, bonus=300)
-        self._banner("COMBO DE RAMPA!" if combo else "RAMPA!", (150, 220, 255), 1.2, 20)
+        self._banner(t("COMBO DE RAMPA!") if combo else t("RAMPA!"), (150, 220, 255), 1.2, 20)
         self._som("revelar", 0.7, 0.2)
         self.particulas.explodir((b.x, b.y), [(150, 220, 255), BRANCO], 12, 220, 0.5, (2, 5))
 
@@ -1067,7 +1068,7 @@ class PinballOvo(MiniJogo):
         b.vx = b.vy = 0.0
         b.rastro = []
         self._pontuar(PTS_NINHO, (NINHO[0], NINHO[1] - 40), (255, 210, 150), 14, bonus=150)
-        self._banner("NINHO!", (255, 210, 150), 1.1, 20)
+        self._banner(t("NINHO!"), (255, 210, 150), 1.1, 20)
         self._som("comer", 0.7, 0.2)
         self.particulas.explodir(NINHO, [(150, 100, 55), (255, 220, 150), BRANCO], 14, 200, 0.5, (2, 5))
 
@@ -1095,7 +1096,7 @@ class PinballOvo(MiniJogo):
             self.salva = 0.0
             self.bola = Bola()
             self.saiu_canal = False
-            self._banner("SALVA-OVO!", (120, 255, 170), 1.4, 20)
+            self._banner(t("SALVA-OVO!"), (120, 255, 170), 1.4, 20)
             self._som("vencer", 0.5, 0.5)
             self.particulas.explodir((x, ALTURA - 20), [(120, 255, 170), BRANCO], 16, 260, 0.6)
             return
@@ -1114,7 +1115,7 @@ class PinballOvo(MiniJogo):
         self.pontos_bola += bonus
         self.melhor_bola = max(self.melhor_bola, self.pontos_bola)
         if bonus:
-            self._banner(f"BÔNUS {self.formatar(self.bonus_bola)} ×{self.mult}", AMARELO, TEMPO_DRENO, 16)
+            self._banner(t("BÔNUS {pts} ×{n}", pts=self.formatar(self.bonus_bola), n=self.mult), AMARELO, TEMPO_DRENO, 16)
         else:
             self._banner("CRACK!", (255, 150, 120), TEMPO_DRENO, 24)
         self.bola = None
@@ -1123,12 +1124,12 @@ class PinballOvo(MiniJogo):
     def _proxima_bola(self):
         self.drenou = 0.0
         if self.bola_n >= self.total_bolas:
-            self.terminar(linhas=[f"PONTOS: {self.formatar(self.pontos)}",
-                                  f"MELHOR BOLA: {self.formatar(self.melhor_bola)}"])
+            self.terminar(linhas=[t("PONTOS: {n}", n=self.formatar(self.pontos)),
+                                  t("MELHOR BOLA: {n}", n=self.formatar(self.melhor_bola))])
             return
         self.bola_n += 1
         self._nova_bola()
-        self._banner(f"BOLA {self.bola_n}", BRANCO, 1.2, 20)
+        self._banner(t("BOLA {n}", n=self.bola_n), BRANCO, 1.2, 20)
 
     # --------------------------------------------------------
     # DESENHO
@@ -1144,9 +1145,9 @@ class PinballOvo(MiniJogo):
 
     def desenhar_jogo(self, tela):
         tela.blit(self.fundo(self.jogador), (0, 0))
-        t = self.tempo
+        tt = self.tempo
 
-        self._desenhar_luzes(tela, t)
+        self._desenhar_luzes(tela, tt)
 
         # Estilingues piscando
         for lado, tri in enumerate((SLING_ESQ, SLING_DIR)):
@@ -1157,14 +1158,14 @@ class PinballOvo(MiniJogo):
         # Ninho com o ovo dentro brilha
         b = self.bola
         if b is not None and b.modo == "ninho":
-            raio = R_NINHO + 10 + int(abs(math.sin(t * 12)) * 6)
+            raio = R_NINHO + 10 + int(abs(math.sin(tt * 12)) * 6)
             tela.blit(_circulo_alpha(raio, (255, 220, 120), 90), (NINHO[0] - raio - 1, NINHO[1] - raio - 1))
 
         # Alvos-limão
         for i, (ax, ay) in enumerate(ALVOS):
             aceso = self.alvos[i]
             if self.alvos_piscar > 0:
-                aceso = int(t * 10) % 2 == 0
+                aceso = int(tt * 10) % 2 == 0
             if aceso:
                 tela.blit(_circulo_alpha(R_ALVO + 9, (255, 240, 100), 70), (ax - R_ALVO - 10, ay - R_ALVO - 10))
             sup = _limao_alvo(aceso)
@@ -1174,8 +1175,8 @@ class PinballOvo(MiniJogo):
         # Panelas (tremem quando batem)
         for i, (px, py) in enumerate(PANELAS):
             tr = self.panela_treme[i]
-            ox = math.sin(t * 70 + i) * 4 * tr / 0.3 if tr > 0 else 0
-            oy = math.cos(t * 55 + i) * 3 * tr / 0.3 if tr > 0 else 0
+            ox = math.sin(tt * 70 + i) * 4 * tr / 0.3 if tr > 0 else 0
+            oy = math.cos(tt * 55 + i) * 3 * tr / 0.3 if tr > 0 else 0
             if self.panela_flash[i] > 0:
                 r = R_PANELA + 16
                 tela.blit(_circulo_alpha(r, (255, 240, 180), 110), (px - r - 1, py - r - 1))
@@ -1187,8 +1188,8 @@ class PinballOvo(MiniJogo):
             self._desenhar_flipper(tela, f)
 
         # SALVA-OVO aceso entre os flippers
-        if self.salva > 0 and not self.salva_usada and (self.salva > 2 or int(t * 8) % 2 == 0):
-            ui.desenhar_texto(tela, "SALVA-OVO", (CENTRO_X, 700), 8, (120, 255, 170), "center")
+        if self.salva > 0 and not self.salva_usada and (self.salva > 2 or int(tt * 8) % 2 == 0):
+            ui.desenhar_texto(tela, t("SALVA-OVO"), (CENTRO_X, 700), 8, (120, 255, 170), "center")
 
         # Bola embaixo da rampa, rampa, bola em cima da rampa
         if b is not None and b.modo != "rampa":
@@ -1210,8 +1211,8 @@ class PinballOvo(MiniJogo):
 
         # Dica da mola
         if (self.estado == "jogando" and b is not None and self._na_mola(b)
-                and self.carga == 0 and int(t * 2) % 2 == 0):
-            ui.desenhar_texto(tela, "SEGURE ESPAÇO!", (MOLA_X - 60, 610), 8, AMARELO, "center")
+                and self.carga == 0 and int(tt * 2) % 2 == 0):
+            ui.desenhar_texto(tela, t("SEGURE ESPAÇO!"), (MOLA_X - 60, 610), 8, AMARELO, "center")
 
     def _desenhar_luzes(self, tela, t):
         for k, letra in enumerate(LETRAS):
@@ -1336,7 +1337,7 @@ class PinballOvo(MiniJogo):
             tela.blit(sup, sup.get_rect(center=(cx - 60 + k * 40, 562)))
 
         if self.salva > 0 and not self.salva_usada:
-            ui.desenhar_texto(tela, "SALVA-OVO", (cx, 610), 10, (120, 255, 170), "midtop")
+            ui.desenhar_texto(tela, t("SALVA-OVO"), (cx, 610), 10, (120, 255, 170), "midtop")
             barra = pygame.Rect(cx - 60, 630, 120, 6)
             pygame.draw.rect(tela, (40, 50, 70), barra, border_radius=3)
             pygame.draw.rect(tela, (120, 255, 170), (barra.x, barra.y, int(barra.w * self.salva / TEMPO_SALVA),
@@ -1347,6 +1348,6 @@ class PinballOvo(MiniJogo):
         self.jogador.desenhar(tela, (912, 270 - pulo), 90)
         dicas = ["4 LIMÕES = ×MULT", "SUBA A RAMPA!", "ACHE O NINHO", "ACENDA L-I-M-A-O",
                  "O FLIPPER TROCA AS LUZES"]
-        dica = dicas[int(self.tempo / 3) % len(dicas)]
+        dica = t(dicas[int(self.tempo / 3) % len(dicas)])
         tam = ui.tamanho_que_cabe(dica, 180, (10, 8))
         ui.desenhar_texto(tela, dica, (912, 356), tam, (255, 220, 160), "midtop")

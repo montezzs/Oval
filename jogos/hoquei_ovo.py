@@ -5,6 +5,7 @@ import pygame
 
 from settings import *
 from core import ui
+from core.idioma import t
 from jogos.base_multi import MiniJogoMulti, TECLAS_MOVER, TECLAS_ACAO, CORES_JOGADOR
 
 # ============================================================
@@ -270,11 +271,11 @@ class HoqueiOvo(MiniJogoMulti):
                               ("LIMÕES & CIA", LARGURA - 250, MESA.top - BORDA // 2),
                               ("LIMÕES & CIA", 250, MESA.bottom + BORDA // 2),
                               ("OVAL", LARGURA - 250, MESA.bottom + BORDA // 2)):
-            t = ui.texto(texto, 10, (40, 40, 60), sombra=False)
-            r = t.get_rect(center=(cx, cy)).inflate(16, 8)
+            tt = ui.texto(t(texto), 10, (40, 40, 60), sombra=False)
+            r = tt.get_rect(center=(cx, cy)).inflate(16, 8)
             pygame.draw.rect(sup, (255, 230, 90), r, border_radius=4)
             pygame.draw.rect(sup, (30, 30, 50), r, 2, border_radius=4)
-            sup.blit(t, t.get_rect(center=r.center))
+            sup.blit(tt, tt.get_rect(center=r.center))
         return sup
 
     @classmethod
@@ -418,7 +419,7 @@ class HoqueiOvo(MiniJogoMulti):
             if self.tempo_fase >= TEMPO_GOL:
                 if max(self.placar) >= self.meta:
                     g = self.placar
-                    self.terminar_multi(0 if g[0] > g[1] else 1, [f"PLACAR  {g[0]} × {g[1]}"])
+                    self.terminar_multi(0 if g[0] > g[1] else 1, [t("PLACAR  {a} × {b}", a=g[0], b=g[1])])
                     return
                 self._saque(1 - self.quem_marcou)
 
@@ -466,7 +467,7 @@ class HoqueiOvo(MiniJogoMulti):
                 break
         novo = Limao(x, y, 0.0, random.choice((-120, 120)))
         self.limoes.append(novo)
-        self._banner("DOIS LIMÕES!", AMARELO, 1.6)
+        self._banner(t("DOIS LIMÕES!"), AMARELO, 1.6)
         self.som("revelar")
         self.particulas.explodir((x, y), [(250, 222, 40), BRANCO, (70, 170, 60)], 18, 220, 0.6,
                                  (2, 5), 0)
@@ -685,7 +686,7 @@ class HoqueiOvo(MiniJogoMulti):
         if forte:
             self.som("acerto", 0.9)
             self.tremer(0.15)
-            self.textos.adicionar("LIMÃO QUENTE!", (r.x, r.y - 70), (255, 150, 60), 14)
+            self.textos.adicionar(t("LIMÃO QUENTE!"), (r.x, r.y - 70), (255, 150, 60), 14)
             self.particulas.explodir(ponto, [(255, 220, 80), (255, 140, 30), BRANCO], 16, 320, 0.4,
                                      (2, 4), 0)
         elif r.espera_som <= 0:
@@ -741,7 +742,7 @@ class HoqueiOvo(MiniJogoMulti):
 
         final = self.placar[quem] >= self.meta
         if not final and self.placar[quem] == self.meta - 1:
-            self._banner("MATCH POINT!", (255, 150, 150), 1.4, 20)
+            self._banner(t("MATCH POINT!"), (255, 150, 150), 1.4, 20)
 
     def calcular_moedas(self, valor, venceu):
         base = self.MOEDAS_PARTIDA + sum(self.placar) // 3
@@ -755,10 +756,10 @@ class HoqueiOvo(MiniJogoMulti):
 
     def desenhar_jogo(self, tela):
         tela.blit(self.fundo(self.jogador), (0, 0))
-        t = self.tempo
+        tt = self.tempo
 
         # Sirene no gol de quem sofreu
-        if self.fase == "gol" and int(t * 8) % 2 == 0:
+        if self.fase == "gol" and int(tt * 8) % 2 == 0:
             x = MESA.left - GOL_FUNDO // 2 if self.quem_marcou == 1 else MESA.right + GOL_FUNDO // 2
             tela.blit(_circulo_alpha(120, (255, 40, 40), 70), (x - 121, GOL_Y - 121))
             tela.blit(_circulo_alpha(60, (255, 90, 60), 90), (x - 61, GOL_Y - 61))
@@ -775,12 +776,12 @@ class HoqueiOvo(MiniJogoMulti):
             sup = _limao_girado(R_LIMAO, L.quente, L.angulo)
             tela.blit(sup, sup.get_rect(center=(round(L.x), round(L.y))))
             if self.fase == "saque" and self.estado == "jogando":
-                raio = R_LIMAO + 8 + int(abs(math.sin(t * 6)) * 5)
+                raio = R_LIMAO + 8 + int(abs(math.sin(tt * 6)) * 5)
                 pygame.draw.circle(tela, (60, 120, 230), (round(L.x), round(L.y)), raio, 3)
 
         # Rebatedores (quem está mais embaixo na frente)
         for r in sorted(self.rebs, key=lambda o: o.y):
-            self._desenhar_rebatedor(tela, r, t)
+            self._desenhar_rebatedor(tela, r, tt)
 
         self.particulas.desenhar(tela)
 
@@ -795,7 +796,7 @@ class HoqueiOvo(MiniJogoMulti):
             painel.center = (LARGURA // 2, 262)
             if esc >= 1:
                 ui.painel(tela, painel, (20, 24, 40), cor, 18, 4, sombra=False)
-            ui.desenhar_texto(tela, "GOL!", (LARGURA // 2, 246), tam, AMARELO, "center")
+            ui.desenhar_texto(tela, t("GOL!"), (LARGURA // 2, 246), tam, AMARELO, "center")
             if k > 0.2:
                 ui.desenhar_texto(tela, self.nome(self.quem_marcou), (LARGURA // 2, 308), 16, cor,
                                   "center")
@@ -865,12 +866,12 @@ class HoqueiOvo(MiniJogoMulti):
             self._hud_cache = (chave, self._montar_hud(caixa))
         tela.blit(self._hud_cache[1], caixa.topleft)
         if len(self.limoes) == 2 and self.fase != "gol":
-            ui.desenhar_texto(tela, "2 LIMÕES!", (caixa.centerx + 150, caixa.bottom - 12), 10,
+            ui.desenhar_texto(tela, t("2 LIMÕES!"), (caixa.centerx + 150, caixa.bottom - 12), 10,
                               AMARELO, "center")
         else:
             falta = max(0, int(TEMPO_DOIS_LIMOES - self.tempo_sem_gol) + 1)
             if self.fase == "jogo" and falta <= 10:
-                ui.desenhar_texto(tela, f"LIMÃO EXTRA EM {falta}", (caixa.centerx + 150,
+                ui.desenhar_texto(tela, t("LIMÃO EXTRA EM {n}", n=falta), (caixa.centerx + 150,
                                                                    caixa.bottom - 12), 10,
                                   (255, 200, 120), "center")
 
@@ -888,7 +889,7 @@ class HoqueiOvo(MiniJogoMulti):
             ui.desenhar_texto(sup, str(self.placar[i]), (c.centerx + lado * 50, c.centery + 2),
                               32, AMARELO, "center")
         ui.desenhar_texto(sup, "×", (c.centerx, c.centery + 2), 20, BRANCO, "center")
-        ui.desenhar_texto(sup, f"ATÉ {self.meta}", (c.centerx - 150, c.bottom - 12), 10,
+        ui.desenhar_texto(sup, t("ATÉ {n}", n=self.meta), (c.centerx - 150, c.bottom - 12), 10,
                           (180, 200, 255), "center")
         return sup
 
@@ -905,8 +906,8 @@ class HoqueiOvo(MiniJogoMulti):
         caixa.centerx = LARGURA // 2
         ui.painel(tela, caixa, (28, 32, 56), self.COR, 22, 5)
 
-        ui.desenhar_texto(tela, self.TITULO, (LARGURA // 2, topo + 20), 28, AMARELO, "midtop")
-        ui.desenhar_texto(tela, "2 JOGADORES", (LARGURA // 2, topo + 58), 12,
+        ui.desenhar_texto(tela, t(self.TITULO), (LARGURA // 2, topo + 20), 28, AMARELO, "midtop")
+        ui.desenhar_texto(tela, t("2 JOGADORES"), (LARGURA // 2, topo + 58), 12,
                           (180, 200, 255), "midtop")
 
         y_ovos = topo + 124
@@ -915,7 +916,7 @@ class HoqueiOvo(MiniJogoMulti):
             self.desenhar_ovo(tela, i, (x, y_ovos + balanco), 60, espelhar=(i == 1))
             ui.desenhar_texto(tela, self.nome(i), (x, y_ovos + 42), 14, CORES_JOGADOR[i], "midtop")
             ctrl = self.CONTROLES_J1 if i == 0 else self.CONTROLES_J2
-            ui.desenhar_texto(tela, ctrl, (x, y_ovos + 64), 10, BRANCO, "midtop")
+            ui.desenhar_texto(tela, t(ctrl), (x, y_ovos + 64), 10, BRANCO, "midtop")
         ui.desenhar_texto(tela, "VS", (LARGURA // 2, y_ovos), 32, AMARELO, "center")
 
         y = y_ovos + 88
@@ -927,8 +928,8 @@ class HoqueiOvo(MiniJogoMulti):
 
         v = self.vitorias()
         y_rec = self.menu_inicio.botoes[0].rect.y - 32
-        ui.desenhar_texto(tela, f"VITÓRIAS  J1 {v[0]} × {v[1]} J2", (LARGURA // 2, y_rec),
+        ui.desenhar_texto(tela, t("VITÓRIAS  J1 {a} × {b} J2", a=v[0], b=v[1]), (LARGURA // 2, y_rec),
                           14, AMARELO, "midtop")
-        ui.desenhar_texto(tela, "ESCOLHA O MODO", (LARGURA // 2, y_rec - 24), 12,
+        ui.desenhar_texto(tela, t("ESCOLHA O MODO"), (LARGURA // 2, y_rec - 24), 12,
                           (180, 200, 255), "midtop")
         self.menu_inicio.desenhar(tela)

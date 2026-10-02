@@ -4,6 +4,7 @@ import pygame
 
 from settings import *
 from core import ui
+from core.idioma import t
 from jogos.base_multi import CORES_JOGADOR
 from jogos.jogo_velha import JogoTabuleiro, TECLAS_DIR, TECLAS_OK, fundo_mesa
 
@@ -214,7 +215,7 @@ class Pontinhos(JogoTabuleiro):
             self.vez = 1 - self.vez
         if all(self.feitas):
             v = 0 if self.placar[0] > self.placar[1] else 1 if self.placar[1] > self.placar[0] else None
-            self.finalizar(v, [f"CAIXAS  {self.placar[0]} × {self.placar[1]}"])
+            self.finalizar(v, [t("CAIXAS  {a} × {b}", a=self.placar[0], b=self.placar[1])])
 
     # BOT -----------------------------------------------------
 

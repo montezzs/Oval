@@ -4,6 +4,7 @@ import random
 import pygame
 
 from settings import *
+from core.idioma import t
 from core import assets, ui
 from core.cena import Cena, tecla_voltar
 from core.fundo_menu import FundoAnimado
@@ -169,13 +170,13 @@ class CenaCriador(Cena):
     def _nome_opcao(self, i):
         v = self.valores[i]
         if LINHAS[i][0] == "ovo":
-            return assets.NOMES_OVOS[v]
-        return f"{v + 1} de {self._tamanho(i)}"
+            return t(assets.NOMES_OVOS[v])
+        return t("{n} de {total}", n=v + 1, total=self._tamanho(i))
 
     def desenhar(self, tela):
         self.fundo.desenhar(tela)
 
-        titulo = "CRIE SEU OVO!" if self.modo in ("inicial", "novo") else "TROCAR APARÊNCIA"
+        titulo = t("CRIE SEU OVO!") if self.modo in ("inicial", "novo") else t("TROCAR APARÊNCIA")
         ui.centralizado(tela, titulo, 50, 36, AMARELO)
         if self.jogador.nome:
             ui.centralizado(tela, self.jogador.nome, 104, 16)
@@ -202,7 +203,7 @@ class CenaCriador(Cena):
                 pygame.draw.rect(tela, UI_DESTAQUE, linha, 3, border_radius=12)
 
             cor = AMARELO if ativa else BRANCO
-            ui.desenhar_texto(tela, rotulo, (linha.x + 16, linha.centery), 16, cor, "midleft")
+            ui.desenhar_texto(tela, t(rotulo), (linha.x + 16, linha.centery), 16, cor, "midleft")
 
             for seta, simbolo in ((esq, "<"), (dir_, ">")):
                 hover = seta.collidepoint(pygame.mouse.get_pos())
@@ -221,7 +222,7 @@ class CenaCriador(Cena):
         for b in self.botoes:
             b.desenhar(tela)
 
-        dica = "↑ ↓ escolhe   ← → troca   ENTER avança"
+        dica = t("↑ ↓ escolhe   ← → troca   ENTER avança")
         if self.modo == "novo":
-            dica += "   ESC volta"
+            dica += t("   ESC volta")
         ui.centralizado(tela, dica, 660, 12)

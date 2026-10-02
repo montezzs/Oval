@@ -5,6 +5,7 @@ import pygame
 
 from settings import *
 from core import ui
+from core.idioma import t
 from jogos.base import MiniJogo
 
 # ============================================================
@@ -491,7 +492,7 @@ class OvoVoador(MiniJogo):
                 self.no_chao = True
                 self.som("bater", 0.6)
         if self.tempo_morto > 0.8 and self.no_chao or self.tempo_morto > 2.0:
-            self.terminar(linhas=[f"PONTOS: {self.pontos}", f"LIMÕES: {self.limoes}"])
+            self.terminar(linhas=[t("PONTOS: {n}", n=self.pontos), t("LIMÕES: {n}", n=self.limoes)])
 
     # --------------------------------------------------------
     # DESENHO
@@ -539,9 +540,9 @@ class OvoVoador(MiniJogo):
 
         if self.estado == "jogando" and not self.comecou:
             if int(self.tempo * 2.5) % 3 != 0:
-                ui.desenhar_texto(tela, "APERTE ESPAÇO!", (LARGURA // 2 + 60, 190), 24,
+                ui.desenhar_texto(tela, t("APERTE ESPAÇO!"), (LARGURA // 2 + 60, 190), 24,
                                   AMARELO, "center")
-            ui.desenhar_texto(tela, "ou clique para voar", (LARGURA // 2 + 60, 232), 12,
+            ui.desenhar_texto(tela, t("ou clique para voar"), (LARGURA // 2 + 60, 232), 12,
                               BRANCO, "center")
 
     def _desenhar_ovo(self, tela):

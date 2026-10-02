@@ -6,6 +6,7 @@ import pygame
 
 from settings import *
 from core import ui
+from core.idioma import t
 
 # ============================================================
 # PETS
@@ -1924,19 +1925,19 @@ class PetNoMundo:
         pid = self.id
         if pid == "pintinho":
             self._som(ctx, "ponto")
-            self._texto(ctx, "PIU!", topo, (255, 230, 90))
+            self._texto(ctx, t("PIU!"), topo, (255, 230, 90))
         elif pid == "gatinho":
             self._som(ctx, "selecionar", 0.5)
-            self._texto(ctx, "RRRR...", topo, (255, 170, 200))
+            self._texto(ctx, t("RRRR..."), topo, (255, 170, 200))
         elif pid == "cachorrinho":
             self._som(ctx, "boing", 0.7)
-            self._texto(ctx, "AU AU!", topo, (255, 230, 170))
+            self._texto(ctx, t("AU AU!"), topo, (255, 230, 170))
         elif pid == "pinguim":
             self._som(ctx, "asa")
             self._sons = [[0.25, "asa", 0.8], [0.5, "asa", 0.6]]
         elif pid == "abelha":
             self._som(ctx, "asa")
-            self._texto(ctx, "ZZZUM!", topo, (255, 220, 60))
+            self._texto(ctx, t("ZZZUM!"), topo, (255, 220, 60))
             cx, cy = self._ovo_centro
             px, py = self._pos_desenho()[:2]
             self._loop_a0 = math.atan2((py - cy) / 0.6, px - cx)
@@ -1944,11 +1945,11 @@ class PetNoMundo:
             self._som(ctx, "mola")
         elif pid == "fantasma":
             self._som(ctx, "virar")
-            self._texto(ctx, "BUH!", topo, (210, 220, 255))
+            self._texto(ctx, t("BUH!"), topo, (210, 220, 255))
         elif pid == "robo":
             self._som(ctx, "ponto", 0.7)
             self._sons = [[0.2, "ponto", 0.7], [0.4, "ponto", 0.7]]
-            self._texto(ctx, "BIP BIP!", topo, (120, 255, 160))
+            self._texto(ctx, t("BIP BIP!"), topo, (120, 255, 160))
         elif pid == "dragao":
             self._som(ctx, "explosao", 0.25)
             if self._ovo_x is not None:
@@ -1957,13 +1958,13 @@ class PetNoMundo:
             self._som(ctx, "acerto")
         elif pid == "tartaruga":
             self._som(ctx, "bater", 0.6)
-            self._texto(ctx, "TOC!", topo, (200, 240, 160))
+            self._texto(ctx, t("TOC!"), topo, (200, 240, 160))
         elif pid == "coelho":
             self._som(ctx, "mola")
-            self._texto(ctx, "BOING!", topo, (255, 200, 220))
+            self._texto(ctx, t("BOING!"), topo, (255, 200, 220))
         elif pid == "capivara":
             self._som(ctx, "selecionar", 0.4)
-            self._texto(ctx, "RELAXA...", topo, (255, 200, 140))
+            self._texto(ctx, t("RELAXA..."), topo, (255, 200, 140))
 
     def _atualizar_reacao(self, dt, ctx):
         u = 1 - self.reacao / self.esp.reacao_dur

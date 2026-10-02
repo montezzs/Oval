@@ -6,6 +6,7 @@ import pygame
 
 from settings import *
 from core import ui
+from core.idioma import t as tr
 from jogos.base import MiniJogo
 
 # ============================================================
@@ -716,6 +717,7 @@ class OvoSobrevivente(MiniJogo):
         chave = self.escolha["opcoes"][i]
         self.up[chave] += 1
         nome, _, _, cor = MELHORIAS[chave]
+        nome = tr(nome)
         if chave == "vida":
             self.vida_max += 1
             self.vidas = min(self.vida_max, self.vidas + 1)
@@ -737,7 +739,7 @@ class OvoSobrevivente(MiniJogo):
             self.nivel += 1
             self.pendentes += 1
             self.som("levelup", 0.8)
-            self.textos.adicionar(f"NÍVEL {self.nivel}!", (self.x, self.y - 70), (140, 230, 255), 18)
+            self.textos.adicionar(tr("NÍVEL {n}!", n=self.nivel), (self.x, self.y - 70), (140, 230, 255), 18)
             self.particulas.explodir((self.x, self.y), [(140, 230, 255), BRANCO, AMARELO], 30, 300,
                                      0.8, gravidade=0)
         if self.pendentes > 0 and self.escolha is None and not self.morto:
@@ -1214,7 +1216,7 @@ class OvoSobrevivente(MiniJogo):
             self.particulas.explodir((self.x, self.y), [self.jogador.cor, BRANCO, AMARELO], 40, 320, 1.0)
         else:
             self.som("erro", 0.8)
-            self.textos.adicionar("AI!", (self.x, self.y - 50), (255, 110, 110), 16)
+            self.textos.adicionar(tr("AI!"), (self.x, self.y - 50), (255, 110, 110), 16)
 
     # Cristais e itens ---------------------------------------------
 
@@ -1252,12 +1254,12 @@ class OvoSobrevivente(MiniJogo):
             if (it[0] - self.x) ** 2 + (it[1] - self.y) ** 2 < 34 * 34:
                 if it[2] == "coracao":
                     self.vidas = min(self.vida_max, self.vidas + 1)
-                    self.textos.adicionar("+1 CORAÇÃO", (self.x, self.y - 60), (255, 120, 150), 14)
+                    self.textos.adicionar(tr("+1 CORAÇÃO"), (self.x, self.y - 60), (255, 120, 150), 14)
                     self.particulas.explodir((self.x, self.y), [(235, 60, 90), (255, 190, 200), BRANCO],
                                              20, 200, 0.6)
                 else:
                     self.ima_total = 3.0
-                    self.textos.adicionar("ÍMÃ!", (self.x, self.y - 60), (255, 120, 120), 16)
+                    self.textos.adicionar(tr("ÍMÃ!"), (self.x, self.y - 60), (255, 120, 120), 16)
                     self.particulas.explodir((self.x, self.y), [(230, 70, 70), BRANCO], 20, 220, 0.6)
                 self.som("moeda", 0.8)
                 continue
@@ -1288,13 +1290,13 @@ class OvoSobrevivente(MiniJogo):
 
     def _fim(self):
         self.pontos = self._calcular_pontos()
-        linhas = [f"PONTOS: {self.pontos}",
-                  f"TEMPO: {_formatar_tempo(self.relogio)} • NÍVEL {self.nivel}",
-                  f"INIMIGOS DERROTADOS: {self.abates}"]
+        linhas = [tr("PONTOS: {n}", n=self.pontos),
+                  tr("TEMPO: {tempo} • NÍVEL {n}", tempo=_formatar_tempo(self.relogio), n=self.nivel),
+                  tr("INIMIGOS DERROTADOS: {n}", n=self.abates)]
         if self.sobreviveu:
-            self.terminar(True, self.pontos, titulo="VOCÊ SOBREVIVEU!", linhas=linhas)
+            self.terminar(True, self.pontos, titulo=tr("VOCÊ SOBREVIVEU!"), linhas=linhas)
         else:
-            self.terminar(False, self.pontos, titulo="O OVO FOI BATIDO!", linhas=linhas)
+            self.terminar(False, self.pontos, titulo=tr("O OVO FOI BATIDO!"), linhas=linhas)
 
     # --------------------------------------------------------
     # DESENHO
@@ -1383,7 +1385,7 @@ class OvoSobrevivente(MiniJogo):
             tam = 30 if len(self.aviso) < 18 else 20
             cor = AMARELO if self.sobreviveu or "DERROTADO" in self.aviso else (255, 120, 100)
             if int(self.t_aviso * 6) % 2 == 0 or self.t_aviso < 1.0:
-                ui.desenhar_texto(tela, self.aviso, (LARGURA // 2, 200), tam, cor, "center")
+                ui.desenhar_texto(tela, tr(self.aviso), (LARGURA // 2, 200), tam, cor, "center")
 
     def _desenhar_inimigo(self, tela, ini, cx, cy):
         # Chamado para até 150 inimigos por quadro: sem get_rect/round
@@ -1459,7 +1461,7 @@ class OvoSobrevivente(MiniJogo):
             cheio.w = max(2, int(barra.w * ch.vida / ch.vida_max))
             pygame.draw.rect(tela, SUCO, cheio, border_radius=6)
             pygame.draw.rect(tela, BRANCO, barra.inflate(8, 8), 2, border_radius=8)
-            ui.desenhar_texto(tela, "LIQUIDIFICADOR", (barra.centerx, barra.bottom + 8), 10,
+            ui.desenhar_texto(tela, tr("LIQUIDIFICADOR"), (barra.centerx, barra.bottom + 8), 10,
                               (255, 170, 150), "midtop")
 
         # Abates e pontos (antes do botão de pausa)
@@ -1467,16 +1469,16 @@ class OvoSobrevivente(MiniJogo):
         caixa.right = LARGURA - 76
         ui.painel(tela, caixa, (20, 24, 40), BRANCO, 12, 3, sombra=False)
         ui.desenhar_texto(tela, f"× {self.abates}", (caixa.x + 14, caixa.y + 15), 12, BRANCO, "midleft")
-        ui.desenhar_texto(tela, f"{self.pontos} PTS", (caixa.x + 14, caixa.y + 34), 10, AMARELO, "midleft")
+        ui.desenhar_texto(tela, tr("{n} PTS", n=self.pontos), (caixa.x + 14, caixa.y + 34), 10, AMARELO, "midleft")
         rec = self.recorde()
         if rec is not None:
-            ui.desenhar_texto(tela, f"REC {rec}", (caixa.right - 12, caixa.y + 15), 8,
+            ui.desenhar_texto(tela, tr("REC {n}", n=rec), (caixa.right - 12, caixa.y + 15), 8,
                               (180, 200, 255), "midright")
 
         # Barra de XP embaixo
         pilula = pygame.Rect(12, ALTURA - 40, 96, 30)
         ui.painel(tela, pilula, (20, 24, 40), (140, 230, 255), 10, 3, sombra=False)
-        ui.desenhar_texto(tela, f"NV {self.nivel}", pilula.center, 12, (170, 235, 255), "center")
+        ui.desenhar_texto(tela, tr("NV {n}", n=self.nivel), pilula.center, 12, (170, 235, 255), "center")
         barra = pygame.Rect(pilula.right + 10, ALTURA - 32, LARGURA - pilula.right - 32, 14)
         pygame.draw.rect(tela, (20, 24, 40), barra.inflate(6, 6), border_radius=8)
         pygame.draw.rect(tela, (50, 60, 90), barra, border_radius=6)
@@ -1500,11 +1502,12 @@ class OvoSobrevivente(MiniJogo):
     def _desenhar_cartas(self, tela):
         esc = self.escolha
         ui.veu(tela, 170)
-        ui.desenhar_texto(tela, "SUBIU DE NÍVEL!", (LARGURA // 2, 130), 30, AMARELO, "center")
-        ui.desenhar_texto(tela, "ESCOLHA UMA MELHORIA", (LARGURA // 2, 180), 14, (180, 220, 255), "center")
+        ui.desenhar_texto(tela, tr("SUBIU DE NÍVEL!"), (LARGURA // 2, 130), 30, AMARELO, "center")
+        ui.desenhar_texto(tela, tr("ESCOLHA UMA MELHORIA"), (LARGURA // 2, 180), 14, (180, 220, 255), "center")
 
         for i, (chave, r) in enumerate(zip(esc["opcoes"], self._rects_cartas())):
             nome, desc, maximo, cor = MELHORIAS[chave]
+            nome, desc = tr(nome), tr(desc)
             # Entrada: as cartas sobem uma depois da outra
             k = max(0.0, min(1.0, (esc["t"] - i * 0.07) / 0.25))
             sel = i == esc["indice"]
@@ -1539,8 +1542,8 @@ class OvoSobrevivente(MiniJogo):
             elif self.up[chave] == 0:
                 texto = "NOVO!"
             else:
-                texto = f"NÍVEL {self.up[chave] + 1}"
-            ui.desenhar_texto(tela, texto, (r.centerx, r.bottom - 50), 10,
+                texto = tr("NÍVEL {n}", n=self.up[chave] + 1)
+            ui.desenhar_texto(tela, tr(texto), (r.centerx, r.bottom - 50), 10,
                               AMARELO if texto == "NOVO!" else (180, 220, 255), "midtop")
             if chave != "lanche":
                 larg = maximo * 18
@@ -1553,5 +1556,5 @@ class OvoSobrevivente(MiniJogo):
                     else:
                         pygame.draw.circle(tela, (90, 90, 120), c, 6, 2)
 
-        ui.desenhar_texto(tela, "1 2 3 • ← → + ENTER • MOUSE", (LARGURA // 2, 580), 10,
+        ui.desenhar_texto(tela, tr("1 2 3 • ← → + ENTER • MOUSE"), (LARGURA // 2, 580), 10,
                           (200, 200, 220), "midtop")

@@ -3,6 +3,7 @@ import math
 import pygame
 
 from settings import *
+from core.idioma import t
 from core import ui
 from core.cena import Cena, tecla_voltar
 from core.fundo_menu import FundoAnimado
@@ -61,20 +62,21 @@ class Produto:
         self.tipo = tipo            # cosmetico | pet | movel | comida | semente
         self.id = pid
         self.dados = dados
-        self.nome = dados.get("nome", pid.upper())
+        # Nome e descrição já no idioma atual (a loja é montada ao abrir)
+        self.nome = t(dados.get("nome", pid.upper()))
         if tipo == "pet" and dados.get("especie"):
-            self.nome = f"{dados['nome']} ({dados['especie']})"
+            self.nome = f"{t(dados['nome'])} ({t(dados['especie'])})"
         self.preco = int(dados.get("preco", 0))
         self.raridade = dados.get("raridade", "COMUM")
-        self.descricao = dados.get("talento") or dados.get("descricao") or DESCRICOES.get(tipo, "")
+        self.descricao = t(dados.get("talento") or dados.get("descricao") or DESCRICOES.get(tipo, ""))
         if tipo == "comida" and dados.get("efeitos"):
             nomes = {"fome": "FOME", "energia": "ENERGIA", "diversao": "DIVERSÃO",
                      "higiene": "HIGIENE"}
-            self.descricao = "  ".join(f"{nomes.get(k, k)} +{v}" for k, v in dados["efeitos"].items())
+            self.descricao = "  ".join(f"{t(nomes.get(k, k))} +{v}" for k, v in dados["efeitos"].items())
         elif tipo == "semente" and dados.get("tempo"):
             minutos = int(dados["tempo"]) // 60
             tempo = f"{minutos // 60}h" if minutos >= 60 else f"{minutos} min"
-            self.descricao = f"Plante no jardim do SOL. Fica pronta em {tempo}."
+            self.descricao = t("Plante no jardim do SOL. Fica pronta em {tempo}.", tempo=tempo)
 
 
 class CenaLoja(Cena):
@@ -246,9 +248,9 @@ class CenaLoja(Cena):
         if p is None:
             return ""
         if p.tipo in ("comida", "semente"):
-            return f"COMPRAR  {p.preco}"
+            return t("COMPRAR  {n}", n=p.preco)
         if not self._tem(p):
-            return f"COMPRAR  {p.preco}"
+            return t("COMPRAR  {n}", n=p.preco)
         if p.id.startswith("canteiro"):
             return "COMPRADO"
         if p.tipo == "cosmetico":
@@ -262,7 +264,7 @@ class CenaLoja(Cena):
     # --------------------------------------------------------
 
     def _avisar(self, msg):
-        self.aviso = msg
+        self.aviso = t(msg)
         self.tempo_aviso = 2.2
 
     def _acao(self):
@@ -305,22 +307,23 @@ class CenaLoja(Cena):
         self.som("compra")
         cores = [CORES_RARIDADE.get(p.raridade, BRANCO), AMARELO, BRANCO]
         self.particulas.explodir(PROVADOR.center, cores, 40, 380)
-        self._avisar(f"{p.nome} COMPRADO!")
+        self._avisar(t("{nome} COMPRADO!", nome=p.nome))
 
     def _abrir_caixa(self):
         from core import caixa, progresso
         save = self.app.save
         item, nome, raridade, consolo = caixa.sortear(save)
+        nome = t(nome)
         progresso.contar(self.app, "caixas")
         cor = CORES_RARIDADE.get(raridade, BRANCO)
         self.particulas.explodir(PROVADOR.center, [cor, AMARELO, BRANCO], 90, 460)
         self.som("levelup" if raridade in ("EPICO", "LENDARIO") else "vencer")
         if consolo:
-            self._avisar(f"{nome} (REPETIDO): +{consolo} OVOEDAS")
+            self._avisar(t("{nome} (REPETIDO): +{n} OVOEDAS", nome=nome, n=consolo))
         else:
-            self._avisar(f"CAIXA: {nome} ({raridade})!")
+            self._avisar(t("CAIXA: {nome} ({raridade})!", nome=nome, raridade=t(raridade)))
             self.produtos = self._montar_produtos()
-        self.app.toasts.adicionar("CAIXA SURPRESA! (" + raridade + ")", nome,
+        self.app.toasts.adicionar(t("CAIXA SURPRESA! (") + t(raridade) + ")", nome,
                                   f"+{consolo}" if consolo else "", None)
         save.salvar()
 
@@ -542,7 +545,7 @@ class CenaLoja(Cena):
 
     def desenhar(self, tela):
         self.fundo.desenhar(tela)
-        ui.desenhar_texto(tela, "LOJA", (LARGURA // 2, 18), 40, AMARELO, "midtop", True, True)
+        ui.desenhar_texto(tela, t("LOJA"), (LARGURA // 2, 18), 40, AMARELO, "midtop", True, True)
         self.botao_voltar.desenhar(tela)
         ui.desenhar_moedas(tela, self.app.save["moedas"], (LARGURA - 16, 20), "topright", 18)
 
@@ -555,7 +558,7 @@ class CenaLoja(Cena):
             ui.sombra_suave(tela, self.rects_abas[i], 10, 4, 70)
             pygame.draw.rect(tela, (120, 70, 20) if ativa else (60, 36, 14), r, border_radius=10)
             pygame.draw.rect(tela, AMARELO if ativa else (190, 150, 100), r, 3, border_radius=10)
-            ui.desenhar_texto(tela, nome, r.center, 10, AMARELO if ativa else UI_TEXTO, "center",
+            ui.desenhar_texto(tela, t(nome), r.center, 10, AMARELO if ativa else UI_TEXTO, "center",
                               True, ativa)
 
         self._desenhar_provador(tela)
@@ -567,7 +570,7 @@ class CenaLoja(Cena):
             ui.painel(tela, r, (40, 24, 10), AMARELO, 10, 2, sombra=False)
             tela.blit(sup, sup.get_rect(center=r.center))
         elif ABAS[self.aba] in ("CASA", "QUINTAL"):
-            ui.desenhar_texto(tela, "QUER MUDAR A FACHADA? USE REFORMAR NA RUA DOS OVOS!",
+            ui.desenhar_texto(tela, t("QUER MUDAR A FACHADA? USE REFORMAR NA RUA DOS OVOS!"),
                               (GRADE.centerx, ALTURA - 16), 8, (255, 220, 150), "center")
 
         self.particulas.desenhar(tela)
@@ -610,7 +613,7 @@ class CenaLoja(Cena):
                                      feliz=True, escala=1.0)
 
         if p is None:
-            ui.desenhar_texto(tela, "EM BREVE!", (PROVADOR.centerx, palco_y + 60), 14,
+            ui.desenhar_texto(tela, t("EM BREVE!"), (PROVADOR.centerx, palco_y + 60), 14,
                               BRANCO, "center")
             return
 
@@ -620,7 +623,7 @@ class CenaLoja(Cena):
         for linha in ui.quebrar_linhas(p.nome, 14, PROVADOR.w - 30)[:2]:
             ui.desenhar_texto(tela, linha, (PROVADOR.centerx, y), 14, AMARELO, "midtop")
             y += 22
-        ui.desenhar_texto(tela, p.raridade.replace("EPICO", "ÉPICO").replace("LENDARIO", "LENDÁRIO"),
+        ui.desenhar_texto(tela, t(p.raridade.replace("EPICO", "ÉPICO").replace("LENDARIO", "LENDÁRIO")),
                           (PROVADOR.centerx, y + 2), 10, cor_r, "midtop")
         y += 22
         for linha in ui.quebrar_linhas(p.descricao, 10, PROVADOR.w - 36)[:4]:
@@ -629,14 +632,14 @@ class CenaLoja(Cena):
 
         tem = self._tem(p)
         if p.tipo in ("comida", "semente"):
-            ui.desenhar_texto(tela, f"VOCÊ TEM: {tem}", (PROVADOR.centerx, self.botao_acao.rect.y - 26),
+            ui.desenhar_texto(tela, t("VOCÊ TEM: {n}", n=tem), (PROVADOR.centerx, self.botao_acao.rect.y - 26),
                               12, BRANCO, "midtop")
 
         # Botão de ação
         rotulo = self._rotulo_acao(p)
         self.botao_acao.rotulo = rotulo
         pode = p.preco <= self.app.save["moedas"]
-        compravel = rotulo.startswith("COMPRAR")
+        compravel = p.tipo in ("comida", "semente") or not self._tem(p)
         if compravel:
             self.botao_acao.cor = (40, 130, 60) if pode else (90, 60, 60)
             self.botao_acao.cor_hover = (60, 180, 90) if pode else (120, 70, 70)
@@ -654,7 +657,7 @@ class CenaLoja(Cena):
     def _desenhar_grade(self, tela):
         itens = self.na_pagina
         if not itens:
-            ui.desenhar_texto(tela, "NADA AQUI AINDA", GRADE.center, 16, BRANCO, "center")
+            ui.desenhar_texto(tela, t("NADA AQUI AINDA"), GRADE.center, 16, BRANCO, "center")
         for i, p in enumerate(itens):
             r = self._rect_card(i)
             sel = i == self.indice
@@ -686,9 +689,9 @@ class CenaLoja(Cena):
                                       "topright")
             else:
                 ativo = self._ativo(p)
-                txt = "EM USO" if ativo else "É SEU"
+                txt = t("EM USO") if ativo else t("É SEU")
                 if p.id.startswith("canteiro"):
-                    txt = "COMPRADO"
+                    txt = t("COMPRADO")
                 ui.desenhar_texto(tela, txt, (r.centerx, r.bottom - 16), 10,
                                   (120, 255, 150) if ativo or p.id.startswith("canteiro") else BRANCO,
                                   "center")
@@ -712,7 +715,7 @@ class CenaLoja(Cena):
                 ativo = rot == atual
                 pygame.draw.rect(tela, (120, 70, 20) if ativo else (60, 36, 14), r, border_radius=10)
                 pygame.draw.rect(tela, AMARELO if ativo else (150, 110, 70), r, 2, border_radius=10)
-                ui.desenhar_texto(tela, rot, (r.centerx, r.centery - 3), 8,
+                ui.desenhar_texto(tela, t(rot), (r.centerx, r.centery - 3), 8,
                                   AMARELO if ativo else BRANCO, "center")
                 ui.desenhar_texto(tela, str(k + 1), (r.centerx, r.bottom - 6), 6,
                                   (200, 170, 120), "center")
@@ -728,7 +731,7 @@ class CenaLoja(Cena):
         caixa.center = (LARGURA // 2, ALTURA // 2)
         ui.painel(tela, caixa, (40, 26, 12), AMARELO, 18, 4)
         p = self.confirmar
-        ui.desenhar_texto(tela, "COMPRAR", (caixa.centerx, caixa.y + 24), 16, UI_TEXTO, "midtop",
+        ui.desenhar_texto(tela, t("COMPRAR"), (caixa.centerx, caixa.y + 24), 16, UI_TEXTO, "midtop",
                           True, True)
         for j, linha in enumerate(ui.quebrar_linhas(p.nome, 16, caixa.w - 40)[:2]):
             ui.desenhar_texto(tela, linha, (caixa.centerx, caixa.y + 54 + j * 24), 16, AMARELO,

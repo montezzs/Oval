@@ -6,6 +6,7 @@ import pygame
 from settings import *
 from core import ui
 from core.cena import Cena, tecla_voltar
+from core.idioma import t
 
 # ============================================================
 # MINI JOGO (CLASSE BASE)
@@ -216,7 +217,7 @@ class MiniJogo(Cena):
         if not self.partida_valida():
             # Ninguém jogou de verdade: não paga nada (anti-farm)
             moedas = 0
-            self.detalhe_moedas = ["NINGUÉM JOGOU: SEM OVOEDAS"]
+            self.detalhe_moedas = [t("NINGUÉM JOGOU: SEM OVOEDAS")]
         else:
             curta = self.tempo_partida < self.TEMPO_MINIMO and not venceu
             # Partida curta não gasta o bônus da 1ª partida do dia
@@ -224,19 +225,19 @@ class MiniJogo(Cena):
             base = self.calcular_moedas(valor, venceu)
             if curta:
                 moedas = min(self.MOEDAS_MIN, base)
-                self.detalhe_moedas = [f"PARTIDA CURTA: +{moedas}",
-                                       f"JOGUE MAIS DE {int(self.TEMPO_MINIMO)} s"]
+                self.detalhe_moedas = [t("PARTIDA CURTA: +{n}", n=moedas),
+                                       t("JOGUE MAIS DE {n} s", n=int(self.TEMPO_MINIMO))]
             else:
                 moedas = base + extra
-                self.detalhe_moedas.append(f"PARTIDA +{base}")
+                self.detalhe_moedas.append(t("PARTIDA +{n}", n=base))
                 if extra:
-                    self.detalhe_moedas.append(f"1ª DO DIA +{extra}")
+                    self.detalhe_moedas.append(t("1ª DO DIA +{n}", n=extra))
                 if self.novo_recorde:
                     moedas += self.MOEDAS_RECORDE
-                    self.detalhe_moedas.append(f"RECORDE +{self.MOEDAS_RECORDE}")
+                    self.detalhe_moedas.append(t("RECORDE +{n}", n=self.MOEDAS_RECORDE))
             bonus = self.app.bonus_moedas()
             if moedas > 0 and round(moedas * bonus) > moedas:
-                self.detalhe_moedas.append(f"BÔNUS ×{bonus:.2f}".replace(".", ","))
+                self.detalhe_moedas.append(t("BÔNUS ×{n}", n=f"{bonus:.2f}".replace(".", ",")))
         moedas = round(moedas * self.app.bonus_moedas()) if moedas > 0 else 0
         self.moedas_ganhas = self.app.save.ganhar(moedas)
         if self.moedas_ganhas > 0:
@@ -245,7 +246,7 @@ class MiniJogo(Cena):
 
         self.titulo_fim = titulo or ("VOCÊ VENCEU!" if venceu else "FIM DE JOGO")
         self.linhas_fim = linhas if linhas is not None else [
-            f"{self.ROTULO_PONTOS}: {self.formatar(valor)}"
+            f"{t(self.ROTULO_PONTOS)}: {self.formatar(valor)}"
         ]
 
         rotulos = ["JOGAR DE NOVO"]
@@ -293,13 +294,13 @@ class MiniJogo(Cena):
         melhor = trofeus._melhor(self.app.save, type(self), r["tipo"] == "menor")
         if melhor is None:
             melhor = valor
-        nome = {"bronze": "BRONZE", "prata": "PRATA", "ouro": "OURO"}[proxima]
+        nome = t({"bronze": "BRONZE", "prata": "PRATA", "ouro": "OURO"}[proxima])
         if r["tipo"] == "menor":
-            self.falta_medalha = f"{nome}: FAÇA {self.formatar(r[proxima])} OU MENOS"
+            self.falta_medalha = t("{nome}: FAÇA {n} OU MENOS", nome=nome, n=self.formatar(r[proxima]))
         else:
             falta = r[proxima] - melhor
             if falta > 0:
-                self.falta_medalha = f"FALTAM {self.formatar(falta)} PARA O {nome}!"
+                self.falta_medalha = t("FALTAM {n} PARA O {nome}!", n=self.formatar(falta), nome=nome)
 
     def sair_para_menu(self):
         self.som("voltar")
@@ -331,13 +332,13 @@ class MiniJogo(Cena):
         caixa = pygame.Rect(12, 12, 300, 48)
         ui.sombra_suave(tela, caixa, 12, 4, 70)
         ui.painel(tela, caixa, UI_PAINEL_HUD, UI_BORDA, 12, 3, sombra=False)
-        ui.desenhar_texto(tela, f"{self.ROTULO_PONTOS}: {self.formatar(self.pontos)}",
+        ui.desenhar_texto(tela, f"{t(self.ROTULO_PONTOS)}: {self.formatar(self.pontos)}",
                           (caixa.x + 16, caixa.centery), 14, AMARELO, "midleft", True, True)
 
         # Recorde fica direto sobre o jogo: contorno para ler em qualquer fundo
         rec = self.recorde()
         if rec is not None:
-            ui.desenhar_texto(tela, f"RECORDE: {self.formatar(rec)}",
+            ui.desenhar_texto(tela, t("RECORDE: {n}", n=self.formatar(rec)),
                               (caixa.right + 16, caixa.centery), 12, UI_TEXTO, "midleft",
                               True, True)
 
@@ -526,8 +527,9 @@ class MiniJogo(Cena):
         ui.painel(tela, caixa, UI_PAINEL, self.COR, 22, 5)
 
         # Título com o avatar do lado
-        tam = ui.tamanho_que_cabe(self.TITULO, caixa.w - 190, (30, 26, 22, 18))
-        ui.desenhar_texto(tela, self.TITULO, (LARGURA // 2, topo + 28 + (30 - tam) // 2), tam,
+        titulo = t(self.TITULO)
+        tam = ui.tamanho_que_cabe(titulo, caixa.w - 190, (30, 26, 22, 18))
+        ui.desenhar_texto(tela, titulo, (LARGURA // 2, topo + 28 + (30 - tam) // 2), tam,
                           AMARELO, "midtop", True, True)
         self.jogador.desenhar(tela, (caixa.x + 60, topo + 46 + math.sin(self.tempo * 3) * 4), 44)
         self.jogador.desenhar(tela, (caixa.right - 60, topo + 46 + math.cos(self.tempo * 3) * 4),
@@ -536,7 +538,7 @@ class MiniJogo(Cena):
         # Instruções
         y = topo + 92
         for linha in self.INSTRUCOES:
-            for sub in ui.quebrar_linhas(linha, 12, caixa.w - 80):
+            for sub in ui.quebrar_linhas(t(linha), 12, caixa.w - 80):
                 ui.desenhar_texto(tela, sub, (LARGURA // 2, y), 12, UI_TEXTO, "midtop")
                 y += 22
             y += 6
@@ -545,7 +547,7 @@ class MiniJogo(Cena):
         indice = self.menu_inicio.indice
         opcao = indice if (self.OPCOES and indice < len(self.OPCOES)) else self.opcao
         rec = self.recorde(opcao)
-        texto_rec = f"★ RECORDE: {self.formatar(rec)} ★" if rec is not None else "★ SEM RECORDE AINDA ★"
+        texto_rec = t("★ RECORDE: {n} ★", n=self.formatar(rec)) if rec is not None else t("★ SEM RECORDE AINDA ★")
         y_rec = self.menu_inicio.botoes[0].rect.y - 36
         ui.desenhar_texto(tela, texto_rec, (LARGURA // 2, y_rec), 14, AMARELO, "midtop",
                           True, True)
@@ -557,7 +559,7 @@ class MiniJogo(Cena):
 
         limite = y_rec - 12
         if self.OPCOES:
-            ui.desenhar_texto(tela, "ESCOLHA A DIFICULDADE", (LARGURA // 2, y_rec - 30),
+            ui.desenhar_texto(tela, t("ESCOLHA A DIFICULDADE"), (LARGURA // 2, y_rec - 30),
                               12, UI_TEXTO_SUAVE, "midtop")
             limite = y_rec - 42
 
@@ -585,11 +587,11 @@ class MiniJogo(Cena):
         if tipo == "opcao":
             if not self.OPCOES:
                 return None
-            return [f"VENCER {op}" for op in self.OPCOES[:3]]
+            return [t("VENCER {op}", op=t(op)) for op in self.OPCOES[:3]]
         if tipo == "partidas":
-            return [f"{r[n]} PARTIDA{'S' if r[n] > 1 else ''}" for n in trofeus.NIVEIS]
+            return [(t("{n} PARTIDAS", n=r[n]) if r[n] > 1 else t("{n} PARTIDA", n=r[n])) for n in trofeus.NIVEIS]
         if tipo == "menor":
-            return [f"{self.formatar(r[n])} OU MENOS" for n in trofeus.NIVEIS]
+            return [t("{n} OU MENOS", n=self.formatar(r[n])) for n in trofeus.NIVEIS]
         return [self.formatar(r[n]) for n in trofeus.NIVEIS]
 
     def _desenhar_medalhas(self, tela, y):
@@ -601,7 +603,7 @@ class MiniJogo(Cena):
         obtido, _ = trofeus.nivel(self.app.save, type(self))
         nivel = trofeus.NIVEIS.index(obtido) if obtido else -1
         cores = [(205, 127, 50), (200, 205, 215), (255, 214, 64)]
-        sups = [ui.texto(t, 8, BRANCO if k <= nivel else (190, 190, 210)) for k, t in enumerate(textos)]
+        sups = [ui.texto(tx, 8, BRANCO if k <= nivel else (190, 190, 210)) for k, tx in enumerate(textos)]
         total = sum(s.get_width() + 22 for s in sups) + 16 * (len(sups) - 1)
         x = LARGURA // 2 - total // 2
         for k, s in enumerate(sups):
@@ -619,12 +621,12 @@ class MiniJogo(Cena):
         restante = TEMPO_CONTAGEM - self.tempo_estado
         passo = TEMPO_CONTAGEM / 3
         numero = int(restante / passo) + 1
-        t = 1.0 - (restante % passo) / passo        # 0 -> 1 dentro de cada número
+        f = 1.0 - (restante % passo) / passo        # 0 -> 1 dentro de cada número
         rotulo = str(max(1, min(3, numero)))
         centro = (LARGURA // 2, ALTURA // 2)
 
         # Disco macio atrás do número (entra com "pop")
-        pop = ui.quicar(min(1.0, t / 0.3))
+        pop = ui.quicar(min(1.0, f / 0.3))
         raio = int(78 * pop)
         if raio > 4:
             disco = pygame.Surface((raio * 2 + 8, raio * 2 + 8), pygame.SRCALPHA)
@@ -636,19 +638,19 @@ class MiniJogo(Cena):
         # Número cresce com pop e some no finalzinho
         tamanho = max(8, int(64 * pop) // 4 * 4)       # passos de 4: menos fontes em cache
         sup = ui.texto(rotulo, tamanho, AMARELO, True, True)
-        if t > 0.8:
+        if f > 0.8:
             sup = sup.copy()
-            sup.set_alpha(int(255 * (1.0 - t) / 0.2))
+            sup.set_alpha(int(255 * (1.0 - f) / 0.2))
         tela.blit(sup, sup.get_rect(center=centro))
 
-        ui.desenhar_texto(tela, "PREPARE-SE!", (LARGURA // 2, ALTURA // 2 + 110), 16,
+        ui.desenhar_texto(tela, t("PREPARE-SE!"), (LARGURA // 2, ALTURA // 2 + 110), 16,
                           UI_TEXTO, "center", True, True)
 
     def _desenhar_vai(self, tela):
         """'VAI!' rapidinho logo depois da contagem."""
         k = 1.0 - self._vai / TEMPO_VAI
         tamanho = max(8, int(56 * ui.quicar(min(1.0, k / 0.35))) // 4 * 4)
-        sup = ui.texto("VAI!", tamanho, (140, 240, 140), True, True)
+        sup = ui.texto(t("VAI!"), tamanho, (140, 240, 140), True, True)
         if k > 0.55:
             sup = sup.copy()
             sup.set_alpha(int(255 * max(0.0, 1.0 - k) / 0.45))
@@ -659,7 +661,7 @@ class MiniJogo(Cena):
         caixa = pygame.Rect(0, 0, 440, 360)
         caixa.center = (LARGURA // 2, ALTURA // 2 + 20)
         ui.painel(tela, caixa, UI_PAINEL, self.COR, 20, 5)
-        ui.desenhar_texto(tela, "PAUSADO", (LARGURA // 2, caixa.y + 34), 28,
+        ui.desenhar_texto(tela, t("PAUSADO"), (LARGURA // 2, caixa.y + 34), 28,
                           AMARELO, "midtop", True, True)
         self.menu_pausa.desenhar(tela)
 
@@ -709,7 +711,7 @@ class MiniJogo(Cena):
             enche = min(1.0, self.tempo_estado / 0.8) * atual / meta
             pygame.draw.rect(tela, (120, 220, 255), (barra.x, barra.y, max(3, int(barra.w * enche)),
                                                      barra.h), border_radius=4)
-            ui.desenhar_texto(tela, f"NÍVEL {nivel}", (cx, barra.bottom + 6), 8, (180, 220, 255),
+            ui.desenhar_texto(tela, t("NÍVEL {n}", n=nivel), (cx, barra.bottom + 6), 8, (180, 220, 255),
                               "midtop")
 
         medalha = getattr(self, "medalha_nova", None)
@@ -722,15 +724,15 @@ class MiniJogo(Cena):
             pygame.draw.circle(tela, ui.escurecer(cor, 70), (c[0], c[1] + 2), raio)
             pygame.draw.circle(tela, cor, c, raio)
             ui.estrela(tela, c, raio * 0.6, ui.clarear(cor, 60), self.tempo * 1.5)
-            ui.desenhar_texto(tela, "MEDALHA NOVA!", (c[0] + 22, c[1] - 7), 8, AMARELO, "midleft")
-            ui.desenhar_texto(tela, medalha.upper(), (c[0] + 22, c[1] + 7), 10, cor, "midleft")
+            ui.desenhar_texto(tela, t("MEDALHA NOVA!"), (c[0] + 22, c[1] - 7), 8, AMARELO, "midleft")
+            ui.desenhar_texto(tela, t(medalha.upper()), (c[0] + 22, c[1] + 7), 10, cor, "midleft")
 
     def _desenhar_fim(self, tela):
-        t = self.tempo_estado
+        te = self.tempo_estado
         festa = self.venceu or self.novo_recorde
 
         # Véu entra suave (não "corta" o jogo de uma vez)
-        ui.veu(tela, int(160 * ui.suavizar(t / 0.25)))
+        ui.veu(tela, int(160 * ui.suavizar(te / 0.25)))
         caixa = pygame.Rect(0, 0, 600, 560)
         caixa.center = (LARGURA // 2, ALTURA // 2 + 10)
         ui.painel(tela, caixa, UI_PAINEL, AMARELO if self.venceu else self.COR, 22, 5)
@@ -745,9 +747,10 @@ class MiniJogo(Cena):
 
         # Faixa do título (entra com "pop")
         cor_titulo = AMARELO if self.venceu else (255, 150, 150)
-        tam = ui.tamanho_que_cabe(self.titulo_fim, caixa.w - 80, (30, 24, 20, 16))
-        pop = ui.quicar(min(1.0, t / 0.4))
-        sup = ui.texto(self.titulo_fim, tam, cor_titulo, True, True)
+        titulo_fim = t(self.titulo_fim)
+        tam = ui.tamanho_que_cabe(titulo_fim, caixa.w - 80, (30, 24, 20, 16))
+        pop = ui.quicar(min(1.0, te / 0.4))
+        sup = ui.texto(titulo_fim, tam, cor_titulo, True, True)
         faixa = pygame.Rect(0, 0, int((sup.get_width() + 70) * pop), int(58 * min(1.0, pop)))
         faixa.center = (LARGURA // 2, caixa.y + 44)
         if faixa.w > 30 and faixa.h > 10:
@@ -762,11 +765,11 @@ class MiniJogo(Cena):
         if self.moedas_ganhas > 0:
             total = self.moedas_ganhas
             duracao = max(0.5, min(1.4, 0.4 + total * 0.02))
-            mostrar = max(1, min(total, int(round(total * ui.sair_rapido(t / duracao)))))
-            brilho = max(0.0, 1.0 - (t - duracao) / 0.35) if t >= duracao else 0.0
+            mostrar = max(1, min(total, int(round(total * ui.sair_rapido(te / duracao)))))
+            brilho = max(0.0, 1.0 - (te - duracao) / 0.35) if te >= duracao else 0.0
             pilula = pygame.Rect(0, 0, 136, 48).inflate(int(14 * brilho), int(8 * brilho))
             pilula.center = (caixa.right - 110, caixa.y + 130)
-            ui.desenhar_texto(tela, "MOEDAS", (pilula.centerx, pilula.y - 8), 10,
+            ui.desenhar_texto(tela, t("MOEDAS"), (pilula.centerx, pilula.y - 8), 10,
                               UI_TEXTO_SUAVE, "midbottom")
             ui.sombra_suave(tela, pilula, pilula.h // 2, 4, 80)
             ui.painel(tela, pilula, UI_MOEDA_FUNDO, ui.misturar(AMARELO, BRANCO, brilho * 0.6),
@@ -785,18 +788,18 @@ class MiniJogo(Cena):
 
         y = caixa.y + 230
         for linha in self.linhas_fim:
-            ui.desenhar_texto(tela, linha, (LARGURA // 2, y), 16, UI_TEXTO, "midtop")
+            ui.desenhar_texto(tela, t(linha), (LARGURA // 2, y), 16, UI_TEXTO, "midtop")
             y += 30
 
         if self.novo_recorde:
             # Pulsa suave em vez de piscar
             k = (math.sin(self.tempo * 6) + 1) / 2
-            ui.desenhar_texto(tela, "★ NOVO RECORDE! ★", (LARGURA // 2, y + 4), 18,
+            ui.desenhar_texto(tela, t("★ NOVO RECORDE! ★"), (LARGURA // 2, y + 4), 18,
                               ui.misturar(AMARELO, BRANCO, k * 0.5), "midtop", True, True)
         else:
             rec = self.recorde()
             if rec is not None:
-                ui.desenhar_texto(tela, f"RECORDE: {self.formatar(rec)}", (LARGURA // 2, y + 4),
+                ui.desenhar_texto(tela, t("RECORDE: {n}", n=self.formatar(rec)), (LARGURA // 2, y + 4),
                                   14, UI_TEXTO_SUAVE, "midtop")
         falta = getattr(self, "falta_medalha", "")
         if falta:
@@ -810,3 +813,8 @@ class MiniJogo(Cena):
         self.menu_fim.desenhar(tela)
 
         self._confete_fim.desenhar(tela)
+
+
+# Fundos guardados em cache podem ter texto (ex.: placas): refaz ao trocar o idioma.
+from core import idioma as _idioma  # noqa: E402
+_idioma.ao_mudar(lambda _i: MiniJogo._fundos.clear())

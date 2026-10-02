@@ -5,6 +5,7 @@ import pygame
 
 from settings import *
 from core import ui
+from core.idioma import t
 from core import assets
 from jogos.base import MiniJogo
 
@@ -142,7 +143,7 @@ def _frente(w, h, jogador, apar, eh_voce):
 
     if eh_voce:
         tam = 12 if w >= 120 else 10
-        ui.desenhar_texto(sup, "VOCÊ", (w // 2, h - 8 - tam // 2 - 4), tam, (220, 90, 40),
+        ui.desenhar_texto(sup, t("VOCÊ"), (w // 2, h - 8 - tam // 2 - 4), tam, (220, 90, 40),
                           "center", False)
         ui.estrela(sup, (14, 14), max(5, w // 16), AMARELO)
         ui.estrela(sup, (w - 14, 14), max(5, w // 16), AMARELO)
@@ -543,7 +544,7 @@ class Memoria(MiniJogo):
                                                      (255, 150, 200)], 22, 230, 0.8)
         meio = ((a.rect.centerx + b.rect.centerx) / 2, (a.rect.centery + b.rect.centery) / 2)
         eh_voce = self.pares[a.par] == self.jogador.aparencia()
-        self.textos.adicionar("É VOCÊ!" if eh_voce else "PAR!", meio, AMARELO, 20)
+        self.textos.adicionar(t("É VOCÊ!") if eh_voce else t("PAR!"), meio, AMARELO, 20)
 
         if self.achados == len(self.pares):
             self.fase = "venceu"
@@ -601,8 +602,8 @@ class Memoria(MiniJogo):
                                          22, 280, 1.0, (3, 6))
             if self.t_fase >= DUR_VITORIA:
                 self.terminar(venceu=True, valor=self.jogadas,
-                              linhas=[f"JOGADAS: {self.jogadas}",
-                                      f"TEMPO: {_formatar_tempo(self.cronometro)}"])
+                              linhas=[t("JOGADAS: {n}", n=self.jogadas),
+                                      t("TEMPO: {n}", n=_formatar_tempo(self.cronometro))])
 
     # --------------------------------------------------------
     # DESENHO
@@ -668,7 +669,7 @@ class Memoria(MiniJogo):
         # Jogadas
         caixa = pygame.Rect(12, 12, 196, 48)
         ui.painel(tela, caixa, fundo, BRANCO, 12, 3, sombra=False)
-        ui.desenhar_texto(tela, f"JOGADAS: {self.jogadas}", (caixa.x + 16, caixa.centery + 1), 14,
+        ui.desenhar_texto(tela, t("JOGADAS: {n}", n=self.jogadas), (caixa.x + 16, caixa.centery + 1), 14,
                           AMARELO, "midleft")
 
         # Pares encontrados (com uma cartinha de ícone)
@@ -680,7 +681,7 @@ class Memoria(MiniJogo):
         pygame.draw.rect(tela, (252, 246, 230), icone, border_radius=4)
         pygame.draw.rect(tela, (196, 160, 104), icone, 2, border_radius=4)
         ui.coracao(tela, icone.center, 12)
-        ui.desenhar_texto(tela, f"PARES: {self.achados}/{len(self.pares)}",
+        ui.desenhar_texto(tela, t("PARES: {n}/{total}", n=self.achados, total=len(self.pares)),
                           (caixa2.right - 12, caixa2.centery + 1), 14, BRANCO, "midright")
 
         # Tempo
@@ -697,7 +698,7 @@ class Memoria(MiniJogo):
         # Nível e recorde
         caixa4 = pygame.Rect(caixa3.right + 12, 12, 176, 48)
         ui.painel(tela, caixa4, fundo, BRANCO, 12, 3, sombra=False)
-        ui.desenhar_texto(tela, self.OPCOES[self.opcao], (caixa4.x + 12, caixa4.y + 9), 10, (180, 220, 255))
+        ui.desenhar_texto(tela, t(self.OPCOES[self.opcao]), (caixa4.x + 12, caixa4.y + 9), 10, (180, 220, 255))
         rec = self.recorde()
-        texto_rec = f"RECORDE: {rec}" if rec is not None else "RECORDE: --"
+        texto_rec = t("RECORDE: {n}", n=rec if rec is not None else "--")
         ui.desenhar_texto(tela, texto_rec, (caixa4.x + 12, caixa4.y + 26), 12, AMARELO)

@@ -7,6 +7,7 @@ from settings import *
 from core import ceu, fachada, ui
 from core import fachada_desenho as fd
 from core.cena import Cena
+from core.idioma import t
 from core.jogador import Jogador
 from cenas.casa_extras.clima import Clima, VEUS
 from cenas.rua_comum import carregar_perfis
@@ -211,7 +212,7 @@ class CenaTitulo(Cena):
         self.menu.desenhar(tela)
         from cenas.casa_extras.eventos_casa import desenhar_faixa
         desenhar_faixa(tela, 0)
-        ui.desenhar_texto(tela, "ENTER = JOGAR", (16, 700), 8, (230, 230, 240), "bottomleft")
+        ui.desenhar_texto(tela, t("ENTER = JOGAR"), (16, 700), 8, (230, 230, 240), "bottomleft")
         ui.desenhar_texto(tela, "V" + VERSAO, (LARGURA - 16, 700), 8, (230, 230, 240), "bottomright")
 
     def _veu_chao(self, tela, veu):
@@ -245,7 +246,7 @@ class CenaTitulo(Cena):
                     ui.desenhar_texto(tela, l, (cx + ox, cy + oy), tam, (120, 60, 20), "center", False)
                 ui.desenhar_texto(tela, l, (cx, cy), tam, AMARELO, "center", False)
             x += w + esp
-        sub = ui.texto("A VIZINHANÇA DOS OVOS", 14, BRANCO)
+        sub = ui.texto(t("A VIZINHANÇA DOS OVOS"), 14, BRANCO)
         caixa = sub.get_rect(midtop=(LARGURA // 2, 236)).inflate(24, 14)
         fundo = pygame.Surface(caixa.size, pygame.SRCALPHA)
         pygame.draw.rect(fundo, (20, 24, 40, 170), fundo.get_rect(), border_radius=10)

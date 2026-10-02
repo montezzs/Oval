@@ -1,3 +1,4 @@
+from core.idioma import t
 import math
 import random
 
@@ -529,7 +530,7 @@ class ChuvaComida(MiniJogo):
         if self.morto:
             self.tempo_morto += dt
             if self.tempo_morto > 1.2:
-                self.terminar(linhas=[f"PONTOS: {self.pontos}", f"MAIOR COMBO: {self.maior_combo}"])
+                self.terminar(linhas=[t("PONTOS: {n}", n=self.pontos), t("MAIOR COMBO: {n}", n=self.maior_combo)])
         else:
             self.proximo -= dt
             if self.proximo <= 0:
@@ -694,12 +695,12 @@ class ChuvaComida(MiniJogo):
             self.ardido = TEMPO_ARDIDO
             self.fumaca = 0.0
             self.som("erro")
-            self.textos.adicionar("ARDEU!", (self.x, CHAO - ALTURA_OVO - 30), (255, 110, 80), 16)
+            self.textos.adicionar(t("ARDEU!"), (self.x, CHAO - ALTURA_OVO - 30), (255, 110, 80), 16)
             self.particulas.explodir((it.x, it.y), [(255, 80, 40), (255, 180, 60)], 14, 200, 0.5)
             self.tremer(0.12)
         else:
             self.som("explosao", 0.8)
-            self.textos.adicionar("BUM!", (it.x, it.y - 30), (255, 150, 60), 20)
+            self.textos.adicionar(t("BUM!"), (it.x, it.y - 30), (255, 150, 60), 20)
             self.particulas.explodir((it.x, it.y), [(255, 170, 40), (255, 90, 30), (255, 240, 120),
                                                     (80, 80, 90)], 40, 340, 0.8, (3, 8))
             self.claroes.append([it.x, it.y, 0.18])
@@ -716,7 +717,7 @@ class ChuvaComida(MiniJogo):
         if it.bom:
             # Comida no chão não tira vida, mas acaba com o combo
             if self.combo >= 3 and not self.morto:
-                self.textos.adicionar("COMBO PERDIDO", (it.x, CHAO - 50), (200, 210, 255), 12)
+                self.textos.adicionar(t("COMBO PERDIDO"), (it.x, CHAO - 50), (200, 210, 255), 12)
             self.combo = 0
             cores = {
                 "limao": [(250, 222, 40)], "maca": [(225, 45, 55)], "melancia": [(240, 60, 80)],
@@ -823,11 +824,11 @@ class ChuvaComida(MiniJogo):
         # Pontos e recorde no mesmo painel (a parede clara apagaria o texto)
         caixa = pygame.Rect(12, 12, 420, 48)
         ui.painel(tela, caixa, (20, 24, 40), BRANCO, 12, 3, sombra=False)
-        ui.desenhar_texto(tela, f"PONTOS: {self.pontos}", (caixa.x + 16, caixa.centery), 14,
+        ui.desenhar_texto(tela, t("PONTOS: {n}", n=self.pontos), (caixa.x + 16, caixa.centery), 14,
                           AMARELO, "midleft")
         rec = self.recorde()
         if rec is not None:
-            ui.desenhar_texto(tela, f"RECORDE: {rec}", (caixa.x + 226, caixa.centery), 12,
+            ui.desenhar_texto(tela, t("RECORDE: {v}", v=rec), (caixa.x + 226, caixa.centery), 12,
                               (180, 200, 255), "midleft")
 
         # Vidas (corações) no canto direito, antes do botão de pausa

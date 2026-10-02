@@ -3,6 +3,7 @@ import math
 import pygame
 
 from settings import *
+from core.idioma import t
 from core import codigo, progresso, ui
 from core.cena import Cena, tecla_voltar
 
@@ -75,8 +76,8 @@ class CenaAmigos(Cena):
     def _adicionar(self):
         res = codigo.adicionar(self.app.config, self.digitado, self.meu)
         msgs = {"ok": "AMIGO ADICIONADO!", "invalido": "CÓDIGO INVÁLIDO :(", "repetido": "ESSE AMIGO JÁ ESTÁ NA LISTA",
-                "eu": "ESSE É O SEU PRÓPRIO CÓDIGO!", "cheio": f"MÁXIMO DE {codigo.MAX_AMIGOS} AMIGOS"}
-        self._avisar(msgs[res])
+                "eu": "ESSE É O SEU PRÓPRIO CÓDIGO!", "cheio": "MÁXIMO DE {n} AMIGOS"}
+        self._avisar(t(msgs[res], n=codigo.MAX_AMIGOS))
         if res == "ok":
             self.som("vencer")
             self.digitado = ""
@@ -112,9 +113,9 @@ class CenaAmigos(Cena):
 
     def _copiar_meu(self):
         if _copiar(self.meu):
-            self._avisar("CÓDIGO COPIADO! MANDE PARA UM AMIGO.")
+            self._avisar(t("CÓDIGO COPIADO! MANDE PARA UM AMIGO."))
         else:
-            self._avisar("NÃO DEU PARA COPIAR: VEJA meu_codigo_oval.txt")
+            self._avisar(t("NÃO DEU PARA COPIAR: VEJA meu_codigo_oval.txt"))
         self.som("selecionar")
 
     def atualizar(self, dt):
@@ -132,10 +133,10 @@ class CenaAmigos(Cena):
         ui.veu(tela, 200)
         caixa = pygame.Rect(30, 14, LARGURA - 60, ALTURA - 84)
         ui.painel(tela, caixa, (30, 34, 60), (120, 220, 255), 20, 4)
-        ui.desenhar_texto(tela, "AMIGOS", (LARGURA // 2, caixa.y + 16), 24, AMARELO, "midtop")
+        ui.desenhar_texto(tela, t("AMIGOS"), (LARGURA // 2, caixa.y + 16), 24, AMARELO, "midtop")
 
         # Meu código
-        ui.desenhar_texto(tela, "CÓDIGO DO SEU OVO:", (caixa.x + 30, 70), 10, (180, 220, 255), "topleft")
+        ui.desenhar_texto(tela, t("CÓDIGO DO SEU OVO:"), (caixa.x + 30, 70), 10, (180, 220, 255), "topleft")
         linhas = ui.quebrar_linhas(self.meu.replace("-", " "), 10, 640)
         for i, l in enumerate(linhas[:4]):
             ui.desenhar_texto(tela, l, (caixa.x + 30, 92 + i * 18), 10, BRANCO, "topleft")
@@ -145,7 +146,7 @@ class CenaAmigos(Cena):
         campo = pygame.Rect(caixa.x + 30, 176, caixa.w - 60, 40)
         pygame.draw.rect(tela, (20, 24, 40), campo, border_radius=10)
         pygame.draw.rect(tela, AMARELO, campo, 2, border_radius=10)
-        texto = self.digitado[-52:] or "COLE O CÓDIGO DE UM AMIGO (CTRL+V) E APERTE ENTER"
+        texto = self.digitado[-52:] or t("COLE O CÓDIGO DE UM AMIGO (CTRL+V) E APERTE ENTER")
         cursor = "_" if self.digitado and int(self.tempo * 2) % 2 == 0 else ""
         ui.desenhar_texto(tela, texto + cursor, (campo.x + 12, campo.centery), 10,
                           BRANCO if self.digitado else (130, 130, 160), "midleft")
@@ -155,10 +156,10 @@ class CenaAmigos(Cena):
         # Lista de amigos
         lista = self._lista()
         if not lista:
-            ui.desenhar_texto(tela, "NENHUM AMIGO AINDA. TROQUE CÓDIGOS E DESAFIE RECORDES!",
+            ui.desenhar_texto(tela, t("NENHUM AMIGO AINDA. TROQUE CÓDIGOS E DESAFIE RECORDES!"),
                               (LARGURA // 2, 340), 10, (180, 180, 210), "midtop")
         from jogos import JOGOS
-        titulos = {j.ID: (j.TITULO_CURTO or j.TITULO) for j in JOGOS}
+        titulos = {j.ID: t(j.TITULO_CURTO or j.TITULO) for j in JOGOS}
         formatos = {j.ID: j.formatar for j in JOGOS}
         for i, (d, jog) in enumerate(lista[:8]):
             col, lin = i % 2, i // 2
@@ -168,11 +169,11 @@ class CenaAmigos(Cena):
             pygame.draw.rect(tela, (90, 100, 150), r, 2, border_radius=12)
             balanco = math.sin(self.tempo * 3 + i) * 3
             jog.desenhar(tela, (r.x + 40, r.centery + balanco), 50)
-            ui.desenhar_texto(tela, f"{d.get('n', 'AMIGO')}  •  NV {d.get('l', 1)}", (r.x + 80, r.y + 8), 10,
+            ui.desenhar_texto(tela, t("{nome}  •  NV {nv}", nome=d.get('n', t('AMIGO')), nv=d.get('l', 1)), (r.x + 80, r.y + 8), 10,
                               AMARELO, "topleft")
             for k, (jid, (valor, _)) in enumerate(list(d.get("r", {}).items())[:3]):
                 fmt = formatos.get(jid, str)
-                ui.desenhar_texto(tela, f"DUVIDO: {fmt(valor)} NO {titulos.get(jid, jid).upper()}",
+                ui.desenhar_texto(tela, t("DUVIDO: {valor} NO {jogo}", valor=fmt(valor), jogo=titulos.get(jid, jid).upper()),
                                   (r.x + 80, r.y + 28 + k * 16), 8, BRANCO, "topleft")
 
         self.botao_voltar.desenhar(tela)

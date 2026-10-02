@@ -1,7 +1,8 @@
 import pygame
 
 from settings import *
-from core import ui
+from core import idioma, ui
+from core.idioma import t
 from core.cena import Cena, tecla_voltar
 from core.janela import TAMANHOS
 
@@ -77,9 +78,9 @@ class CenaPausa(Cena):
         caixa = pygame.Rect(0, 0, 500, 610)
         caixa.midtop = (LARGURA // 2, 36)
         ui.painel(tela, caixa, (30, 34, 60), BRANCO, 20, 4)
-        ui.desenhar_texto(tela, "PAUSADO", (LARGURA // 2, 62), 32, AMARELO, "midtop", True, True)
+        ui.desenhar_texto(tela, t("PAUSADO"), (LARGURA // 2, 62), 32, AMARELO, "midtop", True, True)
         self.menu.desenhar(tela)
-        ui.centralizado(tela, "ESC para voltar", 666, 12)
+        ui.centralizado(tela, t("ESC para voltar"), 666, 12)
 
 
 class CenaOpcoes(Cena):
@@ -95,7 +96,7 @@ class CenaOpcoes(Cena):
         self.pausa = pausa
         from cenas.titulo import CenaTitulo
         self.pode_resetar = isinstance(pausa, CenaTitulo)
-        self.menu = ui.Menu(self._rotulos(), LARGURA // 2, 96, 500, 44, 8, 14)
+        self.menu = ui.Menu(self._rotulos(), LARGURA // 2, 92, 500, 40, 8, 14)
         if self.pode_resetar:
             b = self.menu.botoes[-2]
             b.cor, b.cor_hover = (130, 50, 50), (190, 70, 70)
@@ -105,28 +106,38 @@ class CenaOpcoes(Cena):
         b = self.menu_confirmar.botoes[1]
         b.cor, b.cor_hover = (150, 50, 50), (210, 70, 70)
 
-    def _rotulos(self):
+    def _itens(self):
+        """[(id, rótulo já traduzido)]: o id decide a ação, o rótulo só aparece."""
         vol = int(self.audio.volume * 100)
         sfx = int(self.audio.volume_sfx * 100)
         w, h = self.app.janela.tamanho
-        rotulos = [
-            f"MÚSICA: {vol}%" if vol else "MÚSICA: DESLIGADA",
-            f"EFEITOS: {sfx}%" if sfx else "EFEITOS: DESLIGADOS",
-            f"TELA: {w}x{h}",
-            "SEMPRE DIA: SIM" if self.app.config["sempre_dia"] else "SEMPRE DIA: NÃO (RELÓGIO)",
-            "TELA CHEIA (F11)",
-            "TREMOR DA TELA: " + ("REDUZIDO" if self.app.config["reduzir_tremor"] else "NORMAL"),
-            "MOSTRAR FPS: " + ("SIM" if self.app.config["mostrar_fps"] else "NÃO"),
-            "CORES DAS BARRAS: " + ("DALTÔNICO" if self.app.config["daltonico"] else "PADRÃO"),
+        cfg = self.app.config
+        itens = [
+            ("musica", t("MÚSICA: {v}%", v=vol) if vol else t("MÚSICA: DESLIGADA")),
+            ("efeitos", t("EFEITOS: {v}%", v=sfx) if sfx else t("EFEITOS: DESLIGADOS")),
+            ("tela", t("TELA: {w}x{h}", w=w, h=h)),
+            ("sempre_dia", t("SEMPRE DIA: SIM") if cfg["sempre_dia"] else t("SEMPRE DIA: NÃO (RELÓGIO)")),
+            ("tela_cheia", t("TELA CHEIA (F11)")),
+            ("reduzir_tremor", t("TREMOR DA TELA: {v}", v=t("REDUZIDO") if cfg["reduzir_tremor"] else t("NORMAL"))),
+            ("mostrar_fps", t("MOSTRAR FPS: {v}", v=t("SIM") if cfg["mostrar_fps"] else t("NÃO"))),
+            ("daltonico", t("CORES DAS BARRAS: {v}", v=t("DALTÔNICO") if cfg["daltonico"] else t("PADRÃO"))),
+            ("idioma", t("IDIOMA: {v}", v=idioma.nome())),
         ]
         if self.pode_resetar:
-            rotulos.append("RECOMEÇAR DO ZERO")
-        rotulos.append("VOLTAR")
-        return rotulos
+            itens.append(("resetar", t("RECOMEÇAR DO ZERO")))
+        itens.append(("voltar", t("VOLTAR")))
+        return itens
+
+    def _rotulos(self):
+        return [r for _, r in self._itens()]
 
     def _atualizar_rotulos(self):
         for b, r in zip(self.menu.botoes, self._rotulos()):
             b.rotulo = r
+
+    def entrar(self):
+        super().entrar()
+        self._atualizar_rotulos()     # volta da tela de idioma já traduzido
 
     def _proximo_tamanho(self):
         atual = tuple(self.app.janela.tamanho)
@@ -161,24 +172,25 @@ class CenaOpcoes(Cena):
         escolha = self.menu.evento(e)
         if escolha is None:
             return
-        rotulo = self.menu.botoes[escolha].rotulo
-        if escolha == 0:
+        acao = self._itens()[escolha][0]
+        if acao == "musica":
             self.audio.proximo_volume()
-        elif escolha == 1:
+        elif acao == "efeitos":
             self.audio.proximo_volume_sfx()
-        elif escolha == 2:
+        elif acao == "tela":
             self._proximo_tamanho()
-        elif escolha == 3:
-            self.app.config["sempre_dia"] = not self.app.config["sempre_dia"]
-            self.app.config.salvar()
-        elif rotulo.startswith("TELA CHEIA"):
+        elif acao == "tela_cheia":
             self.app.alternar_tela_cheia()
-        elif rotulo.startswith("TREMOR") or rotulo.startswith("MOSTRAR FPS") or rotulo.startswith("CORES"):
-            chave = "reduzir_tremor" if rotulo.startswith("TREMOR") else \
-                ("mostrar_fps" if rotulo.startswith("MOSTRAR") else "daltonico")
-            self.app.config[chave] = not self.app.config[chave]
+        elif acao in ("sempre_dia", "reduzir_tremor", "mostrar_fps", "daltonico"):
+            self.app.config[acao] = not self.app.config[acao]
             self.app.config.salvar()
-        elif rotulo == "RECOMEÇAR DO ZERO":
+        elif acao == "idioma":
+            from cenas.escolher_idioma import CenaEscolherIdioma
+            self.som("selecionar")
+            self.app.trocar(CenaEscolherIdioma(self.app, lambda: self.app.trocar(self, fade=False),
+                                               fundo=self.casa), fade=False)
+            return
+        elif acao == "resetar":
             self.som("erro", 0.6)
             self.confirmando = True
             self.menu_confirmar.indice = 0
@@ -203,10 +215,10 @@ class CenaOpcoes(Cena):
         caixa = pygame.Rect(0, 0, 580, 650)
         caixa.midtop = (LARGURA // 2, 16)
         ui.painel(tela, caixa, (30, 34, 60), BRANCO, 20, 4)
-        ui.desenhar_texto(tela, "OPÇÕES", (LARGURA // 2, 36), 28, AMARELO, "midtop", True, True)
+        ui.desenhar_texto(tela, t("OPÇÕES"), (LARGURA // 2, 36), 28, AMARELO, "midtop", True, True)
         self.menu.desenhar(tela)
-        ui.centralizado(tela, "Dica: arraste a borda da janela para redimensionar", 680, 10)
-        ui.centralizado(tela, "ESC para voltar", 700, 10)
+        ui.centralizado(tela, t("Dica: arraste a borda da janela para redimensionar"), 680, 10)
+        ui.centralizado(tela, t("ESC para voltar"), 700, 10)
         if self.confirmando:
             self._desenhar_confirmar(tela)
 
@@ -215,12 +227,12 @@ class CenaOpcoes(Cena):
         caixa = pygame.Rect(0, 0, 620, 360)
         caixa.center = (LARGURA // 2, ALTURA // 2)
         ui.painel(tela, caixa, (50, 26, 34), (230, 90, 90), 20, 5)
-        ui.desenhar_texto(tela, "RECOMEÇAR DO ZERO?", (LARGURA // 2, caixa.y + 30), 22,
+        ui.desenhar_texto(tela, t("RECOMEÇAR DO ZERO?"), (LARGURA // 2, caixa.y + 30), 22,
                           (255, 140, 140), "midtop")
         linhas = ["TODOS os ovos, casas, moedas, recordes,",
                   "conquistas e preferências serão APAGADOS.",
                   "Os ovos vão se mudar da rua. Não dá para desfazer!"]
         for k, linha in enumerate(linhas):
-            ui.desenhar_texto(tela, linha, (LARGURA // 2, caixa.y + 84 + k * 24), 11, BRANCO,
+            ui.desenhar_texto(tela, t(linha), (LARGURA // 2, caixa.y + 84 + k * 24), 11, BRANCO,
                               "midtop")
         self.menu_confirmar.desenhar(tela)

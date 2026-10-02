@@ -3,6 +3,8 @@ import math
 import pygame
 
 from core import ui
+from core import idioma
+from core.idioma import t
 from core.fachada import (CATALOGO, cor_parede, cor_porta, cor_telhado, tem_chamine)
 
 # ============================================================
@@ -844,7 +846,7 @@ _placas = {}
 
 
 def _placa_novo(s):
-    chave = round(s, 2)
+    chave = (round(s, 2), idioma.atual())
     sup = _placas.get(chave)
     if sup is None:
         w, h = round(96 * s), round(80 * s)
@@ -854,7 +856,7 @@ def _placa_novo(s):
         q.rect((120, 80, 40), 17, -46, 5, 46)
         q.rect((255, 248, 230), -44, -76, 88, 34, raio=6)
         q.rect((120, 80, 40), -44, -76, 88, 34, 3, raio=6)
-        txt = ui.texto("+NOVO", max(8, round(12 * s)), (60, 160, 60), sombra=False)
+        txt = ui.texto(t("+NOVO"), max(8, round(12 * s)), (60, 160, 60), sombra=False)
         sup.blit(txt, txt.get_rect(center=q.p(0, -59)))
         _placas[chave] = sup
     return sup

@@ -5,6 +5,7 @@ import random
 import pygame
 
 from settings import *
+from core.idioma import t as tr
 from core import ui
 
 # ============================================================
@@ -104,6 +105,14 @@ POOL_MISSOES = [
 BONUS_MISSOES = 40
 
 
+def _texto_missao(x):
+    """Texto da missão no idioma atual (o save guarda o texto em pt)."""
+    for stat, modelo, _, _ in POOL_MISSOES:
+        if stat == x.get("stat"):
+            return tr(modelo, n=x.get("meta", 0))
+    return tr(x.get("texto", ""))
+
+
 def missoes_do_dia(save):
     diario = save["diario"]
     m = diario.get("missoes")
@@ -187,14 +196,14 @@ class Rotina:
                                      50, 380)
         self.ctx.som("vencer")
         from core import itens
-        nome = itens.COMIDAS.get(comida, {}).get("nome", comida.upper())
+        nome = tr(itens.COMIDAS.get(comida, {}).get("nome", comida.upper()))
         if perdeu:
-            self.ctx.avisar(f"SEQUÊNCIA DE {anterior} DIAS PERDIDA :(  +{premio} e 1 {nome}")
+            self.ctx.avisar(tr("SEQUÊNCIA DE {n} DIAS PERDIDA :(  +{premio} e 1 {nome}", n=anterior, premio=premio, nome=nome))
         elif seq > len(PREMIOS_BAU):
             semana = (seq - 1) // 7 + 1
-            self.ctx.avisar(f"{seq} DIAS SEGUIDOS! (SEMANA {semana}) +{premio} e 1 {nome}!")
+            self.ctx.avisar(tr("{n} DIAS SEGUIDOS! (SEMANA {semana}) +{premio} e 1 {nome}!", n=seq, semana=semana, premio=premio, nome=nome))
         else:
-            self.ctx.avisar(f"BAÚ DO DIA {seq}/7: +{premio} OVOEDAS e 1 {nome}!")
+            self.ctx.avisar(tr("BAÚ DO DIA {n}/7: +{premio} OVOEDAS e 1 {nome}!", n=seq, premio=premio, nome=nome))
         self.calendario = 4.0
         self.cal_seq = seq
         from core import progresso
@@ -219,7 +228,7 @@ class Rotina:
                 return True
             if TOTO.collidepoint(pos):
                 self.danca_toto = 2.0
-                self._mostrar(random.choice(DICAS), (TOTO.centerx - 120, TOTO.y - 10))
+                self._mostrar(tr(random.choice(DICAS)), (TOTO.centerx - 120, TOTO.y - 10))
                 self.ctx.som("boing")
                 return True
         return False
@@ -249,8 +258,8 @@ class Rotina:
             item, nome, raridade, consolo = caixa.sortear(save)
             self.ctx.ganhar_moedas(BONUS_MISSOES, (ROBERT.centerx, ROBERT.y + 100))
             progresso.contar(app, "caixas")
-            texto = f"+{consolo} OVOEDAS" if consolo or item is None else nome
-            app.toasts.adicionar("3 MISSÕES COMPLETAS!", "CAIXA SURPRESA: " + texto,
+            texto = tr("+{n} OVOEDAS", n=consolo) if consolo or item is None else tr(nome)
+            app.toasts.adicionar(tr("3 MISSÕES COMPLETAS!"), tr("CAIXA SURPRESA: ") + texto,
                                  f"+{BONUS_MISSOES}", "levelup")
             self.ctx.particulas.explodir(ROBERT.center, [AMARELO, BRANCO, (255, 120, 190)], 60, 400)
         save.salvar()
@@ -267,7 +276,7 @@ class Rotina:
             from core import progresso
             progresso.contar(self.ctx.app, "desafios")
             progresso.ganhar_xp(self.ctx.app, progresso.XP_DESAFIO)
-            self.ctx.avisar(f"PARABÉNS! Desafio cumprido: +{PREMIO_DESAFIO} OVOEDAS!")
+            self.ctx.avisar(tr("PARABÉNS! Desafio cumprido: +{n} OVOEDAS!", n=PREMIO_DESAFIO))
         self.ctx.som("selecionar")
 
     def _mostrar(self, texto, pos):
@@ -298,9 +307,9 @@ class Rotina:
         caixa = pygame.Rect(0, 0, 470, 210)
         caixa.topright = (ROBERT.x - 10, 170 - int(20 * (1 - k)))
         ui.painel(tela, caixa, (30, 34, 60), AMARELO, 16, 3)
-        ui.desenhar_texto(tela, "MISSÕES DO DIA", (caixa.centerx, caixa.y + 12), 14, AMARELO, "midtop")
-        linhas = [(x["texto"], progresso_missao(save, x), x["meta"], x["premio"], x["pago"]) for x in m["lista"]]
-        linhas.append(("DESAFIO: " + d["texto"], 1 if d["feito"] else 0, 1, PREMIO_DESAFIO, d["pago"]))
+        ui.desenhar_texto(tela, tr("MISSÕES DO DIA"), (caixa.centerx, caixa.y + 12), 14, AMARELO, "midtop")
+        linhas = [(_texto_missao(x), progresso_missao(save, x), x["meta"], x["premio"], x["pago"]) for x in m["lista"]]
+        linhas.append((tr("DESAFIO: ") + tr(d["texto"]), 1 if d["feito"] else 0, 1, PREMIO_DESAFIO, d["pago"]))
         for i, (texto, feito, meta, premio, pago) in enumerate(linhas):
             y = caixa.y + 44 + i * 40
             r = pygame.Rect(caixa.x + 14, y, caixa.w - 28, 34)
@@ -318,7 +327,7 @@ class Rotina:
                 ui.desenhar_texto(tela, f"{feito}/{meta}", (r.right - 70, r.centery), 10, BRANCO, "midright")
                 ui.moeda(tela, (r.right - 54, r.centery), 6)
                 ui.desenhar_texto(tela, str(premio), (r.right - 44, r.centery), 10, AMARELO, "midleft")
-        rodape = "BÔNUS JÁ RECEBIDO!" if m["bonus"] else f"COMPLETE AS 3: +{BONUS_MISSOES} E UMA CAIXA SURPRESA!"
+        rodape = tr("BÔNUS JÁ RECEBIDO!") if m["bonus"] else tr("COMPLETE AS 3: +{n} E UMA CAIXA SURPRESA!", n=BONUS_MISSOES)
         ui.desenhar_texto(tela, rodape, (caixa.centerx, caixa.bottom - 12), 8, (230, 220, 170), "midbottom")
 
     def desenhar_calendario(self, tela):
@@ -333,7 +342,7 @@ class Rotina:
         caixa = pygame.Rect(0, 0, 560, 118)
         caixa.midtop = (LARGURA // 2, 170 - int(30 * (1 - k)))
         ui.painel(tela, caixa, (40, 30, 24), AMARELO, 16, 3)
-        titulo = "BAÚ DIÁRIO" if semana == 0 else f"BAÚ DIÁRIO  •  SEMANA {semana + 1}"
+        titulo = tr("BAÚ DIÁRIO") if semana == 0 else tr("BAÚ DIÁRIO  •  SEMANA {n}", n=semana + 1)
         ui.desenhar_texto(tela, titulo, (caixa.centerx, caixa.y + 12), 12, AMARELO, "midtop")
         for i in range(7):
             r = pygame.Rect(caixa.x + 20 + i * 76, caixa.y + 36, 66, 68)
@@ -345,7 +354,7 @@ class Rotina:
             pygame.draw.rect(tela, AMARELO if i == hoje else (150, 120, 80), r, 3 if i == hoje else 2,
                              border_radius=10)
             valor = PREMIOS_BAU[i] if semana == 0 else PREMIOS_BAU[-1]
-            ui.desenhar_texto(tela, f"DIA {i + 1 + semana * 7}", (r.centerx, r.y + 8), 8,
+            ui.desenhar_texto(tela, tr("DIA {n}", n=i + 1 + semana * 7), (r.centerx, r.y + 8), 8,
                               BRANCO if aberto else (170, 160, 150), "midtop")
             ui.moeda(tela, (r.centerx - 12, r.y + 40), 8)
             ui.desenhar_texto(tela, str(valor), (r.centerx - 2, r.y + 40), 10,

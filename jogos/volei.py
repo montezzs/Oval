@@ -5,6 +5,7 @@ import pygame
 
 from settings import *
 from core import ui
+from core.idioma import t, t as _t
 from jogos.base import MiniJogo
 
 # ============================================================
@@ -653,7 +654,7 @@ class Volei(MiniJogo):
         if self._pode_cortar(ovo, ny):
             vx = adversario * VEL_CORTADA * forca
             vy = 140.0
-            self.textos.adicionar("CORTADA!", (b[0], b[1] - 40), LARANJA, 14)
+            self.textos.adicionar(t("CORTADA!"), (b[0], b[1] - 40), LARANJA, 14)
             self.tremer(0.1)
         b[2], b[3] = vx, vy
 
@@ -697,9 +698,9 @@ class Volei(MiniJogo):
         p, c = self.placar
         venceu = p > c
         valor = p + (10 if venceu else 0)
-        titulo = None if venceu else f"{NOME_CPU} VENCEU!"
+        titulo = None if venceu else t("{nome} VENCEU!", nome=NOME_CPU)
         self.terminar(venceu=venceu, valor=valor, titulo=titulo,
-                      linhas=[f"PLACAR: {p} x {c}", f"PONTOS: {valor}"])
+                      linhas=[t("PLACAR: {a} x {b}", a=p, b=c), t("PONTOS: {n}", n=valor)])
 
     # --------------------------------------------------------
     # CPU (ROBERT)
@@ -817,13 +818,13 @@ class Volei(MiniJogo):
         if self.fase == "ponto" and self.estado == "jogando":
             escala = min(1.0, self.relogio_fase * 6)
             tam = 24 if escala < 1 else 32
-            ui.desenhar_texto(tela, "PONTO!", (LARGURA // 2, 210), tam, AMARELO, "center")
+            ui.desenhar_texto(tela, _t("PONTO!"), (LARGURA // 2, 210), tam, AMARELO, "center")
             nome = self._nome_jogador() if self.quem_pontuou == 0 else NOME_CPU
             cor = (140, 255, 140) if self.quem_pontuou == 0 else (255, 150, 150)
             ui.desenhar_texto(tela, nome, (LARGURA // 2, 254), 16, cor, "center")
 
     def _nome_jogador(self):
-        return (self.jogador.nome or "VOCÊ").strip() or "VOCÊ"
+        return (self.jogador.nome or t("VOCÊ")).strip() or t("VOCÊ")
 
     def desenhar_hud(self, tela):
         """Placar grande no topo: JOGADOR  3 x 2  ROBERT."""
@@ -843,11 +844,11 @@ class Volei(MiniJogo):
         ui.desenhar_texto(tela, str(c), (caixa.centerx + 34, caixa.centery + 2), 28, AMARELO, "center")
 
         # Dificuldade e "ponto decisivo"
-        rotulo = ui.texto(self.OPCOES[self.opcao], 12)
+        rotulo = ui.texto(t(self.OPCOES[self.opcao]), 12)
         fundo = pygame.Rect(12, 24, rotulo.get_width() + 20, 32)
         ui.painel(tela, fundo, (20, 24, 40), BRANCO, 10, 2, sombra=False)
         tela.blit(rotulo, rotulo.get_rect(center=fundo.center))
         if self.estado == "jogando" and max(p, c) == PONTOS_VITORIA - 1 and self.fase != "ponto":
             if int(self.tempo * 3) % 2 == 0:
-                ui.desenhar_texto(tela, "PONTO DECISIVO!", (LARGURA // 2, caixa.bottom + 12), 12,
+                ui.desenhar_texto(tela, t("PONTO DECISIVO!"), (LARGURA // 2, caixa.bottom + 12), 12,
                                   AMARELO, "midtop")

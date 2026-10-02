@@ -6,6 +6,7 @@ import pygame
 
 from settings import *
 from core import assets, ui
+from core.idioma import t
 
 # ============================================================
 # MÓVEIS DA CASA E DO QUINTAL (SOL)
@@ -354,7 +355,7 @@ class Geladeira(Movel):
         return True
 
     def dica(self, ctx):
-        return "GELADEIRA: COMIDA"
+        return t("GELADEIRA: COMIDA")
 
 
 # ============================================================
@@ -387,7 +388,7 @@ class Interruptor(Movel):
         return True
 
     def dica(self, ctx):
-        return "ACENDER A LUZ" if ctx.luz_apagada else "APAGAR A LUZ"
+        return t("ACENDER A LUZ") if ctx.luz_apagada else t("APAGAR A LUZ")
 
 
 # ============================================================
@@ -750,7 +751,7 @@ class RelogioCuco(Movel):
                 pygame.draw.polygon(tela, BRANCO, [(556, 100), (566, 92), (568, 100)])
                 pygame.draw.rect(tela, BRANCO, balao, border_radius=6)
                 pygame.draw.rect(tela, (60, 60, 70), balao, 1, border_radius=6)
-                ui.desenhar_texto(tela, "CUCO!", balao.center, 8, (40, 30, 30), "center",
+                ui.desenhar_texto(tela, t("CUCO!"), balao.center, 8, (40, 30, 30), "center",
                                   sombra=False)
         else:
             pygame.draw.rect(tela, (160, 105, 60), porta)
@@ -929,7 +930,7 @@ class EstanteTrofeus(Movel):
         placa = pygame.Rect(352, 116, 86, 20)
         pygame.draw.rect(s, (150, 100, 55), placa, border_radius=4)
         pygame.draw.rect(s, MADEIRA_ESCURA, placa, 2, border_radius=4)
-        rot = ui.texto("TROFÉUS", 8, (255, 225, 140), sombra=False)
+        rot = ui.texto(t("TROFÉUS"), 8, (255, 225, 140), sombra=False)
         s.blit(rot, rot.get_rect(center=placa.center))
 
     def _atualizar_lista(self, ctx):
@@ -986,7 +987,7 @@ class EstanteTrofeus(Movel):
         if i is not None:
             return self._texto(i)
         if self.rect.collidepoint(pos) and not self.lista:
-            return "GANHE TROFÉUS NOS MINI JOGOS!"
+            return t("GANHE TROFÉUS NOS MINI JOGOS!")
         return None
 
     def clicar(self, pos, ctx):
@@ -1093,7 +1094,7 @@ class Televisao(Movel):
                 partes.append((f"{titulo}: {rec}" if rec else str(titulo)).upper())
         except (AttributeError, TypeError):
             pass
-        self.letreiro = "   *   ".join(partes) if partes else "JOGUE OS MINI JOGOS!"
+        self.letreiro = "   *   ".join(partes) if partes else t("JOGUE OS MINI JOGOS!")
 
     def clicar(self, pos, ctx):
         if not self.rect.collidepoint(pos):
@@ -1107,8 +1108,8 @@ class Televisao(Movel):
 
     def dica(self, ctx):
         if self.canal == 0:
-            return "TV DESLIGADA"
-        return f"CANAL {self.canal}: {self.CANAIS[self.canal]}"
+            return t("TV DESLIGADA")
+        return t("CANAL {n}: {nome}", n=self.canal, nome=t(self.CANAIS[self.canal]))
 
     # ------------------ desenho -----------------------------
 
@@ -1132,7 +1133,7 @@ class Televisao(Movel):
 
         if self.canal and self.troca > 0:
             tela.fill((10, 20, 10), (s.right - 42, s.y + 2, 40, 13))
-            ui.desenhar_texto(tela, f"CH {self.canal}", (s.right - 5, s.y + 5), 8,
+            ui.desenhar_texto(tela, t("CH {n}", n=self.canal), (s.right - 5, s.y + 5), 8,
                               (120, 255, 140), "topright", sombra=False)
         _blit_sprite(tela, "tv_vidro", self.TELA, self._pintar_vidro)
         tela.set_clip(antigo)
@@ -1159,7 +1160,7 @@ class Televisao(Movel):
         pygame.draw.line(tela, branco, (cx, cy + 24), (cx - 6, cy + 34), 2)
         pygame.draw.line(tela, branco, (cx, cy + 24), (cx + 6, cy + 34), 2)
         # Letreiro rolando
-        sup = ui.texto("OI OVO!   OI OVO!", 8, BRANCO, sombra=False)
+        sup = ui.texto(t("OI OVO!   OI OVO!"), 8, BRANCO, sombra=False)
         tela.fill((20, 30, 60), (s.x, s.bottom - 13, s.w, 13))
         x = s.right - (t * 40) % (sup.get_width() + s.w)
         tela.blit(sup, (x, s.bottom - 11))
@@ -1381,7 +1382,7 @@ class Aquario(Movel):
         return True
 
     def dica(self, ctx):
-        return "DAR RAÇÃO AOS PEIXES"
+        return t("DAR RAÇÃO AOS PEIXES")
 
 
 # ============================================================
@@ -1520,7 +1521,7 @@ class Cama(Movel):
         ctx.dormir()
 
     def dica(self, ctx):
-        return "DORMIR NA CAMA"
+        return t("DORMIR NA CAMA")
 
 
 # ============================================================
@@ -1650,7 +1651,7 @@ class CasinhaPet(Movel):
         return True
 
     def dica(self, ctx):
-        return f"CASINHA DO {self._nome(ctx)}" if ctx.pet_id else "CASINHA DO PET"
+        return t("CASINHA DO {nome}", nome=self._nome(ctx)) if ctx.pet_id else t("CASINHA DO PET")
 
 
 _encolhidos = {}
@@ -2030,7 +2031,7 @@ class Telescopio(Movel):
             return False
         if not ctx.noite:
             ctx.som("erro", 0.6)
-            ctx.textos.adicionar("SÓ À NOITE!", (self.CABECA[0], 380), BRANCO, 12)
+            ctx.textos.adicionar(t("SÓ À NOITE!"), (self.CABECA[0], 380), BRANCO, 12)
             return True
         self.aberto = True
         self.t_aberto = 0.0
@@ -2057,7 +2058,7 @@ class Telescopio(Movel):
         for i, (x, y) in enumerate(self._constelacao()):
             if i % 3 == int(t * 2) % 3:
                 _blit_brilho(tela, (x, y), 10, (255, 250, 200), 90)
-        ui.desenhar_texto(tela, "CONSTELAÇÃO DO OVO", (LARGURA // 2, 44), 16, AMARELO, "midtop")
+        ui.desenhar_texto(tela, t("CONSTELAÇÃO DO OVO"), (LARGURA // 2, 44), 16, AMARELO, "midtop")
 
         ret = self._pos_estrela()
         if ret:
@@ -2072,21 +2073,21 @@ class Telescopio(Movel):
             ui.estrela(tela, (int(x), int(y)), 11, (255, 250, 190), t * 5)
         elif self.noite_premiada != self._chave_noite() and self.t_estrela is not None \
                 and self.t_aberto < self.t_estrela:
-            ui.desenhar_texto(tela, "Espere uma estrela cadente...", (LARGURA // 2, 612), 12,
+            ui.desenhar_texto(tela, t("Espere uma estrela cadente..."), (LARGURA // 2, 612), 12,
                               (200, 210, 255), "center")
 
         if self.mensagem > 0:
-            ui.desenhar_texto(tela, "DESEJO REALIZADO!", (LARGURA // 2, 150), 24, AMARELO, "center")
-            ui.desenhar_texto(tela, "+15 OVOEDAS", (LARGURA // 2, 190), 16, BRANCO, "center")
+            ui.desenhar_texto(tela, t("DESEJO REALIZADO!"), (LARGURA // 2, 150), 24, AMARELO, "center")
+            ui.desenhar_texto(tela, t("+15 OVOEDAS"), (LARGURA // 2, 190), 16, BRANCO, "center")
 
         mouse = pygame.mouse.get_pos()
         hover = self.botao.collidepoint(mouse)
         ui.painel(tela, self.botao, (70, 80, 130) if hover else (30, 36, 60), BRANCO, 14, 3)
-        ui.desenhar_texto(tela, "VOLTAR", self.botao.center, 16, AMARELO if hover else BRANCO,
+        ui.desenhar_texto(tela, t("VOLTAR"), self.botao.center, 16, AMARELO if hover else BRANCO,
                           "center")
 
     def dica(self, ctx):
-        return "OLHAR AS ESTRELAS" if ctx.noite else "TELESCÓPIO: SÓ À NOITE"
+        return t("OLHAR AS ESTRELAS") if ctx.noite else t("TELESCÓPIO: SÓ À NOITE")
 
 
 # ============================================================
@@ -2215,7 +2216,7 @@ class Balanco(Movel):
         ctx.som("pulo", 0.7)
 
     def dica(self, ctx):
-        return "BALANÇAR"
+        return t("BALANÇAR")
 
 
 # ============================================================

@@ -4,6 +4,7 @@ import random
 import pygame
 
 from settings import *
+from core.idioma import t
 from core import ceu, perfis, ui
 from core import fachada_desenho as fd
 from core.cena import Cena, tecla_confirmar, tecla_voltar
@@ -295,7 +296,7 @@ class CenaMudanca(Cena):
 
         for o in self.ovos:
             if o.balao > 0 and o.perfil.nome:
-                sup = ui.texto("TCHAU, CASA!", 10, (40, 30, 20), sombra=False)
+                sup = ui.texto(t("TCHAU, CASA!"), 10, (40, 30, 20), sombra=False)
                 caixa = sup.get_rect(midbottom=(o.x, o.y - 70)).inflate(16, 10)
                 caixa.clamp_ip(pygame.Rect(4, 0, LARGURA - 8, ALTURA))
                 pygame.draw.rect(tela, BRANCO, caixa, border_radius=8)
@@ -303,12 +304,12 @@ class CenaMudanca(Cena):
 
         if self.buzina > 0 and self.caminhao_x > -LARG_BAU:
             x = self.caminhao_x + LARG_BAU + LARG_CABINE + 20
-            ui.desenhar_texto(tela, "BI-BI!", (x, Y_RUA - 150), 14, AMARELO, "center")
+            ui.desenhar_texto(tela, t("BI-BI!"), (x, Y_RUA - 150), 14, AMARELO, "center")
 
         if self.fase == "fim":
             self._desenhar_fim(tela)
         else:
-            ui.desenhar_texto(tela, "ENTER para pular", (LARGURA - 14, ALTURA - 12), 8,
+            ui.desenhar_texto(tela, t("ENTER para pular"), (LARGURA - 14, ALTURA - 12), 8,
                               (240, 240, 250), "bottomright")
 
     def _desenhar_ovo(self, tela, o):
@@ -355,7 +356,7 @@ class CenaMudanca(Cena):
         pygame.draw.rect(tela, (120, 124, 140), bau, 3, border_radius=10)
         faixa = pygame.Rect(bau.x + 3, bau.y + 92, bau.w - 6, 16)
         pygame.draw.rect(tela, (255, 190, 60), faixa)
-        ui.desenhar_texto(tela, "MUDANÇAS", (bau.centerx + 30, bau.y + 26), 16, (220, 70, 60), "center",
+        ui.desenhar_texto(tela, t("MUDANÇAS"), (bau.centerx + 30, bau.y + 26), 16, (220, 70, 60), "center",
                           False)
         ui.desenhar_texto(tela, "OVAL", (bau.centerx + 30, bau.y + 60), 24, (60, 90, 180), "center", False)
         ovo = pygame.Rect(0, 0, 26, 32)
@@ -412,14 +413,14 @@ class CenaMudanca(Cena):
         caixa = pygame.Rect(0, 0, 640, 250)
         caixa.center = (LARGURA // 2, ALTURA // 2 - 40)
         ui.painel(tela, caixa, (30, 34, 60), AMARELO, 20, 4)
-        ui.desenhar_texto(tela, "ATÉ LOGO, RUA DOS OVOS!", (LARGURA // 2, caixa.y + 34), 20, AMARELO,
+        ui.desenhar_texto(tela, t("ATÉ LOGO, RUA DOS OVOS!"), (LARGURA // 2, caixa.y + 34), 20, AMARELO,
                           "midtop")
         if self.apagou:
             linhas = ["Todos os saves foram apagados.", "Hora de chocar um ovo novinho!"]
         else:
             linhas = ["Alguns arquivos não puderam ser apagados.", "Feche o jogo e confira a pasta saves/."]
         for i, linha in enumerate(linhas):
-            ui.desenhar_texto(tela, linha, (LARGURA // 2, caixa.y + 94 + i * 28), 12, BRANCO, "midtop")
+            ui.desenhar_texto(tela, t(linha), (LARGURA // 2, caixa.y + 94 + i * 28), 12, BRANCO, "midtop")
         if self.tempo_fase > 1.2 and int(self.tempo * 2) % 2 == 0:
-            ui.desenhar_texto(tela, "APERTE ENTER PARA RECOMEÇAR", (LARGURA // 2, caixa.bottom - 40), 12,
+            ui.desenhar_texto(tela, t("APERTE ENTER PARA RECOMEÇAR"), (LARGURA // 2, caixa.bottom - 40), 12,
                               (170, 235, 255), "midtop")

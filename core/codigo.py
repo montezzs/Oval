@@ -2,6 +2,8 @@ import base64
 import json
 import zlib
 
+from core.idioma import t
+
 # ============================================================
 # CÓDIGO DO OVO (amigos, sem internet)
 # ============================================================
@@ -143,7 +145,7 @@ def verificar_desafios(app, jogo, valor):
             vencidos.append(chave)
             save.ganhar(PREMIO_DESAFIO_AMIGO)
             ganhou.append(d.get("n", "AMIGO"))
-            app.toasts.adicionar("DESAFIO DE AMIGO!", f"VOCÊ SUPEROU {d.get('n', 'AMIGO')}!",
+            app.toasts.adicionar(t("DESAFIO DE AMIGO!"), t("VOCÊ SUPEROU {nome}!", nome=d.get('n', t('AMIGO'))),
                                  f"+{PREMIO_DESAFIO_AMIGO}", "conquista")
     if ganhou:
         save.salvar()

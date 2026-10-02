@@ -6,6 +6,7 @@ import pygame
 
 from settings import *
 from core import assets
+from core.idioma import t
 
 # ============================================================
 # TEXTO (COM CACHE)
@@ -18,8 +19,9 @@ _LIMITE_CACHE = 600
 
 # A fonte PressStart2P desenha as MAIÚSCULAS acentuadas com cara
 # de minúscula (fica "MúSICA"). Então tiramos o acento só delas.
-_SEM_ACENTO = str.maketrans("ÁÀÂÃÄÉÈÊËÍÌÎÏÓÒÔÕÖÚÙÛÜÇÑ",
-                            "AAAAAEEEEIIIIOOOOOUUUUCN")
+# (O Ñ fica: sem ele "ESPAÑOL" vira "ESPANOL" e a fonte o desenha bem.)
+_SEM_ACENTO = str.maketrans("ÁÀÂÃÄÉÈÊËÍÌÎÏÓÒÔÕÖÚÙÛÜÇ",
+                            "AAAAAEEEEIIIIOOOOOUUUUC")
 
 # A fonte também tem ligaduras "fi", "fl", "ff" que espremem as
 # duas letras numa célula só ("finca" vira "fnca"). Um ZWNJ
@@ -529,7 +531,8 @@ class Botao:
         borda = misturar(UI_BORDA, UI_DESTAQUE, ativo)
         pygame.draw.rect(tela, borda, r, 3, border_radius=12)
 
-        desenhar_texto(tela, self.rotulo, r.center, self.tamanho,
+        # O rótulo fica em pt (as cenas comparam com ele); traduz ao desenhar
+        desenhar_texto(tela, t(self.rotulo), r.center, self.tamanho,
                        self.cor_texto, "center", True, True)
 
 

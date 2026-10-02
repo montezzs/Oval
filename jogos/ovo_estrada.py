@@ -1,3 +1,4 @@
+from core.idioma import t
 import math
 import random
 
@@ -731,7 +732,7 @@ class OvoEstrada(MiniJogo):
         if voltas > 0 and abs(diff) < 60:
             self.cambalhotas += voltas
             self.pontos = self.metros + 50 * self.cambalhotas
-            txt = "CAMBALHOTA!" if voltas == 1 else f"{voltas}× CAMBALHOTA!"
+            txt = t("CAMBALHOTA!") if voltas == 1 else t("{n}× CAMBALHOTA!", n=voltas)
             self.textos.adicionar(txt, (self.x, self.y - 120), AMARELO, 20)
             self.textos.adicionar(f"+{50 * voltas}", (self.x, self.y - 90), BRANCO, 16)
             self.som("acerto")
@@ -785,7 +786,7 @@ class OvoEstrada(MiniJogo):
                 self.tremer(0.4)
                 self.particulas.explodir((o["x"], o["y"]), [j.cor, j.cor_clara, BRANCO, (255, 220, 90)],
                                          30, 300, 0.9, (3, 7))
-                self.textos.adicionar("CRACK!", (o["x"], o["y"] - 70), (255, 90, 70), 32)
+                self.textos.adicionar(t("CRACK!"), (o["x"], o["y"] - 70), (255, 90, 70), 32)
         elif o:
             o["t"] += dt
         self._atualizar_camera(dt, alvo_x=o["x"] if o else None, alvo_y=o["y"] if o else None)
@@ -794,10 +795,10 @@ class OvoEstrada(MiniJogo):
 
     def _acabar(self, motivo):
         self.fim_motivo = motivo
-        self.terminar(venceu=False, titulo=motivo, linhas=[
-            f"DISTÂNCIA: {self.metros} m",
-            f"CAMBALHOTAS: {self.cambalhotas}",
-            f"MOEDAS DA PISTA: {self.moedas_pista}",
+        self.terminar(venceu=False, titulo=t(motivo), linhas=[
+            t("DISTÂNCIA: {n} m", n=self.metros),
+            t("CAMBALHOTAS: {n}", n=self.cambalhotas),
+            t("MOEDAS DA PISTA: {n}", n=self.moedas_pista),
         ])
 
     def calcular_moedas(self, valor, venceu):
@@ -826,7 +827,7 @@ class OvoEstrada(MiniJogo):
                 self.bipe = 0.0
                 self.som("acerto", 0.8)
                 self.particulas.explodir((g[0], gy), [(220, 40, 40), (255, 200, 60), BRANCO], 14, 180, 0.6)
-                self.textos.adicionar("GASOLINA!", (g[0], gy - 50), (255, 120, 90), 16)
+                self.textos.adicionar(t("GASOLINA!"), (g[0], gy - 50), (255, 120, 90), 16)
 
     def _atualizar_mola(self, dt):
         # Mola amortecida (só visual): a carroceria sobe e desce ~4 px
@@ -911,11 +912,11 @@ class OvoEstrada(MiniJogo):
         # Dicas
         if self.estado == "jogando" and not self.acelerou:
             if int(self.tempo * 2.5) % 3 != 0:
-                ui.desenhar_texto(tela, "SEGURE → PARA ACELERAR!", (LARGURA // 2, 200), 20,
+                ui.desenhar_texto(tela, t("SEGURE → PARA ACELERAR!"), (LARGURA // 2, 200), 20,
                                   AMARELO, "center")
         if self.estado == "jogando" and self.combustivel <= 0 and not self.capotou:
             if int(self.tempo * 3) % 2 == 0:
-                ui.desenhar_texto(tela, "SEM GASOLINA!", (LARGURA // 2, 200), 24,
+                ui.desenhar_texto(tela, t("SEM GASOLINA!"), (LARGURA // 2, 200), 24,
                                   (255, 110, 90), "center")
 
     def _desenhar_terreno(self, tela):
@@ -1012,7 +1013,7 @@ class OvoEstrada(MiniJogo):
         # Pontos e recorde
         caixa4 = pygame.Rect(caixa3.right + 10, 12, 240, 48)
         ui.painel(tela, caixa4, (20, 24, 40), BRANCO, 12, 3, sombra=False)
-        ui.desenhar_texto(tela, f"PONTOS: {self.pontos}", (caixa4.x + 14, caixa4.y + 10), 12, BRANCO)
+        ui.desenhar_texto(tela, t("PONTOS: {n}", n=self.pontos), (caixa4.x + 14, caixa4.y + 10), 12, BRANCO)
         rec = self.recorde()
-        ui.desenhar_texto(tela, f"RECORDE: {rec if rec is not None else '--'}",
+        ui.desenhar_texto(tela, t("RECORDE: {v}", v=rec if rec is not None else '--'),
                           (caixa4.x + 14, caixa4.y + 29), 10, (180, 220, 255))

@@ -3,6 +3,7 @@ import math
 import pygame
 
 from settings import *
+from core.idioma import t as tr
 from core import ui
 
 # ============================================================
@@ -67,7 +68,7 @@ class Tutorial:
         ctx.ganhar_moedas(PREMIO_PASSO, (ctx.x, ctx.ovo_chao - 170))
         ctx.som("acerto")
         if not self.ativo:
-            ctx.avisar("TUTORIAL COMPLETO! Agora a rua é sua!")
+            ctx.avisar(tr("TUTORIAL COMPLETO! Agora a rua é sua!"))
 
     def pular(self):
         self.config["tutorial"] = TUTORIAL_FIM
@@ -121,7 +122,7 @@ class Tutorial:
         if not self.ativo or self.ctx.slide > 0:
             return
         ctx = self.ctx
-        texto = PASSOS[self.passo][0]
+        texto = tr(PASSOS[self.passo][0])
 
         # Balão do ovo
         linhas = ui.quebrar_linhas(texto, 10, 330)
@@ -135,7 +136,7 @@ class Tutorial:
         ponta = (max(caixa.x + 30, min(caixa.right - 30, corpo.centerx)), caixa.bottom)
         pygame.draw.polygon(tela, BRANCO, [(ponta[0] - 10, ponta[1] - 2), (ponta[0] + 10, ponta[1] - 2),
                                            (ponta[0], ponta[1] + 14)])
-        ui.desenhar_texto(tela, f"TUTORIAL {self.passo + 1}/{len(PASSOS)}", (caixa.x + 14, caixa.y + 8),
+        ui.desenhar_texto(tela, tr("TUTORIAL {n}/{total}", n=self.passo + 1, total=len(PASSOS)), (caixa.x + 14, caixa.y + 8),
                           8, (120, 120, 160), "topleft", sombra=False)
         for i, linha in enumerate(linhas):
             ui.desenhar_texto(tela, linha, (caixa.x + 14, caixa.y + 24 + i * 18), 10, (40, 40, 60),
@@ -166,4 +167,4 @@ class Tutorial:
         hover = self.botao_pular.collidepoint(pygame.mouse.get_pos())
         pygame.draw.rect(tela, (70, 80, 130) if hover else (30, 36, 60), self.botao_pular, border_radius=10)
         pygame.draw.rect(tela, BRANCO, self.botao_pular, 2, border_radius=10)
-        ui.desenhar_texto(tela, "PULAR TUTORIAL", self.botao_pular.center, 8, BRANCO, "center")
+        ui.desenhar_texto(tela, tr("PULAR TUTORIAL"), self.botao_pular.center, 8, BRANCO, "center")

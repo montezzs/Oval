@@ -5,6 +5,7 @@ import pygame
 
 from settings import *
 from core import ui
+from core.idioma import t
 from jogos.base_multi import MiniJogoMulti, TECLAS_MOVER, TECLAS_ACAO, CORES_JOGADOR
 
 # ============================================================
@@ -597,7 +598,7 @@ class GuerraTinta(MiniJogoMulti):
         self._pintar_losango((c, l), 2, b.dono)
         cor = self.tintas[b.dono]
         self.particulas.explodir(b.alvo, [cor, ui.misturar(cor, BRANCO, 0.5)], 18, 240, 0.6, (3, 6), 300)
-        self.textos.adicionar("SPLASH!", (b.alvo[0], b.alvo[1] - 24), BRANCO, 12)
+        self.textos.adicionar(t("SPLASH!"), (b.alvo[0], b.alvo[1] - 24), BRANCO, 12)
         self.som("bater", 0.6)
 
     def _criar_item(self):
@@ -636,7 +637,7 @@ class GuerraTinta(MiniJogoMulti):
                 cor = self.tintas[ovo.i]
                 self.particulas.explodir((ovo.x, ovo.y), [cor, BRANCO], 30, 320, 0.8, (3, 7))
             self.som("moeda", 0.7)
-            self.textos.adicionar(NOMES_ITENS[tipo], (ovo.x, ovo.y - 40), BRANCO, 12)
+            self.textos.adicionar(t(NOMES_ITENS[tipo]), (ovo.x, ovo.y - 40), BRANCO, 12)
 
     # --- fim do round ---
 
@@ -678,9 +679,9 @@ class GuerraTinta(MiniJogoMulti):
                 vencedor = None
             else:
                 vencedor = 0 if placar[0] > placar[1] else 1
-            linhas = [f"PINTADO: {self.final[0]:.0f}% × {self.final[1]:.0f}%"]
+            linhas = [t("PINTADO: {a}% × {b}%", a=f"{self.final[0]:.0f}", b=f"{self.final[1]:.0f}")]
             if self.precisa > 1:
-                linhas.insert(0, f"ROUNDS: {placar[0]} × {placar[1]}")
+                linhas.insert(0, t("ROUNDS: {a} × {b}", a=placar[0], b=placar[1]))
             self.terminar_multi(vencedor, linhas)
         else:
             self.round += 1
@@ -796,15 +797,15 @@ class GuerraTinta(MiniJogoMulti):
             painel = pygame.Rect(0, 0, 420, 90)
             painel.center = (cx, AREA.centery)
             ui.painel(tela, painel, (20, 24, 40), AMARELO, 16, 3)
-            ui.desenhar_texto(tela, f"ROUND {self.round}!", (cx, painel.centery - 10), 32, AMARELO, "center")
-            ui.desenhar_texto(tela, f"QUEM FIZER {self.precisa} VENCE", (cx, painel.centery + 26), 10,
+            ui.desenhar_texto(tela, t("ROUND {n}!", n=self.round), (cx, painel.centery - 10), 32, AMARELO, "center")
+            ui.desenhar_texto(tela, t("QUEM FIZER {n} VENCE", n=self.precisa), (cx, painel.centery + 26), 10,
                               BRANCO, "center")
         elif self.fase == "jogo" and self.restante <= 10:
             if (self.tempo * 2) % 1 < 0.7:
                 painel = pygame.Rect(0, 0, 440, 50)
                 painel.midbottom = (cx, AREA.bottom - 10)
                 ui.painel(tela, painel, (20, 24, 40), (255, 120, 120), 14, 3)
-                ui.desenhar_texto(tela, "ÚLTIMOS SEGUNDOS!", painel.center, 18, (255, 150, 150), "center")
+                ui.desenhar_texto(tela, t("ÚLTIMOS SEGUNDOS!"), painel.center, 18, (255, 150, 150), "center")
         elif self.fase in ("contando", "resultado"):
             self._desenhar_placar_final(tela)
 
@@ -813,7 +814,7 @@ class GuerraTinta(MiniJogoMulti):
         painel = pygame.Rect(0, 0, 640, 400)
         painel.center = (LARGURA // 2, AREA.centery)
         ui.painel(tela, painel, (28, 32, 56), self.COR, 20, 4)
-        ui.desenhar_texto(tela, "QUEM PINTOU MAIS?", (painel.centerx, painel.y + 22), 20, AMARELO, "midtop")
+        ui.desenhar_texto(tela, t("QUEM PINTOU MAIS?"), (painel.centerx, painel.y + 22), 20, AMARELO, "midtop")
 
         # Barras crescendo
         k = min(1.0, self.tempo_fase / 1.8) if self.fase == "contando" else 1.0
@@ -841,9 +842,9 @@ class GuerraTinta(MiniJogoMulti):
 
         if self.fase == "resultado":
             if self.vencedor_round is None:
-                texto, cor = "EMPATE!", AMARELO
+                texto, cor = t("EMPATE!"), AMARELO
             else:
-                texto, cor = f"{self.nome(self.vencedor_round)[:12]} VENCEU!", CORES_JOGADOR[self.vencedor_round]
+                texto, cor = t("{nome} VENCEU!", nome=self.nome(self.vencedor_round)[:12]), CORES_JOGADOR[self.vencedor_round]
             ui.desenhar_texto(tela, texto, (painel.centerx, painel.y + 62), 16, cor, "midtop")
 
     def _splat(self, tela, centro, cor):
@@ -862,7 +863,7 @@ class GuerraTinta(MiniJogoMulti):
             pygame.draw.line(tela, cor, (x + dx, y + 10), (x + dx, y + 10 + comp), 6)
             pygame.draw.circle(tela, cor, (int(x + dx), int(y + 10 + comp)), 4)
         pygame.draw.circle(tela, ui.misturar(cor, BRANCO, 0.6), (int(x - 8), int(y - 8)), 5)
-        ui.desenhar_texto(tela, "SPLAT!", (x, y - 44), 14, BRANCO, "center")
+        ui.desenhar_texto(tela, t("SPLAT!"), (x, y - 44), 14, BRANCO, "center")
 
     def desenhar_hud(self, tela):
         # Painéis dos jogadores
@@ -916,7 +917,7 @@ class GuerraTinta(MiniJogoMulti):
         seg = max(0, math.ceil(self.restante))
         cor = (255, 150, 150) if seg <= 10 else BRANCO
         ui.desenhar_texto(tela, f"{seg // 60}:{seg % 60:02d}", (caixa.centerx, caixa.centery - 7), 16, cor, "center")
-        ui.desenhar_texto(tela, f"ROUND {self.round}", (caixa.centerx, caixa.centery + 14), 10,
+        ui.desenhar_texto(tela, t("ROUND {n}", n=self.round), (caixa.centerx, caixa.centery + 14), 10,
                           (180, 200, 255), "center")
 
         # Barra de porcentagem: uma cor "empurra" a outra

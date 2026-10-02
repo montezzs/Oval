@@ -5,6 +5,7 @@ import pygame
 
 from settings import *
 from core import ui
+from core.idioma import t
 from core import sintetizador as sint
 from core.jogador import Jogador
 from jogos.base import MiniJogo
@@ -510,7 +511,7 @@ class CoralOvos(MiniJogo):
             self.t_espera += dt
             if self.t_espera >= TEMPO_RESPOSTA:
                 certo = self.sequencia[self.indice]
-                self.textos.adicionar("DEMOROU!", (CENTRO[0], CENTRO[1] - 110), (255, 170, 120), 16)
+                self.textos.adicionar(t("DEMOROU!"), (CENTRO[0], CENTRO[1] - 110), (255, 170, 120), 16)
                 self._errar(certo)
 
         elif self.fase == "rodada_ok":
@@ -530,7 +531,7 @@ class CoralOvos(MiniJogo):
         elif self.fase == "errou":
             if self.t_fase >= TEMPO_ERRO:
                 if self.vidas > 0:
-                    self.textos.adicionar("DE NOVO!", (CENTRO[0], CENTRO[1] - 110), AMARELO, 18)
+                    self.textos.adicionar(t("DE NOVO!"), (CENTRO[0], CENTRO[1] - 110), AMARELO, 18)
                     self._mudar_fase("preparar")
                 else:
                     self._fim(False)
@@ -591,14 +592,14 @@ class CoralOvos(MiniJogo):
 
     def _fim(self, venceu):
         rodadas = self.pontos
-        linhas = [f"SEQUÊNCIA: {rodadas} NOTAS"]
+        linhas = [t("SEQUÊNCIA: {n} NOTAS", n=rodadas)]
         if venceu:
-            linhas.append("BIS! BIS! A PLATEIA AMOU!")
+            linhas.append(t("BIS! BIS! A PLATEIA AMOU!"))
         else:
             certo = self.sequencia[self.indice] if self.indice < len(self.sequencia) else 0
-            linhas.append(f"ERA O OVO {NOMES_POSICAO[self.lugares[certo]]}")
+            linhas.append(t("ERA O OVO {pos}", pos=t(NOMES_POSICAO[self.lugares[certo]])))
         self.terminar(venceu=venceu, valor=rodadas,
-                      titulo="CONCERTO COMPLETO!" if venceu else "FIM DO SHOW",
+                      titulo=t("CONCERTO COMPLETO!") if venceu else t("FIM DO SHOW"),
                       linhas=linhas)
 
     def calcular_moedas(self, valor, venceu):
@@ -750,17 +751,17 @@ class CoralOvos(MiniJogo):
         caixa.midtop = (LARGURA // 2, 80)
         cor = BRANCO
         if self.fase in ("preparar", "mostrar"):
-            texto, cor = "OUÇA O CORAL...", (190, 210, 255)
+            texto, cor = t("OUÇA O CORAL..."), (190, 210, 255)
         elif self.fase == "vez":
-            texto, cor = f"SUA VEZ!  {self.indice}/{len(self.sequencia)}", AMARELO
+            texto, cor = t("SUA VEZ!  {n}/{total}", n=self.indice, total=len(self.sequencia)), AMARELO
         elif self.fase == "rodada_ok":
-            texto, cor = "MUITO BEM!", (150, 240, 120)
+            texto, cor = t("MUITO BEM!"), (150, 240, 120)
         elif self.fase == "trocar":
-            texto, cor = "TROCA-TROCA!", (255, 160, 220)
+            texto, cor = t("TROCA-TROCA!"), (255, 160, 220)
         elif self.fase == "errou":
-            texto, cor = "DESAFINOU!", (255, 130, 130)
+            texto, cor = t("DESAFINOU!"), (255, 130, 130)
         else:
-            texto, cor = "BRAVO!", AMARELO
+            texto, cor = t("BRAVO!"), AMARELO
         ui.painel(tela, caixa, (24, 14, 28), cor, 12, 3, sombra=False)
         ui.desenhar_texto(tela, texto, (caixa.centerx, caixa.centery + 1), 14, cor, "center")
 
@@ -773,10 +774,10 @@ class CoralOvos(MiniJogo):
     def desenhar_hud(self, tela):
         caixa = pygame.Rect(12, 12, 450, 48)
         ui.painel(tela, caixa, (20, 16, 30), BRANCO, 12, 3, sombra=False)
-        ui.desenhar_texto(tela, f"SEQUÊNCIA: {self.pontos}", (caixa.x + 16, caixa.centery), 14,
+        ui.desenhar_texto(tela, t("SEQUÊNCIA: {n}", n=self.pontos), (caixa.x + 16, caixa.centery), 14,
                           AMARELO, "midleft")
         rec = self.recorde()
-        texto = f"RECORDE: {rec}" if rec is not None else "RECORDE: --"
+        texto = t("RECORDE: {n}", n=rec if rec is not None else "--")
         ui.desenhar_texto(tela, texto, (caixa.x + 246, caixa.centery), 12, (180, 200, 255), "midleft")
 
         # Vidas (FÁCIL) ou o nível
@@ -789,5 +790,5 @@ class CoralOvos(MiniJogo):
                 c = (caixa.x + 32 + i * 43, caixa.centery + 1)
                 ui.coracao(tela, c, 28, (235, 60, 90) if i < self.vidas else (70, 60, 80))
         else:
-            ui.desenhar_texto(tela, self.OPCOES[self.opcao], caixa.center, 12,
+            ui.desenhar_texto(tela, t(self.OPCOES[self.opcao]), caixa.center, 12,
                               (255, 160, 220) if self.opcao == 2 else BRANCO, "center")

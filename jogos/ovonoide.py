@@ -5,6 +5,7 @@ import pygame
 
 from settings import *
 from core import ui
+from core.idioma import t
 from jogos.base import MiniJogo
 
 # ============================================================
@@ -564,7 +565,7 @@ class Ovonoide(MiniJogo):
         if self.morto:
             self.tempo_morto += dt
             if self.tempo_morto > 1.4:
-                self.terminar(linhas=[f"FASE: {self.fase}", f"PONTOS: {self.pontos}"])
+                self.terminar(linhas=[t("FASE: {n}", n=self.fase), t("PONTOS: {n}", n=self.pontos)])
             return
 
         if self.transicao > 0:
@@ -861,7 +862,7 @@ class Ovonoide(MiniJogo):
         self.ultimo_poder = self.tempo
         y = RAQUETE_Y - (80 if recente else 50)
         x = max(160, min(LARGURA - 160, c.x))
-        self.textos.adicionar(NOMES_PODER[c.tipo], (x, y), ui.clarear(cor, 40), 16)
+        self.textos.adicionar(t(NOMES_PODER[c.tipo]), (x, y), ui.clarear(cor, 40), 16)
         self.pontos += 5
         if c.tipo == "grande":
             self.grande = TEMPO_GRANDE
@@ -914,7 +915,7 @@ class Ovonoide(MiniJogo):
     def _perder_vida(self):
         self.vidas -= 1
         self.tremer(0.3)
-        self.textos.adicionar("CRACK!", (LARGURA // 2, ALTURA - 120), (255, 150, 120), 24)
+        self.textos.adicionar(t("CRACK!"), (LARGURA // 2, ALTURA - 120), (255, 150, 120), 24)
         self.som("erro")
         if self.vidas <= 0:
             self.vidas = 0
@@ -931,7 +932,7 @@ class Ovonoide(MiniJogo):
         self.pontos += BONUS_FASE
         self.transicao = 2.0
         self.som("vencer", 0.8)
-        self.textos.adicionar(f"FASE LIMPA! +{BONUS_FASE}", (LARGURA // 2, 400), AMARELO, 24)
+        self.textos.adicionar(t("FASE LIMPA! +{n}", n=BONUS_FASE), (LARGURA // 2, 400), AMARELO, 24)
         cores = [self.jogador.cor, self.jogador.cor_clara, AMARELO, BRANCO]
         for o in self.ovos:
             self.particulas.explodir((o.x, o.y), cores, 30, 320, 1.0)
@@ -1041,26 +1042,26 @@ class Ovonoide(MiniJogo):
 
         # Nome da fase
         if self.estado == "jogando" and self.aviso > 0 and not self.morto:
-            ui.desenhar_texto(tela, f"FASE {self.fase}", (LARGURA // 2, 440), 24, AMARELO, "center")
-            ui.desenhar_texto(tela, self.nome_fase, (LARGURA // 2, 480), 16, (255, 170, 240), "center")
+            ui.desenhar_texto(tela, t("FASE {n}", n=self.fase), (LARGURA // 2, 440), 24, AMARELO, "center")
+            ui.desenhar_texto(tela, t(self.nome_fase), (LARGURA // 2, 480), 16, (255, 170, 240), "center")
             if any(o.preso for o in self.ovos):
-                ui.desenhar_texto(tela, "ESPAÇO ou CLIQUE para lançar", (LARGURA // 2, 520), 12,
+                ui.desenhar_texto(tela, t("ESPAÇO ou CLIQUE para lançar"), (LARGURA // 2, 520), 12,
                                   BRANCO, "center")
 
     def desenhar_hud(self, tela):
         caixa = pygame.Rect(12, 12, 420, 48)
         ui.painel(tela, caixa, (20, 24, 40), (255, 80, 200), 12, 3, sombra=False)
-        ui.desenhar_texto(tela, f"PONTOS: {self.pontos}", (caixa.x + 16, caixa.centery), 14,
+        ui.desenhar_texto(tela, t("PONTOS: {n}", n=self.pontos), (caixa.x + 16, caixa.centery), 14,
                           AMARELO, "midleft")
         rec = self.recorde()
         if rec is not None:
-            ui.desenhar_texto(tela, f"RECORDE: {rec}", (caixa.x + 236, caixa.centery), 12,
+            ui.desenhar_texto(tela, t("RECORDE: {n}", n=rec), (caixa.x + 236, caixa.centery), 12,
                               (180, 200, 255), "midleft")
 
         # Fase no meio (com os poderes ativos do lado)
         caixa = pygame.Rect(444, 12, 300, 48)
         ui.painel(tela, caixa, (20, 24, 40), (255, 80, 200), 12, 3, sombra=False)
-        ui.desenhar_texto(tela, f"FASE {self.fase}", (caixa.x + 16, caixa.centery), 14,
+        ui.desenhar_texto(tela, t("FASE {n}", n=self.fase), (caixa.x + 16, caixa.centery), 14,
                           (255, 170, 240), "midleft")
         self._desenhar_poderes_ativos(tela, caixa.x + 126, caixa.y + 9)
 

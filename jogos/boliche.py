@@ -5,6 +5,7 @@ import pygame
 
 from settings import *
 from core import ui
+from core.idioma import t as tr
 from jogos.base_hibrido import MiniJogoHibrido
 from jogos.base_multi import TECLAS_MOVER, TECLAS_ACAO, CORES_JOGADOR
 
@@ -106,8 +107,8 @@ def desenhar_inicio_hibrido(jogo, tela):
     caixa.centerx = LARGURA // 2
     ui.painel(tela, caixa, (28, 32, 56), jogo.COR, 22, 5)
 
-    ui.desenhar_texto(tela, jogo.TITULO, (LARGURA // 2, topo + 20), 28, AMARELO, "midtop")
-    sub = f"VS {jogo.nome(1)}" if jogo.solo else "2 JOGADORES"
+    ui.desenhar_texto(tela, tr(jogo.TITULO), (LARGURA // 2, topo + 20), 28, AMARELO, "midtop")
+    sub = tr("VS {nome}", nome=jogo.nome(1)) if jogo.solo else tr("2 JOGADORES")
     ui.desenhar_texto(tela, sub, (LARGURA // 2, topo + 58), 12, (180, 200, 255), "midtop")
 
     y_ovos = topo + 124
@@ -119,21 +120,21 @@ def desenhar_inicio_hibrido(jogo, tela):
             ctrl = "COMPUTADOR"
         else:
             ctrl = jogo.CONTROLES_J1 if i == 0 else jogo.CONTROLES_J2
-        ui.desenhar_texto(tela, ctrl, (x, y_ovos + 64), 10, BRANCO, "midtop")
+        ui.desenhar_texto(tela, tr(ctrl), (x, y_ovos + 64), 10, BRANCO, "midtop")
     ui.desenhar_texto(tela, "VS", (LARGURA // 2, y_ovos), 32, AMARELO, "center")
 
     y = y_ovos + 88
     for linha in jogo.INSTRUCOES:
-        for s in ui.quebrar_linhas(linha, 10, caixa.w - 50):
+        for s in ui.quebrar_linhas(tr(linha), 10, caixa.w - 50):
             ui.desenhar_texto(tela, s, (LARGURA // 2, y), 10, BRANCO, "midtop")
             y += 16
         y += 3
 
     v = jogo.vitorias()
     y_rec = jogo.menu_inicio.botoes[0].rect.y - 32
-    ui.desenhar_texto(tela, f"VITÓRIAS  J1 {v[0]} × {v[1]} J2", (LARGURA // 2, y_rec),
+    ui.desenhar_texto(tela, tr("VITÓRIAS  J1 {a} × {b} J2", a=v[0], b=v[1]), (LARGURA // 2, y_rec),
                       14, AMARELO, "midtop")
-    ui.desenhar_texto(tela, "ESCOLHA O MODO", (LARGURA // 2, y_rec - 24), 12,
+    ui.desenhar_texto(tela, tr("ESCOLHA O MODO"), (LARGURA // 2, y_rec - 24), 12,
                       (180, 200, 255), "midtop")
     jogo.menu_inicio.desenhar(tela)
 
@@ -644,7 +645,7 @@ class Boliche(MiniJogoHibrido):
         elif n == 0:
             self.banner = ["ZERO!", (255, 140, 120), 1.5]
         else:
-            self.banner = [f"{n} PINO{'S' if n > 1 else ''}", cor, 1.4]
+            self.banner = [tr("{n} PINOS", n=n) if n > 1 else tr("{n} PINO", n=n), cor, 1.4]
         self.fase = "resultado"
         self.tempo_fase = 0.0
 
@@ -702,7 +703,7 @@ class Boliche(MiniJogoHibrido):
                        if b == 10 and (k == 0 or f[k - 1] == 10 or (k == 2 and sum(f[:2]) == 10)))
                    for i in (0, 1)]
         linhas = [f"{self.nome(0)[:10]} {t[0]}  ×  {t[1]} {self.nome(1)[:10]}",
-                  f"STRIKES: {strikes[0]} × {strikes[1]}"]
+                  tr("STRIKES: {a} × {b}", a=strikes[0], b=strikes[1])]
         self.fase = "fim"
         self.terminar_multi(vencedor, linhas)
 
@@ -766,7 +767,7 @@ class Boliche(MiniJogoHibrido):
         if self.banner:
             texto, cor, t = self.banner
             tam = 44 if t > 1.5 else 40
-            ui.desenhar_texto(tela, texto, (CX, 330), tam, cor, "center")
+            ui.desenhar_texto(tela, tr(texto), (CX, 330), tam, cor, "center")
 
     def _desenhar_trajeto(self, tela):
         """Seta da mira + prévia curta do caminho (com a curva do efeito)."""
@@ -803,11 +804,11 @@ class Boliche(MiniJogoHibrido):
         # Painel da vez (esquerda)
         caixa = pygame.Rect(12, 540, 236, 168)
         ui.painel(tela, caixa, (20, 24, 40), CORES_JOGADOR[self.vez], 12, 3, sombra=False)
-        ui.desenhar_texto(tela, "VEZ DE", (caixa.centerx, caixa.y + 12), 10, (180, 200, 255), "midtop")
+        ui.desenhar_texto(tela, tr("VEZ DE"), (caixa.centerx, caixa.y + 12), 10, (180, 200, 255), "midtop")
         ui.desenhar_texto(tela, self.nome(self.vez)[:12], (caixa.centerx, caixa.y + 30), 14,
                           CORES_JOGADOR[self.vez], "midtop")
         bola = len(self.jogadas[self.vez][min(self.frame, 9)]) + 1
-        ui.desenhar_texto(tela, f"FRAME {self.frame + 1}  BOLA {bola}", (caixa.centerx, caixa.y + 56),
+        ui.desenhar_texto(tela, tr("FRAME {f}  BOLA {b}", f=self.frame + 1, b=bola), (caixa.centerx, caixa.y + 56),
                           10, BRANCO, "midtop")
         if self._eh_bot():
             dica = ["PENSANDO..."]
@@ -816,15 +817,15 @@ class Boliche(MiniJogoHibrido):
                     "forca": ["ESPAÇO: FORÇA"],
                     "efeito": ["ESPAÇO: EFEITO"]}.get(self.fase, [])
         for k, linha in enumerate(dica):
-            ui.desenhar_texto(tela, linha, (caixa.centerx, caixa.y + 92 + k * 22), 10, AMARELO, "midtop")
-        ui.desenhar_texto(tela, f"PINOS EM PÉ: {sum(1 for p in self.pinos if p.ativo and not p.caido)}",
+            ui.desenhar_texto(tela, tr(linha), (caixa.centerx, caixa.y + 92 + k * 22), 10, AMARELO, "midtop")
+        ui.desenhar_texto(tela, tr("PINOS EM PÉ: {n}", n=sum(1 for p in self.pinos if p.ativo and not p.caido)),
                           (caixa.centerx, caixa.bottom - 22), 8, (200, 200, 220), "midtop")
 
         # Medidores (direita)
         caixa = pygame.Rect(LARGURA - 248, 540, 236, 168)
         ui.painel(tela, caixa, (20, 24, 40), BRANCO, 12, 3, sombra=False)
         barra = pygame.Rect(caixa.x + 24, caixa.y + 34, 36, 118)
-        ui.desenhar_texto(tela, "FORÇA", (barra.centerx, caixa.y + 12), 8, BRANCO, "midtop")
+        ui.desenhar_texto(tela, tr("FORÇA"), (barra.centerx, caixa.y + 12), 8, BRANCO, "midtop")
         pygame.draw.rect(tela, (50, 50, 70), barra, border_radius=6)
         f = self.forca if self.fase != "mira" else 0.0
         cheio = pygame.Rect(barra.x, barra.bottom - int(barra.h * f), barra.w, int(barra.h * f))
@@ -833,13 +834,13 @@ class Boliche(MiniJogoHibrido):
         pygame.draw.rect(tela, BRANCO, barra, 2, border_radius=6)
 
         trilho = pygame.Rect(caixa.x + 84, caixa.y + 80, 132, 14)
-        ui.desenhar_texto(tela, "EFEITO", (trilho.centerx, caixa.y + 12), 8, BRANCO, "midtop")
-        ui.desenhar_texto(tela, "<- CURVA ->", (trilho.centerx, caixa.y + 44), 8, (180, 200, 255), "midtop")
+        ui.desenhar_texto(tela, tr("EFEITO"), (trilho.centerx, caixa.y + 12), 8, BRANCO, "midtop")
+        ui.desenhar_texto(tela, tr("<- CURVA ->"), (trilho.centerx, caixa.y + 44), 8, (180, 200, 255), "midtop")
         pygame.draw.rect(tela, (50, 50, 70), trilho, border_radius=6)
         pygame.draw.line(tela, BRANCO, (trilho.centerx, trilho.y - 4), (trilho.centerx, trilho.bottom + 4), 2)
         e = self.efeito if self.fase in ("efeito", "rolando", "resultado") else 0.0
         pygame.draw.circle(tela, AMARELO, (int(trilho.centerx + e * trilho.w / 2), trilho.centery), 10)
-        ui.desenhar_texto(tela, f"MIRA {self.ang:+.1f}", (trilho.centerx, caixa.y + 118),
+        ui.desenhar_texto(tela, tr("MIRA {n:+.1f}", n=self.ang), (trilho.centerx, caixa.y + 118),
                           8, (200, 200, 220), "midtop")
 
     def _desenhar_placar(self, tela):
@@ -856,7 +857,7 @@ class Boliche(MiniJogoHibrido):
             x = W_NOME + k * W_F + (W_10 if k == 10 else 0)
             w = W_F if k < 9 else W_10
             ui.desenhar_texto(sup, str(k + 1), (x + w // 2, 0), 8, (200, 200, 230), "midtop")
-        ui.desenhar_texto(sup, "TOTAL", (W_NOME + 9 * W_F + W_10 + W_TOT // 2, 0), 8, (200, 200, 230), "midtop")
+        ui.desenhar_texto(sup, tr("TOTAL"), (W_NOME + 9 * W_F + W_10 + W_TOT // 2, 0), 8, (200, 200, 230), "midtop")
         for i in (0, 1):
             y = 14 + i * H
             totais = pontuacao(self.jogadas[i])

@@ -5,6 +5,7 @@ import pygame
 
 from settings import *
 from core import ui
+from core.idioma import t as tr
 from jogos.base_hibrido import MiniJogoHibrido
 from jogos.base_multi import TECLAS_MOVER, TECLAS_ACAO, CORES_JOGADOR
 from jogos.boliche import desenhar_inicio_hibrido, ajustar_botoes_hibrido
@@ -423,7 +424,7 @@ class Dardos(MiniJogoHibrido):
             self.particulas.explodir((x, y), [AMARELO, BRANCO, (255, 200, 120)], 18, 240, 0.6)
         else:
             self.som("bater", 0.7)
-        self.textos.adicionar(rot if pts else "FORA!", (x, y - 30), AMARELO if pts >= 25 or rot[0] == "T" else cor, 14)
+        self.textos.adicionar(rot if pts else tr("FORA!"), (x, y - 30), AMARELO if pts >= 25 or rot[0] == "T" else cor, 14)
         self.turno.append(rot if pts else "0")
 
         novo = self.resta[self.vez] - pts
@@ -468,10 +469,10 @@ class Dardos(MiniJogoHibrido):
         for i in (0, 1):
             h = self.historico[i]
             medias.append(round(sum(h) / len(h)) if h else 0)
-        linhas = [f"RESTAM  {self.resta[0]} × {self.resta[1]}",
-                  f"MÉDIA POR TURNO  {medias[0]} × {medias[1]}"]
+        linhas = [tr("RESTAM  {a} × {b}", a=self.resta[0], b=self.resta[1]),
+                  tr("MÉDIA POR TURNO  {a} × {b}", a=medias[0], b=medias[1])]
         if vencedor is not None and self.resta[vencedor] == 0:
-            linhas.insert(0, f"{self.nome(vencedor)[:12]} ZEROU NA RODADA {self.rodada}!")
+            linhas.insert(0, tr("{nome} ZEROU NA RODADA {n}!", nome=self.nome(vencedor)[:12], n=self.rodada))
         self.terminar_multi(vencedor, linhas)
 
     # --------------------------------------------------------
@@ -517,16 +518,16 @@ class Dardos(MiniJogoHibrido):
         self.textos.desenhar(tela)
         if self.banner:
             texto, cor, _ = self.banner
-            ui.desenhar_texto(tela, texto, (C[0], C[1]), 44, cor, "center")
+            ui.desenhar_texto(tela, tr(texto), (C[0], C[1]), 44, cor, "center")
         elif self.fase == "troca":
             pts = self.inicio_turno - self.resta[self.vez]
-            ui.desenhar_texto(tela, f"TURNO: {pts}", (C[0], C[1]), 32, AMARELO, "center")
+            ui.desenhar_texto(tela, tr("TURNO: {n}", n=pts), (C[0], C[1]), 32, AMARELO, "center")
 
     def desenhar_hud(self, tela):
         caixa = pygame.Rect(14, 14, 272, 692)
         ui.painel(tela, caixa, (20, 24, 40), BRANCO, 14, 3, sombra=False)
         ui.desenhar_texto(tela, "301", (caixa.centerx, caixa.y + 12), 20, AMARELO, "midtop")
-        ui.desenhar_texto(tela, f"RODADA {min(self.rodada, RODADAS)}/{RODADAS}", (caixa.centerx, caixa.y + 42),
+        ui.desenhar_texto(tela, tr("RODADA {n}/{total}", n=min(self.rodada, RODADAS), total=RODADAS), (caixa.centerx, caixa.y + 42),
                           10, (180, 200, 255), "midtop")
         for i in (0, 1):
             r = pygame.Rect(caixa.x + 12, caixa.y + 70 + i * 132, caixa.w - 24, 120)
@@ -538,12 +539,12 @@ class Dardos(MiniJogoHibrido):
             ui.desenhar_texto(tela, str(self.resta[i]), (r.centerx, r.y + 40), 36, BRANCO, "midtop")
             h = self.historico[i]
             if h:
-                ui.desenhar_texto(tela, f"ÚLTIMO: {h[-1]}", (r.centerx, r.bottom - 18), 8,
+                ui.desenhar_texto(tela, tr("ÚLTIMO: {x}", x=h[-1]), (r.centerx, r.bottom - 18), 8,
                                   (200, 200, 220), "midtop")
 
         # Dardos do turno
         y = caixa.y + 348
-        ui.desenhar_texto(tela, "DARDOS DO TURNO", (caixa.centerx, y), 10, BRANCO, "midtop")
+        ui.desenhar_texto(tela, tr("DARDOS DO TURNO"), (caixa.centerx, y), 10, BRANCO, "midtop")
         for k in range(3):
             r = pygame.Rect(caixa.x + 20 + k * 80, y + 22, 70, 40)
             pygame.draw.rect(tela, (30, 34, 54), r, border_radius=8)
@@ -554,13 +555,13 @@ class Dardos(MiniJogoHibrido):
         # Saída sugerida
         f = fecha(self.resta[self.vez])
         if f and self.fase in ("mirar", "espera"):
-            ui.desenhar_texto(tela, f"SAÍDA: {rotulo_alvo(f)}", (caixa.centerx, y + 76), 12,
+            ui.desenhar_texto(tela, tr("SAÍDA: {x}", x=rotulo_alvo(f)), (caixa.centerx, y + 76), 12,
                               (120, 255, 150), "midtop")
 
         # Força e firmeza
         y = caixa.y + 460
         barra = pygame.Rect(caixa.x + 24, y + 22, caixa.w - 48, 22)
-        ui.desenhar_texto(tela, "FORÇA", (caixa.centerx, y), 10, BRANCO, "midtop")
+        ui.desenhar_texto(tela, tr("FORÇA"), (caixa.centerx, y), 10, BRANCO, "midtop")
         pygame.draw.rect(tela, (50, 50, 70), barra, border_radius=6)
         zona = pygame.Rect(barra.x + int(barra.w * (FORCA_IDEAL - 0.08)), barra.y, int(barra.w * 0.16), barra.h)
         pygame.draw.rect(tela, (60, 140, 70), zona)
@@ -569,7 +570,7 @@ class Dardos(MiniJogoHibrido):
         pygame.draw.rect(tela, BRANCO, barra, 2, border_radius=6)
 
         y += 64
-        ui.desenhar_texto(tela, "FIRMEZA DA MÃO", (caixa.centerx, y), 10, BRANCO, "midtop")
+        ui.desenhar_texto(tela, tr("FIRMEZA DA MÃO"), (caixa.centerx, y), 10, BRANCO, "midtop")
         barra = pygame.Rect(caixa.x + 24, y + 22, caixa.w - 48, 22)
         pygame.draw.rect(tela, (50, 50, 70), barra, border_radius=6)
         firme = 1 - (min(TREMOR_SOLTO, self.amplitude()) - TREMOR_MIN) / (TREMOR_SOLTO - TREMOR_MIN)
@@ -577,8 +578,8 @@ class Dardos(MiniJogoHibrido):
         pygame.draw.rect(tela, cor, (barra.x, barra.y, int(barra.w * max(0.02, firme)), barra.h), border_radius=6)
         pygame.draw.rect(tela, BRANCO, barra, 2, border_radius=6)
         if self.segurando and self.t_segura > CANSA:
-            ui.desenhar_texto(tela, "BRAÇO CANSANDO!", (caixa.centerx, y + 52), 10, (255, 140, 120), "midtop")
+            ui.desenhar_texto(tela, tr("BRAÇO CANSANDO!"), (caixa.centerx, y + 52), 10, (255, 140, 120), "midtop")
         elif self._eh_bot():
-            ui.desenhar_texto(tela, "BOT MIRANDO...", (caixa.centerx, y + 52), 10, (180, 200, 255), "midtop")
+            ui.desenhar_texto(tela, tr("BOT MIRANDO..."), (caixa.centerx, y + 52), 10, (180, 200, 255), "midtop")
         else:
-            ui.desenhar_texto(tela, "SEGURE E SOLTE", (caixa.centerx, y + 52), 10, (180, 200, 255), "midtop")
+            ui.desenhar_texto(tela, tr("SEGURE E SOLTE"), (caixa.centerx, y + 52), 10, (180, 200, 255), "midtop")

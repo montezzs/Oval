@@ -5,7 +5,8 @@ import time
 import pygame
 
 from settings import *
-from core import assets, perfis, progresso, ui
+from core import assets, idioma, perfis, progresso, ui
+from core.idioma import t
 from core.audio import Audio
 from core.janela import Janela
 from core.jogador import Jogador
@@ -57,6 +58,7 @@ class App:
         # Saves: o save antigo (1 ovo) vira o morador da casa 1
         perfis.migrar_save_antigo()
         self.config = perfis.carregar_config()
+        idioma.definir(self.config["idioma"] or "pt")
         # Tutorial: quem já jogava antes dele existir não precisa ver
         if self.config["tutorial"] < 0:
             from cenas.casa_extras.tutorial import TUTORIAL_FIM
@@ -95,13 +97,22 @@ class App:
         self.rodando = True
         self.tempo_total = 0.0
 
+        if self.config["idioma"] is None:
+            # Idioma ainda não escolhido: pergunta antes de tudo
+            from cenas.escolher_idioma import CenaEscolherIdioma
+            self.trocar(CenaEscolherIdioma(self, self._comecar), fade=False)
+        else:
+            self._comecar(fade=False)
+
+    def _comecar(self, fade=True):
+        """Primeira cena de verdade (depois do idioma)."""
         if perfis.primeira_execucao(self.config):
             # 1ª vez: cria o ovo da casa 1 e vai direto para ela
             self.iniciar_rascunho(0)
-            self.trocar(CenaNome(self, "inicial", self._depois_do_nome), fade=False)
+            self.trocar(CenaNome(self, "inicial", self._depois_do_nome), fade=fade)
         else:
             from cenas.titulo import CenaTitulo
-            self.trocar(CenaTitulo(self), fade=False)
+            self.trocar(CenaTitulo(self), fade=fade)
 
     # --------------------------------------------------------
     # FLUXO INICIAL (1ª execução)
@@ -150,28 +161,29 @@ class App:
         from types import SimpleNamespace
         save = self.save
         horas = int(segundos // 3600)
-        linhas = [f"Você ficou fora {horas // 24} DIA(S)!" if horas >= 48 else f"Você ficou fora {horas}h!"]
+        linhas = [t("Você ficou fora {n} DIA(S)!", n=horas // 24) if horas >= 48
+                  else t("Você ficou fora {n}h!", n=horas)]
         try:
             from cenas.casa_extras.jardim import Jardim
             jardim = Jardim(SimpleNamespace(app=SimpleNamespace(save=save)))
             prontas = sum(1 for c in save["jardim"] if jardim.pronta(c))
             if prontas:
-                linhas.append(f"{prontas} PLANTA(S) PRONTA(S) NO JARDIM")
+                linhas.append(t("{n} PLANTA(S) PRONTA(S) NO JARDIM", n=prontas))
         except Exception:
             pass
         if save["diario"].get("bau_ultimo") != datetime.date.today().isoformat():
-            linhas.append("O BAÚ DO DIA ESTÁ ESPERANDO")
+            linhas.append(t("O BAÚ DO DIA ESTÁ ESPERANDO"))
         cartas = sum(1 for c in save["cartas"] if isinstance(c, dict) and not c.get("lida"))
         if cartas:
-            linhas.append(f"{cartas} CARTA(S) NOVA(S) NA CAIXA DO CORREIO")
+            linhas.append(t("{n} CARTA(S) NOVA(S) NA CAIXA DO CORREIO", n=cartas))
         m = save["diario"].get("missoes")
         if not isinstance(m, dict) or m.get("dia") != datetime.date.today().isoformat():
-            linhas.append("MISSÕES NOVAS COM O ROBERT")
+            linhas.append(t("MISSÕES NOVAS COM O ROBERT"))
         baixas = [nome for nome in ("fome", "energia", "diversao", "higiene")
                   if self.necessidades.valor(nome) < 40]
         if baixas:
             rotulos = {"fome": "FOME", "energia": "SONO", "diversao": "TÉDIO", "higiene": "SUJEIRA"}
-            linhas.append("O OVO ESTÁ COM " + ", ".join(rotulos[b] for b in baixas) + "!")
+            linhas.append(t("O OVO ESTÁ COM {lista}!", lista=", ".join(t(rotulos[b]) for b in baixas)))
         return linhas
 
     def descarregar_ovo(self):
@@ -449,11 +461,11 @@ class App:
             os.makedirs(pasta, exist_ok=True)
             pygame.image.save(foto, os.path.join(pasta, nome))
         except (OSError, pygame.error):
-            self.toasts.adicionar("OPS!", "NÃO DEU PARA SALVAR A FOTO", "", "erro")
+            self.toasts.adicionar(t("OPS!"), t("NÃO DEU PARA SALVAR A FOTO"), "", "erro")
             return
         self._flash = 0.25
         self.audio.som("obturador")
-        self.toasts.adicionar("FOTO SALVA!", f"fotos/{nome}", "", None)
+        self.toasts.adicionar(t("FOTO SALVA!"), f"fotos/{nome}", "", None)
         progresso.contar(self, "fotos")
 
     def _atualizar_transicao(self, dt):

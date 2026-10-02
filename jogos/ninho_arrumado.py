@@ -6,6 +6,7 @@ import pygame
 
 from settings import *
 from core import ui
+from core.idioma import t as tr
 from core.cena import tecla_voltar
 from jogos.base import MiniJogo
 
@@ -914,9 +915,9 @@ class NinhoArrumado(MiniJogo):
         self.app.save.salvar()
 
         ultimo = self.nivel == len(NIVEIS) - 1
-        titulo = "TODOS NO NINHO!" if ultimo else f"NÍVEL {self.nivel + 1} COMPLETO!"
+        titulo = tr("TODOS NO NINHO!") if ultimo else tr("NÍVEL {n} COMPLETO!", n=self.nivel + 1)
         self.terminar(venceu=True, valor=self.total_estrelas(), titulo=titulo,
-                      linhas=["", "", f"PASSOS: {self.movimentos}  •  PAR: {self.par}"])
+                      linhas=["", "", tr("PASSOS: {n}  •  PAR: {par}", n=self.movimentos, par=self.par)])
 
         # Menu de fim próprio: próximo nível / repetir / escolher
         if self.nivel + 1 < len(NIVEIS):
@@ -980,7 +981,7 @@ class NinhoArrumado(MiniJogo):
         x, y = self._centro(self.bebes[i])
         self.som("ponto", 0.8)
         self.particulas.explodir((x, y), [AMARELO, BRANCO, (255, 200, 120)], 12, 150, 0.6, (2, 4))
-        self.textos.adicionar("zzz", (x + self.cel * 0.3, y - self.cel * 0.5), BRANCO, 12)
+        self.textos.adicionar(tr("zzz"), (x + self.cel * 0.3, y - self.cel * 0.5), BRANCO, 12)
 
     def _atualizar_vitoria(self, dt):
         antes = self.t_fase
@@ -1198,30 +1199,30 @@ class NinhoArrumado(MiniJogo):
                 and int(self.tempo * 3) % 2 == 0
             cor = (84, 96, 150) if hover or destaque else (40, 44, 70)
             ui.painel(tela, r, cor, AMARELO if destaque else BRANCO, 12, 3, sombra=False)
-            ui.desenhar_texto(tela, rot, r.center, 12, BRANCO, "center")
+            ui.desenhar_texto(tela, tr(rot), r.center, 12, BRANCO, "center")
 
         centro = (LARGURA // 2, BOTAO_DESFAZER.centery)
         if self.travado and self.t_travado > 0.6 and self.fase == "jogando":
             r = pygame.Rect(0, 0, 560, 40)
             r.center = centro
             ui.painel(tela, r, (120, 60, 30), (255, 190, 90), 12, 3, sombra=False)
-            ui.desenhar_texto(tela, "Parece que travou! Aperte R ou Z", centro, 12,
+            ui.desenhar_texto(tela, tr("Parece que travou! Aperte R ou Z"), centro, 12,
                               (255, 235, 180), "center")
         else:
-            ui.desenhar_texto(tela, self.nome_nivel, centro, 12, (90, 55, 25), "center", False)
+            ui.desenhar_texto(tela, tr(self.nome_nivel), centro, 12, (90, 55, 25), "center", False)
 
     def desenhar_hud(self, tela):
         # Nível
         caixa = pygame.Rect(12, 12, 200, 48)
         ui.painel(tela, caixa, (20, 24, 40), BRANCO, 12, 3, sombra=False)
-        ui.desenhar_texto(tela, f"NÍVEL {self.nivel + 1}/{len(NIVEIS)}", caixa.center, 14,
+        ui.desenhar_texto(tela, tr("NÍVEL {n}/{total}", n=self.nivel + 1, total=len(NIVEIS)), caixa.center, 14,
                           AMARELO, "center")
 
         # Passos e par
         caixa2 = pygame.Rect(caixa.right + 10, 12, 190, 48)
         ui.painel(tela, caixa2, (20, 24, 40), BRANCO, 12, 3, sombra=False)
-        ui.desenhar_texto(tela, f"PASSOS: {self.movimentos}", (caixa2.x + 14, caixa2.y + 10), 12, BRANCO)
-        ui.desenhar_texto(tela, f"PAR: {self.par}", (caixa2.x + 14, caixa2.y + 29), 10, (180, 220, 255))
+        ui.desenhar_texto(tela, tr("PASSOS: {n}", n=self.movimentos), (caixa2.x + 14, caixa2.y + 10), 12, BRANCO)
+        ui.desenhar_texto(tela, tr("PAR: {n}", n=self.par), (caixa2.x + 14, caixa2.y + 29), 10, (180, 220, 255))
 
         # Estrelas que ainda dá para ganhar
         caixa3 = pygame.Rect(caixa2.right + 10, 12, 132, 48)
@@ -1298,9 +1299,9 @@ class NinhoArrumado(MiniJogo):
         prog = self._progresso()
         liberado = prog["nivel"]
         ys = self._y_seletor
-        ui.desenhar_texto(tela, f"NÍVEL {self.nivel + 1} DE {len(NIVEIS)}", (LARGURA // 2, ys), 16,
+        ui.desenhar_texto(tela, tr("NÍVEL {n} DE {total}", n=self.nivel + 1, total=len(NIVEIS)), (LARGURA // 2, ys), 16,
                           AMARELO, "midtop")
-        ui.desenhar_texto(tela, self.nome_nivel, (LARGURA // 2, ys + 24), 10, (180, 200, 255), "midtop")
+        ui.desenhar_texto(tela, tr(self.nome_nivel), (LARGURA // 2, ys + 24), 10, (180, 200, 255), "midtop")
 
         # Miniatura do nível
         _, _, mapa = NIVEIS[self.nivel]
@@ -1329,7 +1330,7 @@ class NinhoArrumado(MiniJogo):
 
         # Total
         y_rec = self.menu_inicio.botoes[0].rect.y - 32
-        ui.desenhar_texto(tela, f"★ TOTAL: {self.total_estrelas()} DE {len(NIVEIS) * 3} ★",
+        ui.desenhar_texto(tela, tr("★ TOTAL: {n} DE {total} ★", n=self.total_estrelas(), total=len(NIVEIS) * 3),
                           (LARGURA // 2, y_rec), 14, AMARELO, "midtop")
         self.menu_inicio.desenhar(tela)
 

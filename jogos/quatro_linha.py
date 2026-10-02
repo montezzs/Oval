@@ -5,6 +5,7 @@ import pygame
 
 from settings import *
 from core import ui
+from core.idioma import t as tr
 from jogos.base_multi import CORES_JOGADOR
 from jogos.jogo_velha import JogoTabuleiro, TECLAS_OK, fundo_mesa
 
@@ -235,9 +236,9 @@ class QuatroEmLinha(JogoTabuleiro):
             x, y = TAB.x + q["c"] * CEL + CEL // 2, self._y_linha(q["r"])
             self.particulas.explodir((x, y), [self.cor(q["p"]), AMARELO, BRANCO], 36, 320, 1.0)
             self.tremer(0.2)
-            self.finalizar(q["p"], [f"4 EM LINHA EM {sum(v is not None for v in self.g)} JOGADAS"])
+            self.finalizar(q["p"], [tr("4 EM LINHA EM {n} JOGADAS", n=sum(v is not None for v in self.g))])
         elif None not in self.g:
-            self.finalizar(None, ["TABULEIRO CHEIO!"])
+            self.finalizar(None, [tr("TABULEIRO CHEIO!")])
         else:
             self.vez = 1 - self.vez
 
@@ -357,4 +358,4 @@ class QuatroEmLinha(JogoTabuleiro):
         caixa = pygame.Rect(LARGURA - 300, 12, 220, 56)
         ui.painel(tela, caixa, (20, 24, 40), BRANCO, 12, 3, sombra=False)
         n = sum(v is not None for v in self.g)
-        ui.desenhar_texto(tela, f"JOGADAS: {n}", caixa.center, 12, AMARELO, "center")
+        ui.desenhar_texto(tela, tr("JOGADAS: {n}", n=n), caixa.center, 12, AMARELO, "center")

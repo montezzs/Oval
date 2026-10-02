@@ -1,3 +1,5 @@
+from core import idioma
+from core.idioma import t
 import math
 import random
 
@@ -353,7 +355,7 @@ class SumoOvo(MiniJogoMulti):
         jogador.desenhar(sup, (w * 0.36, h * 0.58), h * 0.4, angulo=-12)
         jogador.desenhar(sup, (w * 0.64, h * 0.58), h * 0.4, aparencia=apar2, espelhar=True,
                          angulo=12)
-        ui.desenhar_texto(sup, "BUM!", (w // 2, int(h * 0.2)), 12, AMARELO, "center")
+        ui.desenhar_texto(sup, t("BUM!"), (w // 2, int(h * 0.2)), 12, AMARELO, "center")
 
     # --------------------------------------------------------
     # PARTIDA
@@ -389,10 +391,10 @@ class SumoOvo(MiniJogoMulti):
         self.powerup = None           # [tipo, x, y, vida]
         self.prox_powerup = POWERUP_INTERVALO
         self.banner = None            # [texto, cor, tempo restante, tamanho]
-        self._banner(f"ROUND {self.num_round}", AMARELO, 1.4, 32)
+        self._banner(t("ROUND {n}", n=self.num_round), AMARELO, 1.4, 32)
 
     def _banner(self, texto, cor, tempo, tamanho=32):
-        self.banner = [texto, cor, tempo, tamanho, tempo]
+        self.banner = [t(texto), cor, tempo, tamanho, tempo]
 
     def _montar_plateia(self):
         """Mini-ovos da família assistindo (desenhados uma vez só)."""
@@ -528,7 +530,7 @@ class SumoOvo(MiniJogoMulti):
             if L.queda >= TEMPO_QUEDA and not L.sumiu:
                 L.sumiu = True
                 self.particulas.explodir((L.x, L.y + 50), COR_POEIRA, 14, 160, 0.6, (3, 6), 200)
-                self.textos.adicionar("POF!", (L.x, L.y - 20), BRANCO, 16)
+                self.textos.adicionar(t("POF!"), (L.x, L.y - 20), BRANCO, 16)
             return
 
         pode = self.fase == "luta" and L.tonto <= 0
@@ -634,10 +636,10 @@ class SumoOvo(MiniJogoMulti):
         if tipo == "pimenta":
             L.pimenta = PIMENTA_TEMPO
             L.recarga_inv = 0.0
-            self.textos.adicionar("PIMENTA!", (L.x, L.y - 110), (255, 120, 80), 16)
+            self.textos.adicionar(t("PIMENTA!"), (L.x, L.y - 110), (255, 120, 80), 16)
         else:
             L.bigorna = BIGORNA_TEMPO
-            self.textos.adicionar("BIGORNA!", (L.x, L.y - 110), (200, 210, 230), 16)
+            self.textos.adicionar(t("BIGORNA!"), (L.x, L.y - 110), (200, 210, 230), 16)
         L.vel_esticar += 6.0
         self.particulas.explodir((L.x, L.y - 45), [cor, BRANCO, AMARELO], 14, 200, 0.6, (2, 5), 200)
 
@@ -764,7 +766,7 @@ class SumoOvo(MiniJogoMulti):
             self.particulas.explodir(meio, COR_POEIRA, 6, 150, 0.5, (3, 5), 120)
             if vel_rel > 400:
                 self.som("boing", 0.9)
-                self.textos.adicionar("BUM!", (meio[0], meio[1] - 50), AMARELO, 20)
+                self.textos.adicionar(t("BUM!"), (meio[0], meio[1] - 50), AMARELO, 20)
                 self.particulas.explodir(meio, [BRANCO, AMARELO], 8, 260, 0.35, (2, 4), 0)
             else:
                 self.som("bater", min(1.0, 0.3 + vel_rel / 500))
@@ -808,12 +810,12 @@ class SumoOvo(MiniJogoMulti):
         L = self.lut[v]
         L.pulinhos = 1.2
         L.vel_esticar -= 8.0
-        self.textos.adicionar("HAI!", (L.x, L.y - 120), AMARELO, 24)
+        self.textos.adicionar(t("HAI!"), (L.x, L.y - 120), AMARELO, 24)
         self.confete = 1.2
         self.cor_confete = self.cor(v)
         self.plateia_pulo = 1.6
         final = self.rounds[v] >= ROUNDS_VITORIA
-        self._banner(f"{self.nome(v)} VENCE{' A LUTA' if final else ' O ROUND'}!",
+        self._banner(t("{nome} VENCE A LUTA!" if final else "{nome} VENCE O ROUND!", nome=self.nome(v)),
                      CORES_JOGADOR[v], 2.2, 24 if len(self.nome(v)) <= 8 else 20)
 
     def _nova_rachadura(self):
@@ -836,7 +838,7 @@ class SumoOvo(MiniJogoMulti):
 
     def _acabar(self, vencedor):
         r = self.rounds
-        self.terminar_multi(vencedor, [f"ROUNDS  {r[0]} × {r[1]}"])
+        self.terminar_multi(vencedor, [t("ROUNDS  {a} × {b}", a=r[0], b=r[1])])
 
     def calcular_moedas(self, valor, venceu):
         base = self.MOEDAS_PARTIDA + self.rounds_jogados
@@ -1028,7 +1030,7 @@ class SumoOvo(MiniJogoMulti):
         pygame.draw.polygon(tela, cor, [(centro_ovo[0] - 6, my), (centro_ovo[0] + 6, my),
                                         (centro_ovo[0], my + 7)])
         if self.fase == "preparar":
-            ui.desenhar_texto(tela, f"J{L.i + 1}", (centro_ovo[0], my - 6), 12, cor, "midbottom")
+            ui.desenhar_texto(tela, idioma.t("J{n}", n=L.i + 1), (centro_ovo[0], my - 6), 12, cor, "midbottom")
 
         # Tempo de fincar restante
         if L.fincado:
@@ -1071,9 +1073,9 @@ class SumoOvo(MiniJogoMulti):
         caixa.centerx = LARGURA // 2
         ui.painel(tela, caixa, (20, 24, 40), BRANCO, 14, 3, sombra=False)
 
-        ui.desenhar_texto(tela, f"ROUND {self.num_round}", (caixa.centerx, caixa.y + 12), 12,
+        ui.desenhar_texto(tela, t("ROUND {n}", n=self.num_round), (caixa.centerx, caixa.y + 12), 12,
                           AMARELO, "midtop")
-        ui.desenhar_texto(tela, self.OPCOES[self.opcao], (caixa.centerx, caixa.bottom - 10), 10,
+        ui.desenhar_texto(tela, t(self.OPCOES[self.opcao]), (caixa.centerx, caixa.bottom - 10), 10,
                           (180, 200, 255), "midbottom")
 
         for i in (0, 1):
@@ -1097,7 +1099,7 @@ class SumoOvo(MiniJogoMulti):
 
         if self.morte_subita and self.estado == "jogando" and self.fase == "luta"                 and self.tempo_round - self.modo["encolhe_desde"] < 4.0:
             if int(self.tempo * 3) % 2 == 0:
-                ui.desenhar_texto(tela, "O RINGUE ESTÁ ENCOLHENDO!", (LARGURA // 2, caixa.bottom + 8),
+                ui.desenhar_texto(tela, t("O RINGUE ESTÁ ENCOLHENDO!"), (LARGURA // 2, caixa.bottom + 8),
                                   10, (255, 150, 150), "midtop")
 
     # --------------------------------------------------------
@@ -1113,8 +1115,8 @@ class SumoOvo(MiniJogoMulti):
         caixa.centerx = LARGURA // 2
         ui.painel(tela, caixa, (28, 32, 56), self.COR, 22, 5)
 
-        ui.desenhar_texto(tela, self.TITULO, (LARGURA // 2, topo + 20), 28, AMARELO, "midtop")
-        ui.desenhar_texto(tela, "2 JOGADORES", (LARGURA // 2, topo + 58), 12,
+        ui.desenhar_texto(tela, t(self.TITULO), (LARGURA // 2, topo + 20), 28, AMARELO, "midtop")
+        ui.desenhar_texto(tela, t("2 JOGADORES"), (LARGURA // 2, topo + 58), 12,
                           (180, 200, 255), "midtop")
 
         y_ovos = topo + 124
@@ -1123,20 +1125,20 @@ class SumoOvo(MiniJogoMulti):
             self.desenhar_ovo(tela, i, (x, y_ovos + balanco), 60, espelhar=(i == 1))
             ui.desenhar_texto(tela, self.nome(i), (x, y_ovos + 42), 14, CORES_JOGADOR[i], "midtop")
             ctrl = self.CONTROLES_J1 if i == 0 else self.CONTROLES_J2
-            ui.desenhar_texto(tela, ctrl, (x, y_ovos + 64), 10, BRANCO, "midtop")
+            ui.desenhar_texto(tela, t(ctrl), (x, y_ovos + 64), 10, BRANCO, "midtop")
         ui.desenhar_texto(tela, "VS", (LARGURA // 2, y_ovos), 32, AMARELO, "center")
 
         y = y_ovos + 88
         for linha in self.INSTRUCOES:
-            for sub in ui.quebrar_linhas(linha, 10, caixa.w - 50):
+            for sub in ui.quebrar_linhas(t(linha), 10, caixa.w - 50):
                 ui.desenhar_texto(tela, sub, (LARGURA // 2, y), 10, BRANCO, "midtop")
                 y += 16
             y += 3
 
         v = self.vitorias()
         y_rec = self.menu_inicio.botoes[0].rect.y - 32
-        ui.desenhar_texto(tela, f"VITÓRIAS  J1 {v[0]} × {v[1]} J2", (LARGURA // 2, y_rec),
+        ui.desenhar_texto(tela, t("VITÓRIAS  J1 {a} × {b} J2", a=v[0], b=v[1]), (LARGURA // 2, y_rec),
                           14, AMARELO, "midtop")
-        ui.desenhar_texto(tela, "ESCOLHA O MODO", (LARGURA // 2, y_rec - 24), 12,
+        ui.desenhar_texto(tela, t("ESCOLHA O MODO"), (LARGURA // 2, y_rec - 24), 12,
                           (180, 200, 255), "midtop")
         self.menu_inicio.desenhar(tela)

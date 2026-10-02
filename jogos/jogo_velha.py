@@ -8,6 +8,7 @@ import pygame
 
 from settings import *
 from core import ui
+from core.idioma import t, t as _t
 from jogos.base_hibrido import MiniJogoHibrido
 from jogos.base_multi import CORES_JOGADOR
 
@@ -142,8 +143,8 @@ class JogoTabuleiro(MiniJogoHibrido):
 
     def texto_vez(self):
         if self.vez_do_bot():
-            return "PENSANDO" + "." * (1 + int(self.tempo * 3) % 3)
-        return "SUA VEZ!"
+            return t("PENSANDO") + "." * (1 + int(self.tempo * 3) % 3)
+        return t("SUA VEZ!")
 
     def desenhar_vez(self, tela, rect):
         i = self.vez
@@ -169,9 +170,9 @@ class JogoTabuleiro(MiniJogoHibrido):
         caixa.centerx = LARGURA // 2
         ui.painel(tela, caixa, (28, 32, 56), self.COR, 22, 5)
 
-        tam = ui.tamanho_que_cabe(self.TITULO, caixa.w - 60, (28, 24, 20))
-        ui.desenhar_texto(tela, self.TITULO, (LARGURA // 2, topo + 20), tam, AMARELO, "midtop")
-        ui.desenhar_texto(tela, "VS BOT OU 2 JOGADORES NO MESMO PC", (LARGURA // 2, topo + 58),
+        tam = ui.tamanho_que_cabe(t(self.TITULO), caixa.w - 60, (28, 24, 20))
+        ui.desenhar_texto(tela, t(self.TITULO), (LARGURA // 2, topo + 20), tam, AMARELO, "midtop")
+        ui.desenhar_texto(tela, t("VS BOT OU 2 JOGADORES NO MESMO PC"), (LARGURA // 2, topo + 58),
                           10, (180, 200, 255), "midtop")
 
         y_ovos = topo + 124
@@ -179,22 +180,22 @@ class JogoTabuleiro(MiniJogoHibrido):
             balanco = math.sin(self.tempo * 3 + i * 1.5) * 4
             self.desenhar_ovo(tela, i, (x, y_ovos + balanco), 60, espelhar=(i == 1))
             ui.desenhar_texto(tela, self.nome(i), (x, y_ovos + 42), 14, CORES_JOGADOR[i], "midtop")
-            ctrl = "BOT" if (i == 1 and self.solo) else "MOUSE OU SETAS"
+            ctrl = t("BOT") if (i == 1 and self.solo) else t("MOUSE OU SETAS")
             ui.desenhar_texto(tela, ctrl, (x, y_ovos + 64), 10, BRANCO, "midtop")
         ui.desenhar_texto(tela, "VS", (LARGURA // 2, y_ovos), 32, AMARELO, "center")
 
         y = y_ovos + 88
         for linha in self.INSTRUCOES:
-            for sub in ui.quebrar_linhas(linha, 10, caixa.w - 50):
+            for sub in ui.quebrar_linhas(t(linha), 10, caixa.w - 50):
                 ui.desenhar_texto(tela, sub, (LARGURA // 2, y), 10, BRANCO, "midtop")
                 y += 16
             y += 3
 
         v = self.vitorias()
         y_rec = self.menu_inicio.botoes[0].rect.y - 32
-        ui.desenhar_texto(tela, f"VITÓRIAS  J1 {v[0]} × {v[1]} J2", (LARGURA // 2, y_rec),
+        ui.desenhar_texto(tela, t("VITÓRIAS  J1 {a} × {b} J2", a=v[0], b=v[1]), (LARGURA // 2, y_rec),
                           14, AMARELO, "midtop")
-        ui.desenhar_texto(tela, "ESCOLHA O MODO", (LARGURA // 2, y_rec - 24), 12,
+        ui.desenhar_texto(tela, t("ESCOLHA O MODO"), (LARGURA // 2, y_rec - 24), 12,
                           (180, 200, 255), "midtop")
         self.menu_inicio.desenhar(tela)
 
@@ -309,15 +310,15 @@ class JogoVelha(JogoTabuleiro):
                 self.placar[v] += 1
                 c = self._centro(linha[1])
                 self.particulas.explodir(c, [CORES_JOGADOR[v], AMARELO, BRANCO], 30, 300, 0.9)
-                self.textos.adicionar(f"PONTO DE {self.nome(v)[:10]}!", c, AMARELO) \
+                self.textos.adicionar(t("PONTO DE {nome}!", nome=self.nome(v)[:10]), c, AMARELO) \
                     if hasattr(self.textos, "adicionar") else None
             if max(self.placar) >= META or self.rodada >= MAX_RODADAS:
                 if self.placar[0] == self.placar[1]:
                     ganhador = None
                 else:
                     ganhador = 0 if self.placar[0] > self.placar[1] else 1
-                self.finalizar(ganhador, [f"PLACAR  {self.placar[0]} × {self.placar[1]}",
-                                          f"RODADAS JOGADAS: {self.rodada}"], 1.6)
+                self.finalizar(ganhador, [t("PLACAR  {a} × {b}", a=self.placar[0], b=self.placar[1]),
+                                          t("RODADAS JOGADAS: {n}", n=self.rodada)], 1.6)
             else:
                 self.pausa_rodada = 1.3
             return
@@ -431,7 +432,7 @@ class JogoVelha(JogoTabuleiro):
         for i in (0, 1):
             x = caixa.x + 30 if i == 0 else caixa.right - 30
             self.desenhar_ovo(tela, i, (x, caixa.centery + 1), 30)
-        ui.desenhar_texto(tela, f"RODADA {min(self.rodada + 1, MAX_RODADAS)}  •  MELHOR DE 5",
+        ui.desenhar_texto(tela, _t("RODADA {n}  •  MELHOR DE 5", n=min(self.rodada + 1, MAX_RODADAS)),
                           (LARGURA // 2, caixa.bottom + 6), 8, (90, 50, 30), "midtop", False)
         self.particulas.desenhar(tela)
         self.textos.desenhar(tela)

@@ -5,6 +5,7 @@ import pygame
 
 from settings import *
 from core import ui
+from core.idioma import t as tr
 from core.assets import comida_sup
 from jogos.base import MiniJogo
 
@@ -771,7 +772,7 @@ class OvoMan(MiniJogo):
             self.ganhou_extra = True
             self.vidas += 1
             self.som("acerto")
-            self.textos.adicionar("+1 VIDA!", (AREA.centerx, AREA.y + 40), (140, 255, 140), 16)
+            self.textos.adicionar(tr("+1 VIDA!"), (AREA.centerx, AREA.y + 40), (140, 255, 140), 16)
 
     def _pegar_pimenta(self, cel):
         self.pimenta = max(3.0, 7.0 - (self.nivel - 1))
@@ -792,7 +793,7 @@ class OvoMan(MiniJogo):
         self.fruta = None
         self.pimenta = 0.0
         self.som("bandeira")
-        self.textos.adicionar("HORTA LIMPA!", (AREA.centerx, _tela(LUGAR_FRUTA)[1]), AMARELO, 20)
+        self.textos.adicionar(tr("HORTA LIMPA!"), (AREA.centerx, _tela(LUGAR_FRUTA)[1]), AMARELO, 20)
 
     # --- utensílios ---
 
@@ -931,12 +932,12 @@ class OvoMan(MiniJogo):
         self.som("erro")
         pos = _tela(self.ovo.pos)
         self.particulas.explodir(pos, [AMARELO, BRANCO, (255, 190, 60)], 26, 220)
-        self.textos.adicionar("OVO MEXIDO!", (pos[0], pos[1] - 30), AMARELO, 16)
+        self.textos.adicionar(tr("OVO MEXIDO!"), (pos[0], pos[1] - 30), AMARELO, 16)
 
     def _depois_de_morrer(self):
         self.vidas -= 1
         if self.vidas <= 0:
-            self.terminar(linhas=[f"PONTOS: {self.pontos}", f"NÍVEL: {self.nivel}"])
+            self.terminar(linhas=[tr("PONTOS: {n}", n=self.pontos), tr("NÍVEL: {n}", n=self.nivel)])
             return
         self._posicionar()
         self.fase = "pronto"
@@ -987,7 +988,7 @@ class OvoMan(MiniJogo):
 
         if self.estado == "jogando" and self.fase == "pronto":
             x, y = _tela(LUGAR_FRUTA)
-            ui.desenhar_texto(tela, "PRONTO!", (x, y), 16, AMARELO, "center")
+            ui.desenhar_texto(tela, tr("PRONTO!"), (x, y), 16, AMARELO, "center")
 
     def _desenhar_ovo(self, tela):
         ovo = self.ovo
@@ -1098,11 +1099,11 @@ class OvoMan(MiniJogo):
     def desenhar_hud(self, tela):
         caixa = pygame.Rect(12, 12, 300, 48)
         ui.painel(tela, caixa, (20, 24, 40), BRANCO, 12, 3, sombra=False)
-        ui.desenhar_texto(tela, f"PONTOS: {self.pontos}", (caixa.x + 16, caixa.centery), 14,
+        ui.desenhar_texto(tela, tr("PONTOS: {n}", n=self.pontos), (caixa.x + 16, caixa.centery), 14,
                           AMARELO, "midleft")
         rec = self.recorde()
         if rec is not None:
-            ui.desenhar_texto(tela, f"RECORDE: {rec}", (caixa.right + 16, caixa.centery), 12,
+            ui.desenhar_texto(tela, tr("RECORDE: {n}", n=rec), (caixa.right + 16, caixa.centery), 12,
                               (180, 200, 255), "midleft")
 
         # Nível e vidas (ovinhos) antes do botão de pausa
@@ -1111,7 +1112,7 @@ class OvoMan(MiniJogo):
         caixa = pygame.Rect(0, 12, largura, 48)
         caixa.right = LARGURA - 76
         ui.painel(tela, caixa, (20, 24, 40), BRANCO, 12, 3, sombra=False)
-        ui.desenhar_texto(tela, f"NÍVEL {self.nivel}", (caixa.x + 14, caixa.centery), 12,
+        ui.desenhar_texto(tela, tr("NÍVEL {n}", n=self.nivel), (caixa.x + 14, caixa.centery), 12,
                           (140, 255, 160), "midleft")
         for i in range(mostrar):
             self.jogador.desenhar(tela, (caixa.right - 22 - i * 30, caixa.centery + 1), 24)
@@ -1124,7 +1125,7 @@ class OvoMan(MiniJogo):
             pygame.draw.rect(tela, (20, 24, 40), barra, border_radius=7)
             pygame.draw.rect(tela, (230, 60, 40), (barra.x + 2, barra.y + 2, larg, 10), border_radius=5)
             pygame.draw.rect(tela, BRANCO, barra, 2, border_radius=7)
-            ui.desenhar_texto(tela, "PIMENTA!", (barra.x - 10, barra.centery), 10,
+            ui.desenhar_texto(tela, tr("PIMENTA!"), (barra.x - 10, barra.centery), 10,
                               (255, 140, 110), "midright")
 
 

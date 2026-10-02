@@ -5,6 +5,7 @@ import pygame
 
 from settings import *
 from core import ui
+from core.idioma import t as tr
 from core import trilhas
 from jogos.base import MiniJogo
 
@@ -680,7 +681,7 @@ class OvoRitmo(MiniJogo):
     def _errar(self, nota, caiu=True):
         self._registrar("ERROU")
         if self.combo >= 10:
-            self.textos.adicionar("COMBO PERDIDO", (PISTAS_X[1] + 45, RECEPTOR_Y - 190),
+            self.textos.adicionar(tr("COMBO PERDIDO"), (PISTAS_X[1] + 45, RECEPTOR_Y - 190),
                                   (220, 210, 255), 12)
         self.combo = 0
         self.energia = max(0.0, self.energia - 8)
@@ -818,10 +819,10 @@ class OvoRitmo(MiniJogo):
             self.nota_final = "S" if p >= 0.95 else "A" if p >= 0.85 else "B" if p >= 0.70 else "C"
         else:
             self.nota_final = "-"
-        linhas = [f"PONTOS: {self.pontos}" + (f"   NOTA: {self.nota_final}" if completou else ""),
-                  f"PRECISÃO: {int(p * 100)}%   COMBO: {self.maior_combo}",
-                  f"ACERTOS: {self.acertos}/{len(self.notas)}"]
-        self.terminar(venceu=completou, titulo="SHOW COMPLETO!" if completou else "A MÚSICA PAROU!",
+        linhas = [tr("PONTOS: {n}", n=self.pontos) + (tr("   NOTA: {n}", n=self.nota_final) if completou else ""),
+                  tr("PRECISÃO: {p}%   COMBO: {c}", p=int(p * 100), c=self.maior_combo),
+                  tr("ACERTOS: {n}/{total}", n=self.acertos, total=len(self.notas))]
+        self.terminar(venceu=completou, titulo=tr("SHOW COMPLETO!") if completou else tr("A MÚSICA PAROU!"),
                       linhas=linhas)
 
     def calcular_moedas(self, valor, venceu):
@@ -891,7 +892,7 @@ class OvoRitmo(MiniJogo):
         self._desenhar_julgamento(tela)
 
         if self.parou:
-            ui.desenhar_texto(tela, "A MÚSICA PAROU!", (PISTAS_X[1] + 45, 330), 24, (255, 120, 120),
+            ui.desenhar_texto(tela, tr("A MÚSICA PAROU!"), (PISTAS_X[1] + 45, 330), 24, (255, 120, 120),
                               "center")
 
     def _desenhar_notas(self, tela):
@@ -1002,10 +1003,10 @@ class OvoRitmo(MiniJogo):
         if self.julgamento:
             texto, t = self.julgamento
             tam = 28 if t < 0.08 else 24
-            rotulo = texto + ("!" if texto in ("PERFEITO", "ÓTIMO") else "")
+            rotulo = tr(texto + ("!" if texto in ("PERFEITO", "ÓTIMO") else ""))
             ui.desenhar_texto(tela, rotulo, (cx, 440 - min(t, 0.1) * 60), tam, CORES_JULG[texto], "center")
         if self.combo >= 5:
-            txt = f"{self.combo} COMBO"
+            txt = tr("{n} COMBO", n=self.combo)
             ui.desenhar_texto(tela, txt, (cx, 482), 14, BRANCO, "center")
             if self.multiplicador > 1:
                 ui.desenhar_texto(tela, f"×{self.multiplicador}", (cx, 506), 16,
@@ -1015,13 +1016,13 @@ class OvoRitmo(MiniJogo):
         fundo = (22, 12, 36)
         caixa = pygame.Rect(12, 12, 262, 48)
         ui.painel(tela, caixa, fundo, BRANCO, 12, 3, sombra=False)
-        ui.desenhar_texto(tela, f"PONTOS: {self.pontos}", (caixa.x + 14, caixa.centery), 14,
+        ui.desenhar_texto(tela, tr("PONTOS: {n}", n=self.pontos), (caixa.x + 14, caixa.centery), 14,
                           AMARELO, "midleft")
 
         c2 = pygame.Rect(12, 66, 262, 30)
         ui.painel(tela, c2, fundo, (150, 120, 200), 10, 2, sombra=False)
         rec = self.recorde()
-        ui.desenhar_texto(tela, f"RECORDE: {rec if rec is not None else '--'}", (c2.x + 14, c2.centery + 1),
+        ui.desenhar_texto(tela, tr("RECORDE: {n}", n=rec if rec is not None else '--'), (c2.x + 14, c2.centery + 1),
                           10, (180, 200, 255), "midleft")
         ui.desenhar_texto(tela, self.OPCOES[self.opcao], (c2.right - 12, c2.centery + 1), 10,
                           (255, 180, 240), "midright")

@@ -7,6 +7,7 @@ from settings import *
 from core import assets, ui
 from core.cena import tecla_voltar
 from core.jogador import Jogador
+from core.idioma import t
 from jogos.base import MiniJogo
 
 # ============================================================
@@ -133,9 +134,9 @@ class MiniJogoMulti(MiniJogo):
 
     def rotulo_j2(self):
         if self._vizinho is not None:
-            nome = self._vizinho.nome.strip()[:8].upper() or "VIZINHO"
-            return f"J2: {nome} (CASA {self._slot_vizinho + 1})"
-        return "J2: SORTEADO"
+            nome = self._vizinho.nome.strip()[:8].upper() or t("VIZINHO")
+            return t("J2: {nome} (CASA {n})", nome=nome, n=self._slot_vizinho + 1)
+        return t("J2: SORTEADO")
 
     def sortear_j2(self):
         j1 = self.jogador.aparencia()
@@ -158,10 +159,10 @@ class MiniJogoMulti(MiniJogo):
 
     def nome(self, i):
         if i == 0:
-            return (self.jogador.nome or "JOGADOR 1").strip() or "JOGADOR 1"
+            return (self.jogador.nome or t("JOGADOR 1")).strip() or t("JOGADOR 1")
         if self._vizinho is not None:
-            return self._vizinho.nome.strip() or "JOGADOR 2"
-        return "JOGADOR 2"
+            return self._vizinho.nome.strip() or t("JOGADOR 2")
+        return t("JOGADOR 2")
 
     def cor(self, i):
         return Jogador.cor_do_ovo(self.aparencia(i)[0])
@@ -217,12 +218,12 @@ class MiniJogoMulti(MiniJogo):
             self.app.save["recordes"][self.chave_recorde() + "_vitorias"] = placar
             self.app.save.salvar()
 
-        titulo = "EMPATE!" if vencedor is None else f"{self.nome(vencedor)} VENCEU!"
+        titulo = t("EMPATE!") if vencedor is None else t("{nome} VENCEU!", nome=self.nome(vencedor))
         self.vencedor = vencedor
         linhas = list(linhas or [])
-        linhas.append(f"VITÓRIAS  J1 {placar[0]} × {placar[1]} J2")
+        linhas.append(t("VITÓRIAS  J1 {a} × {b} J2", a=placar[0], b=placar[1]))
         if self._cor_trocada:
-            linhas.append("COR DO J2 TROCADA NESTA PARTIDA")
+            linhas.append(t("COR DO J2 TROCADA NESTA PARTIDA"))
         # "venceu" aqui = o J1 venceu (define o bônus de moedas e o som)
         self.terminar(venceu=(vencedor == 0), valor=0, titulo=titulo, linhas=linhas,
                       registrar=False)
@@ -320,7 +321,7 @@ class MiniJogoMulti(MiniJogo):
                 apar = (apar[0], apar[1], apar[2], BOCA_TRISTE)
             self.desenhar_ovo(tela, i, (x, caixa.y + 150 + dy), 70, espelhar=(i == 1), angulo=ang,
                               aparencia=apar)
-        ui.desenhar_texto(tela, "PARA " + self.nome(0).upper(), (caixa.right - 110, caixa.y + 104),
+        ui.desenhar_texto(tela, t("PARA {nome}", nome=self.nome(0).upper()), (caixa.right - 110, caixa.y + 104),
                           8, (230, 220, 170), "center")
 
     def _desenhar_inicio(self, tela):
@@ -330,14 +331,14 @@ class MiniJogoMulti(MiniJogo):
         caixa.centerx = LARGURA // 2
         ui.painel(tela, caixa, UI_PAINEL, self.COR, 22, 5)
 
-        tam = ui.tamanho_que_cabe(self.TITULO, caixa.w - 60, (28, 24, 20))
-        ui.desenhar_texto(tela, self.TITULO, (LARGURA // 2, topo + 22), tam, AMARELO, "midtop",
+        tam = ui.tamanho_que_cabe(t(self.TITULO), caixa.w - 60, (28, 24, 20))
+        ui.desenhar_texto(tela, t(self.TITULO), (LARGURA // 2, topo + 22), tam, AMARELO, "midtop",
                           True, True)
-        ui.desenhar_texto(tela, "2 JOGADORES", (LARGURA // 2, topo + 62), 12,
+        ui.desenhar_texto(tela, t("2 JOGADORES"), (LARGURA // 2, topo + 62), 12,
                           UI_TEXTO_SUAVE, "midtop")
 
         if self._cor_trocada:
-            ui.desenhar_texto(tela, "COR DO J2 TROCADA NESTA PARTIDA", (LARGURA // 2, topo + 80), 8,
+            ui.desenhar_texto(tela, t("COR DO J2 TROCADA NESTA PARTIDA"), (LARGURA // 2, topo + 80), 8,
                               (230, 220, 170), "midtop")
 
         # VS com os dois ovos e os controles
@@ -348,24 +349,24 @@ class MiniJogoMulti(MiniJogo):
             ui.desenhar_texto(tela, self.nome(i), (x, y_ovos + 52), 14,
                               CORES_JOGADOR[i], "midtop", True, True)
             ctrl = self.CONTROLES_J1 if i == 0 else self.CONTROLES_J2
-            ui.desenhar_texto(tela, ctrl, (x, y_ovos + 74), 10, BRANCO, "midtop")
+            ui.desenhar_texto(tela, t(ctrl), (x, y_ovos + 74), 10, BRANCO, "midtop")
         ui.desenhar_texto(tela, "VS", (LARGURA // 2, y_ovos), 36, AMARELO, "center", True, True)
 
         # Instruções
         y = y_ovos + 104
         for linha in self.INSTRUCOES:
-            for sub in ui.quebrar_linhas(linha, 12, caixa.w - 80):
+            for sub in ui.quebrar_linhas(t(linha), 12, caixa.w - 80):
                 ui.desenhar_texto(tela, sub, (LARGURA // 2, y), 12, UI_TEXTO, "midtop")
                 y += 20
             y += 4
 
         v = self.vitorias()
         y_rec = self.menu_inicio.botoes[0].rect.y - 30
-        ui.desenhar_texto(tela, f"VITÓRIAS  J1 {v[0]} × {v[1]} J2",
+        ui.desenhar_texto(tela, t("VITÓRIAS  J1 {a} × {b} J2", a=v[0], b=v[1]),
                           (caixa.right - 40 if self.OPCOES else LARGURA // 2, y_rec), 12, AMARELO,
                           "topright" if self.OPCOES else "midtop")
         if self.OPCOES:
-            ui.desenhar_texto(tela, "ESCOLHA O MODO:", (caixa.x + 40, y_rec), 12,
+            ui.desenhar_texto(tela, t("ESCOLHA O MODO:"), (caixa.x + 40, y_rec), 12,
                               UI_TEXTO_SUAVE, "topleft")
 
         self.menu_inicio.desenhar(tela)

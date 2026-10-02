@@ -5,6 +5,7 @@ import pygame
 
 from settings import *
 from core import ui
+from core.idioma import t
 from jogos.base import MiniJogo
 
 # ============================================================
@@ -545,7 +546,7 @@ class DescidaNeve(MiniJogo):
                 voltas = int((abs(self.giro_ar) + 30) // 360)
                 self.manobras += voltas
                 self.som("acerto")
-                txt = "MANOBRA!" if voltas == 1 else f"MANOBRA x{voltas}!"
+                txt = t("MANOBRA!") if voltas == 1 else t("MANOBRA x{n}!", n=voltas)
                 self.textos.adicionar(txt + f" +{PONTOS_MANOBRA * voltas}", (self.x, OVO_Y - 70), AMARELO, 18)
                 cores = [self.jogador.cor, self.jogador.cor_clara, AMARELO, BRANCO]
                 self.particulas.explodir((self.x, OVO_Y), cores, 24, 260, 0.7)
@@ -563,7 +564,7 @@ class DescidaNeve(MiniJogo):
                     self.relogio += BONUS_BANDEIRA
                     self.som("moeda", 0.7)
                     lado = 1 if self.x < LARGURA - 260 else -1
-                    self.textos.adicionar(f"BANDEIRA +{BONUS_BANDEIRA}s", (self.x + lado * 150, OVO_Y + 10),
+                    self.textos.adicionar(t("BANDEIRA +{n}s", n=BONUS_BANDEIRA), (self.x + lado * 150, OVO_Y + 10),
                                           (50, 130, 50), 14)
                     self.particulas.explodir((o.x, OVO_Y), [(230, 60, 60), (60, 110, 230), AMARELO], 14, 180, 0.5)
                 else:
@@ -598,7 +599,7 @@ class DescidaNeve(MiniJogo):
             # A neve do pinheiro cai
             self.particulas.explodir((o.x, o.y - self.dist + OVO_Y - 50), [BRANCO], 16, 120, 0.8, (2, 5), 400)
         restam = BATIDAS - self.batidas
-        self.textos.adicionar("TOMBOU!" if restam > 0 else "AI!", (self.x, OVO_Y - 60), (230, 70, 70), 18)
+        self.textos.adicionar(t("TOMBOU!") if restam > 0 else t("AI!"), (self.x, OVO_Y - 60), (230, 70, 70), 18)
 
     def _rastro(self):
         if self.ar > 0 or self.tombo > 0:
@@ -637,7 +638,7 @@ class DescidaNeve(MiniJogo):
                 self.boneco_y = self.dist - DIST_BONECO
                 self.boneco_x = self.x
                 self.som("explosao", 0.5)
-                self.textos.adicionar("O BONECO GIGANTE!", (LARGURA // 2, 160), (80, 150, 230), 20)
+                self.textos.adicionar(t("O BONECO GIGANTE!"), (LARGURA // 2, 160), (80, 150, 230), 20)
             return
         # Persegue 20 px/s mais devagar que a sua média, mas não "teleporta"
         # quando você para (no máximo 150 px/s mais rápido que você agora)
@@ -661,9 +662,9 @@ class DescidaNeve(MiniJogo):
         self.vel = 0.0
 
     def _terminar(self):
-        self.terminar(titulo=self.motivo, linhas=[f"DISTÂNCIA: {self.metros} m",
-                                                 f"BANDEIRAS: {self.bandeiras}  MANOBRAS: {self.manobras}",
-                                                 f"PONTOS: {self.pontos}"])
+        self.terminar(titulo=t(self.motivo), linhas=[t("DISTÂNCIA: {n} m", n=self.metros),
+                                                 t("BANDEIRAS: {a}  MANOBRAS: {b}", a=self.bandeiras, b=self.manobras),
+                                                 t("PONTOS: {n}", n=self.pontos)])
 
     # --------------------------------------------------------
     # DESENHO
@@ -886,11 +887,11 @@ class DescidaNeve(MiniJogo):
         escuro = (20, 24, 40)
         caixa = pygame.Rect(12, 12, 400, 48)
         ui.painel(tela, caixa, escuro, BRANCO, 12, 3, sombra=False)
-        ui.desenhar_texto(tela, f"PONTOS: {self.pontos}", (caixa.x + 16, caixa.centery), 14,
+        ui.desenhar_texto(tela, t("PONTOS: {n}", n=self.pontos), (caixa.x + 16, caixa.centery), 14,
                           AMARELO, "midleft")
         rec = self.recorde()
         if rec is not None:
-            ui.desenhar_texto(tela, f"RECORDE: {rec}", (caixa.x + 226, caixa.centery), 12,
+            ui.desenhar_texto(tela, t("RECORDE: {n}", n=rec), (caixa.x + 226, caixa.centery), 12,
                               (180, 200, 255), "midleft")
 
         # Relógio
@@ -926,4 +927,4 @@ class DescidaNeve(MiniJogo):
                                                   (x, caixa.centery + 1)])
         ui.desenhar_texto(tela, f"×{self.bandeiras}", (x + 18, caixa.centery), 12, AMARELO, "midleft")
         if self.recarga <= 0 and self.ar <= 0:
-            ui.desenhar_texto(tela, "PULO", (caixa.right - 12, caixa.centery), 10, (140, 230, 140), "midright")
+            ui.desenhar_texto(tela, t("PULO"), (caixa.right - 12, caixa.centery), 10, (140, 230, 140), "midright")

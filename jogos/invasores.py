@@ -5,6 +5,7 @@ import pygame
 
 from settings import *
 from core import ui
+from core.idioma import t, t as _t
 from jogos.base import MiniJogo
 
 # ============================================================
@@ -586,7 +587,7 @@ class Invasores(MiniJogo):
         if self.morto:
             self.tempo_morto += dt
             if self.tempo_morto > 1.4:
-                self.terminar(linhas=[self.motivo, f"PONTOS: {self.pontos}", f"ONDA: {self.onda}"])
+                self.terminar(linhas=[_t(self.motivo), _t("PONTOS: {n}", n=self.pontos), _t("ONDA: {n}", n=self.onda)])
             return
 
         # Hit-stop: a cozinha congela um pouquinho quando o ovo é atingido
@@ -598,7 +599,7 @@ class Invasores(MiniJogo):
         if self.triplo > 0:
             self.triplo = max(0.0, self.triplo - dt)
             if self.triplo == 0:
-                self.textos.adicionar("FIM DO TIRO TRIPLO", (self.x, OVO_Y - 70), (200, 210, 255), 10)
+                self.textos.adicionar(_t("FIM DO TIRO TRIPLO"), (self.x, OVO_Y - 70), (200, 210, 255), 10)
 
         self._mover_ovo(dt)
         if (any(t in self.teclas for t in TECLAS_TIRO) or self.mouse_apertado):
@@ -616,7 +617,7 @@ class Invasores(MiniJogo):
 
         # Onda limpa!
         if not self.morto and not any(i.vivo for i in self.inimigos):
-            self.textos.adicionar("ONDA LIMPA!", (LARGURA // 2, 300), AMARELO, 24)
+            self.textos.adicionar(_t("ONDA LIMPA!"), (LARGURA // 2, 300), AMARELO, 24)
             self.som("vencer", 0.6)
             self.gotas.clear()
             self._montar_ninhos()
@@ -814,7 +815,7 @@ class Invasores(MiniJogo):
             self.escudo = False
             self.invencivel = 0.6
             self.som("boing", 0.7)
-            self.textos.adicionar("ESCUDO!", (self.x, OVO_Y - 70), (150, 210, 255), 14)
+            self.textos.adicionar(t("ESCUDO!"), (self.x, OVO_Y - 70), (150, 210, 255), 14)
             self.particulas.explodir((self.x, OVO_Y - 20), [(170, 225, 255), BRANCO], 18, 200, 0.5)
             return
 
@@ -829,7 +830,7 @@ class Invasores(MiniJogo):
         else:
             self.congelado = TEMPO_CONGELA
             self.invencivel = TEMPO_INVENCIVEL
-            self.textos.adicionar("ENGORDUROU!", (self.x, OVO_Y - 70), OLEO, 14)
+            self.textos.adicionar(t("ENGORDUROU!"), (self.x, OVO_Y - 70), OLEO, 14)
 
     def _morrer(self, motivo):
         if self.morto:
@@ -891,10 +892,10 @@ class Invasores(MiniJogo):
         pos = (self.x, OVO_Y - 70)
         if p["tipo"] == "triplo":
             self.triplo = TEMPO_TRIPLO
-            self.textos.adicionar("TIRO TRIPLO!", pos, LARANJA, 16)
+            self.textos.adicionar(t("TIRO TRIPLO!"), pos, LARANJA, 16)
         else:
             self.escudo = True
-            self.textos.adicionar("ESCUDO!", pos, (150, 210, 255), 16)
+            self.textos.adicionar(t("ESCUDO!"), pos, (150, 210, 255), 16)
         self.particulas.explodir(pos, [self.jogador.cor, AMARELO, BRANCO], 20, 200, 0.6)
 
     # --------------------------------------------------------
@@ -949,13 +950,13 @@ class Invasores(MiniJogo):
 
         # Aviso de onda nova
         if self.aviso_onda > 0 and self.estado == "jogando":
-            ui.desenhar_texto(tela, f"ONDA {self.onda}!", (LARGURA // 2, 360), 32, AMARELO, "center")
+            ui.desenhar_texto(tela, _t("ONDA {n}!", n=self.onda), (LARGURA // 2, 360), 32, AMARELO, "center")
 
         # Tiro triplo: barrinha no canto de baixo
         if self.triplo > 0:
             caixa = pygame.Rect(12, BANCADA_Y + 12, 180, 30)
             ui.painel(tela, caixa, (20, 24, 40), LARANJA, 10, 2, sombra=False)
-            ui.desenhar_texto(tela, "TRIPLO", (caixa.x + 12, caixa.centery + 1), 10, LARANJA, "midleft")
+            ui.desenhar_texto(tela, _t("TRIPLO"), (caixa.x + 12, caixa.centery + 1), 10, LARANJA, "midleft")
             barra = pygame.Rect(caixa.x + 82, caixa.y + 10, 86, 10)
             pygame.draw.rect(tela, (60, 60, 80), barra, border_radius=4)
             barra.w = max(2, int(barra.w * self.triplo / TEMPO_TRIPLO))
@@ -1010,18 +1011,18 @@ class Invasores(MiniJogo):
     def desenhar_hud(self, tela):
         caixa = pygame.Rect(12, 12, 420, 48)
         ui.painel(tela, caixa, (20, 24, 40), BRANCO, 12, 3, sombra=False)
-        ui.desenhar_texto(tela, f"PONTOS: {self.pontos}", (caixa.x + 16, caixa.centery), 14,
+        ui.desenhar_texto(tela, t("PONTOS: {n}", n=self.pontos), (caixa.x + 16, caixa.centery), 14,
                           AMARELO, "midleft")
         rec = self.recorde()
         if rec is not None:
-            ui.desenhar_texto(tela, f"RECORDE: {rec}", (caixa.x + 236, caixa.centery), 12,
+            ui.desenhar_texto(tela, t("RECORDE: {n}", n=rec), (caixa.x + 236, caixa.centery), 12,
                               (180, 200, 255), "midleft")
 
         # Onda e vidas à direita (antes do botão de pausa)
         caixa = pygame.Rect(0, 12, 280, 48)
         caixa.right = LARGURA - 76
         ui.painel(tela, caixa, (20, 24, 40), BRANCO, 12, 3, sombra=False)
-        ui.desenhar_texto(tela, f"ONDA {self.onda}", (caixa.x + 16, caixa.centery), 12,
+        ui.desenhar_texto(tela, t("ONDA {n}", n=self.onda), (caixa.x + 16, caixa.centery), 12,
                           BRANCO, "midleft")
         for i in range(VIDAS):
             c = (caixa.right - 120 + i * 40, caixa.centery + 1)

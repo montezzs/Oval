@@ -5,6 +5,7 @@ import pygame
 
 from settings import *
 from core import ui
+from core.idioma import t
 from core.assets import comida_sup
 from jogos.base import MiniJogo
 
@@ -151,8 +152,8 @@ class Cobrinha(MiniJogo):
         if self.morto:
             self.tempo_morto += dt
             if self.tempo_morto > 0.9:
-                self.terminar(linhas=[f"LIMÕES: {self.pontos}",
-                                      f"TAMANHO: {len(self.corpo)}"])
+                self.terminar(linhas=[t("LIMÕES: {n}", n=self.pontos),
+                                      t("TAMANHO: {n}", n=len(self.corpo))])
             return
 
         # Limão dourado some depois de um tempo
@@ -203,7 +204,7 @@ class Cobrinha(MiniJogo):
 
         if self.limao is None:
             # Encheu o tabuleiro inteiro!
-            self.terminar(venceu=True, linhas=[f"LIMÕES: {self.pontos}", "TABULEIRO CHEIO!"])
+            self.terminar(venceu=True, linhas=[t("LIMÕES: {n}", n=self.pontos), t("TABULEIRO CHEIO!")])
 
     def _comer(self, cel, valor):
         self.pontos += valor
@@ -302,5 +303,5 @@ class Cobrinha(MiniJogo):
         self.textos.desenhar(tela)
 
         if self.estado == "jogando" and not self.morto and self.dourado:
-            ui.desenhar_texto(tela, f"LIMÃO DOURADO: {self.tempo_dourado:.1f}s",
+            ui.desenhar_texto(tela, t("LIMÃO DOURADO: {n}s", n=f"{self.tempo_dourado:.1f}"),
                               (LARGURA // 2, ALTURA - 38), 12, AMARELO, "center")

@@ -4,6 +4,7 @@ import time
 import pygame
 
 from settings import *
+from core.idioma import t as tr
 from core import ui
 
 # ============================================================
@@ -68,6 +69,12 @@ class Jardim:
 
     def rect(self, i):
         return pygame.Rect(CANTEIROS_X[i], TOPO, LARG, BASE - TOPO)
+
+    @staticmethod
+    def _nome_comida(cid):
+        itens = _itens()
+        d = getattr(itens, "COMIDAS", {}).get(cid) if itens else None
+        return tr(d["nome"]) if d and d.get("nome") else cid.upper()
 
     def _dados_semente(self, sid):
         itens = _itens()
@@ -152,7 +159,7 @@ class Jardim:
         r = self.rect(i)
         for cid, qtd in colheita.get("comida", {}).items():
             self.save["comida"][cid] = self.save["comida"].get(cid, 0) + qtd
-            self.ctx.textos.adicionar(f"+{qtd} {cid.upper()}", (r.centerx, r.y - 30), BRANCO, 10)
+            self.ctx.textos.adicionar(f"+{qtd} {self._nome_comida(cid)}", (r.centerx, r.y - 30), BRANCO, 10)
         moedas = colheita.get("moedas", 0)
         if moedas:
             self.ctx.ganhar_moedas(moedas, (r.centerx, r.y - 50))
@@ -200,7 +207,7 @@ class Jardim:
             elif self.precisa_agua(c):
                 self.regar(i)
             else:
-                self.ctx.avisar(f"PRONTO EM {_formatar_tempo(self.restante(c) / self._velocidade())}")
+                self.ctx.avisar(tr("PRONTO EM {tempo}", tempo=_formatar_tempo(self.restante(c) / self._velocidade())))
             return True
         return False
 
@@ -245,7 +252,7 @@ class Jardim:
             c = self.save["jardim"][i]
             if not c.get("semente"):
                 if r.inflate(10, 90).move(0, -40).collidepoint(mouse):
-                    ui.desenhar_texto(tela, "PLANTAR", (r.centerx, r.y - 16), 8, BRANCO, "center")
+                    ui.desenhar_texto(tela, tr("PLANTAR"), (r.centerx, r.y - 16), 8, BRANCO, "center")
                 continue
 
             e = self.estagio(c)
@@ -260,7 +267,7 @@ class Jardim:
                                                            (r.centerx, int(y) - 12)])
                 pygame.draw.circle(tela, (200, 230, 255), (r.centerx - 3, int(y) + 3), 3)
             if r.inflate(10, 90).move(0, -40).collidepoint(mouse) and not self.pronta(c):
-                txt = "REGAR!" if self.precisa_agua(c) else _formatar_tempo(
+                txt = tr("REGAR!") if self.precisa_agua(c) else _formatar_tempo(
                     self.restante(c) / self._velocidade())
                 ui.desenhar_texto(tela, txt, (r.centerx, r.bottom + 12), 8, BRANCO, "center")
 
@@ -280,7 +287,7 @@ class Jardim:
         caixa.midbottom = (max(largura // 2 + 10, min(LARGURA - largura // 2 - 10, r0.centerx)),
                            r0.y - 90)
         ui.painel(tela, caixa, (40, 30, 20), AMARELO, 12, 3)
-        ui.desenhar_texto(tela, "ESCOLHA A SEMENTE", (caixa.centerx, caixa.y + 8), 8, AMARELO,
+        ui.desenhar_texto(tela, tr("ESCOLHA A SEMENTE"), (caixa.centerx, caixa.y + 8), 8, AMARELO,
                           "midtop")
         mouse = pygame.mouse.get_pos()
         for k, (sid, q) in enumerate(sementes):

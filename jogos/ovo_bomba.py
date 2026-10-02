@@ -5,6 +5,7 @@ import pygame
 
 from settings import *
 from core import ui
+from core.idioma import t as tr
 from jogos.base_multi import (MiniJogoMulti, TECLAS_MOVER, TECLAS_ACAO, CORES_JOGADOR,
                               jogador_da_tecla)
 
@@ -686,7 +687,7 @@ class OvoBomba(MiniJogoMulti):
         else:
             ovo.chute = True
         self.som("moeda", 0.7)
-        self.textos.adicionar(NOMES_ITENS[tipo], (ovo.x, ovo.y - 40), CORES_JOGADOR[ovo.i], 12)
+        self.textos.adicionar(tr(NOMES_ITENS[tipo]), (ovo.x, ovo.y - 40), CORES_JOGADOR[ovo.i], 12)
         self.particulas.explodir((ovo.x, ovo.y), [AMARELO, BRANCO, self.cor(ovo.i)], 12, 160, 0.5, (2, 4))
 
     def _pegar(self, ovo):
@@ -695,7 +696,7 @@ class OvoBomba(MiniJogoMulti):
         self.som("bater")
         self.particulas.explodir((ovo.x, ovo.y), [CHOCOLATE, CHOCOLATE_CLARO, (230, 200, 160)],
                                  24, 260, 0.9, (3, 7))
-        self.textos.adicionar("OVO DE CHOCOLATE!", (ovo.x, ovo.y - 44), BRANCO, 12)
+        self.textos.adicionar(tr("OVO DE CHOCOLATE!"), (ovo.x, ovo.y - 44), BRANCO, 12)
         if self.primeira_morte is None:
             self.primeira_morte = self.tempo_round
 
@@ -748,7 +749,7 @@ class OvoBomba(MiniJogoMulti):
             placar = self.vitorias_round
             if max(placar) >= precisa:
                 v = 0 if placar[0] > placar[1] else 1
-                self.terminar_multi(v, [f"ROUNDS: {placar[0]} × {placar[1]}"])
+                self.terminar_multi(v, [tr("ROUNDS: {a} × {b}", a=placar[0], b=placar[1])])
             else:
                 self.round += 1
                 self.particulas.limpar()
@@ -919,19 +920,19 @@ class OvoBomba(MiniJogoMulti):
             painel = pygame.Rect(0, 0, 420, 90)
             painel.center = (cx, AREA.centery)
             ui.painel(tela, painel, (20, 24, 40), AMARELO, 16, 3)
-            ui.desenhar_texto(tela, f"ROUND {self.round}!", (cx, painel.centery - 10), tam, AMARELO, "center")
+            ui.desenhar_texto(tela, tr("ROUND {n}!", n=self.round), (cx, painel.centery - 10), tam, AMARELO, "center")
             precisa = self.modo[0]
-            ui.desenhar_texto(tela, f"QUEM FIZER {precisa} VENCE", (cx, painel.centery + 26), 10,
+            ui.desenhar_texto(tela, tr("QUEM FIZER {n} VENCE", n=precisa), (cx, painel.centery + 26), 10,
                               BRANCO, "center")
         elif self.fase == "fim_round":
             painel = pygame.Rect(0, 0, 560, 90)
             painel.center = (cx, AREA.centery)
             ui.painel(tela, painel, (20, 24, 40), AMARELO, 16, 3)
             if self.vencedor_round is None:
-                ui.desenhar_texto(tela, "EMPATE! DE NOVO!", (cx, painel.centery - 10), 20, AMARELO, "center")
+                ui.desenhar_texto(tela, tr("EMPATE! DE NOVO!"), (cx, painel.centery - 10), 20, AMARELO, "center")
             else:
                 v = self.vencedor_round
-                ui.desenhar_texto(tela, f"{self.nome(v)[:12]} VENCEU O ROUND!", (cx, painel.centery - 10),
+                ui.desenhar_texto(tela, tr("{nome} VENCEU O ROUND!", nome=self.nome(v)[:12]), (cx, painel.centery - 10),
                                   16, CORES_JOGADOR[v], "center")
             ui.desenhar_texto(tela, f"{self.vitorias_round[0]} × {self.vitorias_round[1]}",
                               (cx, painel.centery + 24), 16, BRANCO, "center")
@@ -939,7 +940,7 @@ class OvoBomba(MiniJogoMulti):
             painel = pygame.Rect(0, 0, 330, 56)
             painel.center = (cx, AREA.centery)
             ui.painel(tela, painel, (20, 24, 40), (255, 120, 120), 14, 3)
-            ui.desenhar_texto(tela, "MORTE SÚBITA!", painel.center, 20, (255, 120, 120), "center")
+            ui.desenhar_texto(tela, tr("MORTE SÚBITA!"), painel.center, 20, (255, 120, 120), "center")
 
     def desenhar_hud(self, tela):
         precisa = self.modo[0]
@@ -983,12 +984,12 @@ class OvoBomba(MiniJogoMulti):
         caixa.centerx = (12 + 330 + LARGURA - 76 - 330) // 2
         ui.painel(tela, caixa, (20, 24, 40), BRANCO, 12, 3, sombra=False)
         if self.morte_subita:
-            ui.desenhar_texto(tela, "MORTE", (caixa.centerx, caixa.centery - 9), 12, (255, 120, 120), "center")
-            ui.desenhar_texto(tela, "SÚBITA!", (caixa.centerx, caixa.centery + 11), 12, (255, 120, 120), "center")
+            ui.desenhar_texto(tela, tr("MORTE"), (caixa.centerx, caixa.centery - 9), 12, (255, 120, 120), "center")
+            ui.desenhar_texto(tela, tr("SÚBITA!"), (caixa.centerx, caixa.centery + 11), 12, (255, 120, 120), "center")
         else:
             resta = max(0, math.ceil(TEMPO_MORTE_SUBITA - self.tempo_round))
             cor = (255, 150, 150) if resta <= 10 else BRANCO
             ui.desenhar_texto(tela, f"{resta // 60}:{resta % 60:02d}", (caixa.centerx, caixa.centery - 8),
                               16, cor, "center")
-            ui.desenhar_texto(tela, f"ROUND {self.round}", (caixa.centerx, caixa.centery + 16), 10,
+            ui.desenhar_texto(tela, tr("ROUND {n}", n=self.round), (caixa.centerx, caixa.centery + 16), 10,
                               (180, 200, 255), "center")

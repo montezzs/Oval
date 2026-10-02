@@ -5,6 +5,7 @@ import pygame
 
 from settings import *
 from core import assets, ui
+from core.idioma import t
 from jogos.base_multi import MiniJogoMulti, TECLAS_MOVER, CORES_JOGADOR
 
 # ============================================================
@@ -472,7 +473,7 @@ class FutebolOvo(MiniJogoMulti):
         if jg.medidor >= 1.0 and jg.armado <= 0 and not jg.preso:
             jg.armado = SUPER_ARMADO
             self.som("revelar", 0.8)
-            self.textos.adicionar("SUPER!", (jg.x, jg.cy - 90), (255, 150, 60), 16)
+            self.textos.adicionar(t("SUPER!"), (jg.x, jg.cy - 90), (255, 150, 60), 16)
 
     def _controles(self):
         apertadas = pygame.key.get_pressed()
@@ -579,17 +580,17 @@ class FutebolOvo(MiniJogoMulti):
         antes = self.relogio
         self.relogio = max(0.0, self.relogio - dt)
         if antes > 10 >= self.relogio:
-            self._banner("10 SEGUNDOS!", (255, 180, 120), 1.2, 20)
+            self._banner(t("10 SEGUNDOS!"), (255, 180, 120), 1.2, 20)
         if self.relogio <= 0:
             if self.placar[0] == self.placar[1]:
                 self.gol_de_ouro = True
-                self._banner("GOL DE OURO!", AMARELO, 2.0, 32)
+                self._banner(t("GOL DE OURO!"), AMARELO, 2.0, 32)
                 self.som("bandeira")
                 self.tremer(0.2)
             else:
                 self.fase = "apito"
                 self.tempo_fase = 0.0
-                self._banner("FIM DE JOGO!", BRANCO, 1.6, 32)
+                self._banner(t("FIM DE JOGO!"), BRANCO, 1.6, 32)
                 self.som("bandeira")
 
     def _acabou(self):
@@ -603,9 +604,9 @@ class FutebolOvo(MiniJogoMulti):
     def _acabar(self):
         g = self.placar
         vencedor = None if g[0] == g[1] else (0 if g[0] > g[1] else 1)
-        linhas = [f"PLACAR  {g[0]} × {g[1]}"]
+        linhas = [t("PLACAR  {a} × {b}", a=g[0], b=g[1])]
         if self.gol_de_ouro:
-            linhas.append("DECIDIDO NO GOL DE OURO!")
+            linhas.append(t("DECIDIDO NO GOL DE OURO!"))
         self.terminar_multi(vencedor, linhas)
 
     def calcular_moedas(self, valor, venceu):
@@ -627,7 +628,7 @@ class FutebolOvo(MiniJogoMulti):
         if jg.gigante > 0:
             jg.gigante = max(0.0, jg.gigante - dt_fis)
             if jg.gigante <= 0:
-                self.textos.adicionar("NORMAL", (jg.x, jg.cy - 70), BRANCO, 12)
+                self.textos.adicionar(t("NORMAL"), (jg.x, jg.cy - 70), BRANCO, 12)
         jg.vel_esticar += (-240 * jg.esticar - 11 * jg.vel_esticar) * dt
         jg.esticar = max(-1.0, min(1.0, jg.esticar + jg.vel_esticar * dt))
 
@@ -695,16 +696,16 @@ class FutebolOvo(MiniJogoMulti):
         if tipo == "gigante":
             jg.gigante = GIGANTE_TEMPO
             jg.vel_esticar += 8.0
-            self.textos.adicionar("OVO GIGANTE!", (jg.x, jg.cy - 110), AMARELO, 16)
+            self.textos.adicionar(t("OVO GIGANTE!"), (jg.x, jg.cy - 110), AMARELO, 16)
             jg.x = min(max(jg.x, jg.x_min), jg.x_max)
         elif tipo == "gelo":
             outro.congelado = GELO_TEMPO
             outro.chute = 0.0
             self.som("erro", 0.6)
-            self.textos.adicionar("CONGELOU!", (outro.x, outro.cy - 90), (160, 230, 255), 16)
+            self.textos.adicionar(t("CONGELOU!"), (outro.x, outro.cy - 90), (160, 230, 255), 16)
         else:
             self.bola.praia = PRAIA_TEMPO
-            self.textos.adicionar("BOLA DE PRAIA!", (self.bola.x, self.bola.y - 60), (255, 200, 90), 14)
+            self.textos.adicionar(t("BOLA DE PRAIA!"), (self.bola.x, self.bola.y - 60), (255, 200, 90), 14)
 
     # --------------------------------------------------------
     # FÍSICA
@@ -887,7 +888,7 @@ class FutebolOvo(MiniJogoMulti):
             jg.vel_esticar -= 8.0
             self.tremer(0.3)
             self.som("explosao", 0.7)
-            self.textos.adicionar("TOMA!", (jg.x, jg.cy - 90), (255, 150, 60), 18)
+            self.textos.adicionar(t("TOMA!"), (jg.x, jg.cy - 90), (255, 150, 60), 18)
             self._apagar_fogo()
             b.vx = -b.vx * 0.3
             b.vy = -300
@@ -931,7 +932,7 @@ class FutebolOvo(MiniJogoMulti):
             self.som("bater", min(1.0, 0.35 + forca / 1200))
             self.particulas.explodir(ponto, [BRANCO, (230, 255, 230)], 5, 120, 0.3, (2, 4), 200)
             if jg.medidor >= 1.0 and jg.armado <= 0:
-                self.textos.adicionar("SUPER PRONTO!", (jg.x, jg.cy - 100), AMARELO, 12)
+                self.textos.adicionar(t("SUPER PRONTO!"), (jg.x, jg.cy - 100), AMARELO, 12)
 
     def _tentar_chute(self, jg):
         if jg.chute <= 0 or jg.chute_feito or jg.preso:
@@ -969,7 +970,7 @@ class FutebolOvo(MiniJogoMulti):
         b.y = min(max(b.y, TETO + b.raio + 2), CHAO - b.raio - 2)
         self.som("explosao", 0.8)
         self.tremer(0.2)
-        self.textos.adicionar("SUPER-CHUTE!", (jg.x, jg.cy - 100), (255, 140, 40), 18)
+        self.textos.adicionar(t("SUPER-CHUTE!"), (jg.x, jg.cy - 100), (255, 140, 40), 18)
         self.particulas.explodir((b.x, b.y), [(255, 140, 30), (255, 220, 60), (230, 60, 30)], 18,
                                  300, 0.5, (3, 6), 0)
 
@@ -1045,7 +1046,7 @@ class FutebolOvo(MiniJogoMulti):
                                      14, 420, 1.2, (3, 6), 400)
         self.jogs[quem].vel_esticar += 8.0
         if self.gol_de_ouro:
-            self._banner("GOL DE OURO!", AMARELO, TEMPO_GOL, 24)
+            self._banner(t("GOL DE OURO!"), AMARELO, TEMPO_GOL, 24)
 
     # --------------------------------------------------------
     # DESENHO
@@ -1322,7 +1323,7 @@ class FutebolOvo(MiniJogoMulti):
     def _desenhar_gooool(self, tela):
         if self.fase != "gol" or self.estado != "jogando":
             return
-        letras = "GOOOOL!"
+        letras = t("GOOOOL!")
         n = min(len(letras), int(self.tempo_fase / 0.09) + 1)
         texto = letras[:n]
         cor = CORES_JOGADOR[self.quem_marcou]
@@ -1371,16 +1372,16 @@ class FutebolOvo(MiniJogoMulti):
                     parte.right = barra.right
                 pygame.draw.rect(tela, cor, parte, border_radius=5)
             pygame.draw.rect(tela, BRANCO, barra, 2, border_radius=5)
-            rotulo = "SUPER!" if cheio else "SUPER"
+            rotulo = t("SUPER!") if cheio else t("SUPER")
             ui.desenhar_texto(tela, rotulo, barra.center, 10, (40, 30, 20) if cheio else BRANCO,
                               "center", sombra=not cheio)
             ui.desenhar_texto(tela, str(self.placar[i]), (caixa.centerx + lado * 44, caixa.y + 30), 32,
                               AMARELO, "center")
         ui.desenhar_texto(tela, "×", (caixa.centerx, caixa.y + 30), 20, BRANCO, "center")
         if self.gol_de_ouro:
-            info, cor = "GOL DE OURO", AMARELO
+            info, cor = t("GOL DE OURO"), AMARELO
         elif self.modo["tempo"] is None:
-            info, cor = f"ATÉ {self.modo['gols']}", (180, 200, 255)
+            info, cor = t("ATÉ {n}", n=self.modo['gols']), (180, 200, 255)
         else:
             info = self.formatar(math.ceil(self.relogio))
             cor = (255, 150, 150) if self.relogio <= 10 else BRANCO
@@ -1399,8 +1400,8 @@ class FutebolOvo(MiniJogoMulti):
         caixa.centerx = LARGURA // 2
         ui.painel(tela, caixa, (28, 32, 56), self.COR, 22, 5)
 
-        ui.desenhar_texto(tela, self.TITULO, (LARGURA // 2, topo + 20), 28, AMARELO, "midtop")
-        ui.desenhar_texto(tela, "2 JOGADORES", (LARGURA // 2, topo + 58), 12,
+        ui.desenhar_texto(tela, t(self.TITULO), (LARGURA // 2, topo + 20), 28, AMARELO, "midtop")
+        ui.desenhar_texto(tela, t("2 JOGADORES"), (LARGURA // 2, topo + 58), 12,
                           (180, 200, 255), "midtop")
 
         y_ovos = topo + 124
@@ -1414,15 +1415,15 @@ class FutebolOvo(MiniJogoMulti):
 
         y = y_ovos + 88
         for linha in self.INSTRUCOES:
-            for sub in ui.quebrar_linhas(linha, 10, caixa.w - 50):
+            for sub in ui.quebrar_linhas(t(linha), 10, caixa.w - 50):
                 ui.desenhar_texto(tela, sub, (LARGURA // 2, y), 10, BRANCO, "midtop")
                 y += 16
             y += 3
 
         v = self.vitorias()
         y_rec = self.menu_inicio.botoes[0].rect.y - 32
-        ui.desenhar_texto(tela, f"VITÓRIAS  J1 {v[0]} × {v[1]} J2", (LARGURA // 2, y_rec),
+        ui.desenhar_texto(tela, t("VITÓRIAS  J1 {a} × {b} J2", a=v[0], b=v[1]), (LARGURA // 2, y_rec),
                           14, AMARELO, "midtop")
-        ui.desenhar_texto(tela, "ESCOLHA O MODO", (LARGURA // 2, y_rec - 24), 12,
+        ui.desenhar_texto(tela, t("ESCOLHA O MODO"), (LARGURA // 2, y_rec - 24), 12,
                           (180, 200, 255), "midtop")
         self.menu_inicio.desenhar(tela)

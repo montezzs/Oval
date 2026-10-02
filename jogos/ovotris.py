@@ -5,6 +5,7 @@ import pygame
 
 from settings import *
 from core import ui
+from core.idioma import t as tr
 from jogos.base import MiniJogo
 
 # ============================================================
@@ -335,8 +336,8 @@ class Ovotris(MiniJogo):
                   ("↓ / S", "DESCER"), ("ESPAÇO", "CAIR DE VEZ"), ("C / E", "GUARDAR")]
         for i, (tecla, acao) in enumerate(linhas):
             y = placa.y + 18 + i * 24
-            ui.desenhar_texto(sup, tecla, (placa.x + 14, y), 10, (255, 236, 170), "topleft", False)
-            ui.desenhar_texto(sup, acao, (placa.x + 104, y), 10, (60, 34, 20), "topleft", False)
+            ui.desenhar_texto(sup, tr(tecla), (placa.x + 14, y), 10, (255, 236, 170), "topleft", False)
+            ui.desenhar_texto(sup, tr(acao), (placa.x + 104, y), 10, (60, 34, 20), "topleft", False)
 
         # Tabuleiro com moldura de madeira
         tab = pygame.Rect(X0, Y0, COLS * CEL, LINHAS * CEL)
@@ -357,7 +358,7 @@ class Ovotris(MiniJogo):
                           (RETANGULO_DADOS, None)):
             ui.painel(sup, r, COR_PAINEL, COR_BORDA_PAINEL, 14, 3)
             if titulo:
-                ui.desenhar_texto(sup, titulo, (r.centerx, r.y + 12), 10, AMARELO, "midtop")
+                ui.desenhar_texto(sup, tr(titulo), (r.centerx, r.y + 12), 10, AMARELO, "midtop")
         return sup
 
     @classmethod
@@ -667,7 +668,7 @@ class Ovotris(MiniJogo):
         if novo_nivel > self.nivel:
             self.nivel = novo_nivel
             self.som("vencer", 0.5)
-            self.textos.adicionar(f"NÍVEL {self.nivel}!", (X0 + COLS * CEL / 2, Y0 + 220), (140, 230, 255), 20)
+            self.textos.adicionar(tr("NÍVEL {n}!", n=self.nivel), (X0 + COLS * CEL / 2, Y0 + 220), (140, 230, 255), 20)
             if self.relogio - self.t_danca > DUR_DANCA:
                 self.t_danca = self.relogio - DUR_DANCA * 0.5
         self.linhas_cheias = []
@@ -697,9 +698,9 @@ class Ovotris(MiniJogo):
         if self.fase == "fim_jogo":
             self.t_fase += dt
             if self.t_fase >= DUR_FIM:
-                self.terminar(linhas=[f"PONTOS: {self.pontos}",
-                                      f"LINHAS: {self.linhas}",
-                                      f"NÍVEL: {self.nivel}" + (f"  •  OVOTRIS: {self.ovotris}"
+                self.terminar(linhas=[tr("PONTOS: {n}", n=self.pontos),
+                                      tr("LINHAS: {n}", n=self.linhas),
+                                      tr("NÍVEL: {n}", n=self.nivel) + (f"  •  OVOTRIS: {self.ovotris}"
                                                                  if self.ovotris else "")])
             return
 
@@ -803,7 +804,7 @@ class Ovotris(MiniJogo):
         self._desenhar_ovotris(tela)
 
         if self.fase == "fim_jogo" and self.t_fase > 0.5:
-            ui.desenhar_texto(tela, "FIM DA PILHA!", (X0 + COLS * CEL // 2, Y0 + LINHAS * CEL // 2), 20,
+            ui.desenhar_texto(tela, tr("FIM DA PILHA!"), (X0 + COLS * CEL // 2, Y0 + LINHAS * CEL // 2), 20,
                               (255, 130, 130), "center")
 
     def _desenhar_peca_mini(self, tela, tipo, centro, cel):
@@ -828,7 +829,7 @@ class Ovotris(MiniJogo):
                 veu.fill((40, 30, 46, 150))
                 tela.blit(veu, (r.x + 8, r.y + 32))
         else:
-            ui.desenhar_texto(tela, "C / E", (r.centerx, r.y + 70), 12, (150, 130, 150), "center")
+            ui.desenhar_texto(tela, tr("C / E"), (r.centerx, r.y + 70), 12, (150, 130, 150), "center")
 
         # Próximas 3
         r = RETANGULO_PROXIMAS
@@ -847,7 +848,7 @@ class Ovotris(MiniJogo):
                  ("RECORDE", str(rec) if rec is not None else "--", AMARELO)]
         for i, (rotulo, valor, cor) in enumerate(itens):
             y = r.y + 16 + i * 64
-            ui.desenhar_texto(tela, rotulo, (r.centerx, y), 10, (210, 190, 170), "midtop")
+            ui.desenhar_texto(tela, tr(rotulo), (r.centerx, y), 10, (210, 190, 170), "midtop")
             ui.desenhar_texto(tela, valor, (r.centerx, y + 20), 16, cor, "midtop")
 
     def _desenhar_avatar(self, tela):
@@ -910,7 +911,7 @@ class Ovotris(MiniJogo):
     def desenhar_hud(self, tela):
         caixa = pygame.Rect(12, 12, 324, 48)
         ui.painel(tela, caixa, (20, 24, 40), BRANCO, 12, 3, sombra=False)
-        ui.desenhar_texto(tela, f"PONTOS: {self.pontos}", (caixa.x + 16, caixa.centery + 1), 14,
+        ui.desenhar_texto(tela, tr("PONTOS: {n}", n=self.pontos), (caixa.x + 16, caixa.centery + 1), 14,
                           AMARELO, "midleft")
 
 
@@ -935,5 +936,5 @@ def _galinha(sup, x, poleiro_y):
     # asa
     pygame.draw.arc(sup, (200, 190, 180), (corpo.x + 12, corpo.y + 8, 26, 20), math.pi * 1.1, math.pi * 1.9, 2)
     # zzz
-    ui.desenhar_texto(sup, "z", (cab[0] + 14, cab[1] - 22), 10, (200, 210, 255), "center", False)
-    ui.desenhar_texto(sup, "z", (cab[0] + 22, cab[1] - 34), 12, (200, 210, 255), "center", False)
+    ui.desenhar_texto(sup, tr("z"), (cab[0] + 14, cab[1] - 22), 10, (200, 210, 255), "center", False)
+    ui.desenhar_texto(sup, tr("z"), (cab[0] + 22, cab[1] - 34), 12, (200, 210, 255), "center", False)
