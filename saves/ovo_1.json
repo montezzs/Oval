@@ -1,0 +1,149 @@
+{
+  "nome": "ovenho",
+  "ovo": 0,
+  "cabelo": 1,
+  "olho": 1,
+  "boca": 2,
+  "recordes": {},
+  "moedas": 20,
+  "moedas_total": 20,
+  "inventario": [
+    "vaso_flor"
+  ],
+  "equipado": {},
+  "pet": "",
+  "moveis": [],
+  "comida": {
+    "maca": 1
+  },
+  "necessidades": {
+    "fome": 77.75,
+    "energia": 80.2,
+    "diversao": 79.13,
+    "higiene": 78.88
+  },
+  "jardim": [
+    {},
+    {},
+    {},
+    {}
+  ],
+  "ultimo_tempo": 1790901585.2199366,
+  "album": [],
+  "diario": {
+    "bau_seq": 1,
+    "bau_ultimo": "2026-10-01",
+    "desafio": {
+      "dia": "2026-10-01",
+      "jogo": "voador",
+      "tipo": "maior",
+      "meta": 15,
+      "texto": "Faça 15 em OVO VOADOR!",
+      "feito": false,
+      "pago": false
+    },
+    "feliz_dia": "2026-10-01",
+    "feliz_seg": 20.73099999999962,
+    "feliz_contou": false,
+    "buffs": {},
+    "missoes": {
+      "dia": "2026-10-01",
+      "lista": [
+        {
+          "stat": "banhos",
+          "texto": "DÊ 1 BANHO(S) NO OVO",
+          "meta": 1,
+          "base": 0,
+          "premio": 12,
+          "pago": false
+        },
+        {
+          "stat": "moedas_jogos",
+          "texto": "GANHE 30 OVOEDAS EM JOGOS",
+          "meta": 30,
+          "base": 0,
+          "premio": 15,
+          "pago": false
+        }
+      ],
+      "bonus": false
+    }
+  },
+  "jogados": [],
+  "casa": {
+    "cor_parede": 1,
+    "parede": "liso",
+    "cor_telhado": 0,
+    "telhado": "triangulo",
+    "cor_porta": 0,
+    "porta": "reta",
+    "janela": "quadrada",
+    "cerca": "nenhuma",
+    "correio": "padrao",
+    "caminho": "terra",
+    "chamine": true,
+    "itens": {
+      "esq": "vaso_flor",
+      "dir": "",
+      "telhado": ""
+    }
+  },
+  "criado_em": 1790901322.1444714,
+  "cartas": [],
+  "xp": 0,
+  "nivel": 1,
+  "conquistas": [],
+  "stats": {
+    "liberados": [
+      "cobrinha",
+      "minado",
+      "memoria",
+      "volei",
+      "chuva",
+      "pulo",
+      "voador",
+      "ovo_corredor",
+      "ovonoide",
+      "ovo_2048",
+      "mini_golfe",
+      "atravessa",
+      "coral_ovos",
+      "ovo_colher",
+      "ovotris",
+      "toupeiras",
+      "salto_lago",
+      "pescaria",
+      "descida_neve",
+      "invasores",
+      "liga_ovos",
+      "lanchonete",
+      "ovo_ritmo",
+      "ovo_man",
+      "ninho_arrumado",
+      "estoura_bolha",
+      "ovo_estrada",
+      "ovo_sobrevivente",
+      "micro_ovo",
+      "pinball_ovo",
+      "ovo_cozinheiro",
+      "sumo_ovo",
+      "hoquei_ovo",
+      "guerra_tinta",
+      "futebol_ovo",
+      "ovo_bomba",
+      "corrida_rua",
+      "xadegg",
+      "quatro_linha",
+      "pontinhos",
+      "jogo_velha",
+      "ovo_kombat",
+      "thumb_fighter",
+      "boliche",
+      "dardos",
+      "rei_quintal"
+    ],
+    "streak": 1,
+    "nivel": 1,
+    "carinhos": 10
+  }
+}

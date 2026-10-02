@@ -281,11 +281,6 @@ class FutebolOvo(MiniJogoMulti):
     MOEDAS_VITORIA_J1 = 8
     MOEDAS_MAX = 30
 
-    TRILHA = dict(bpm=104, tom="B", escala="menor", lead="quadrada", duty=0.25,
-                  envelope="staccato", baixo="tropical", onda_baixo="triangulo",
-                  acomp="chop", onda_acomp="sino", bateria="samba",
-                  energia=0.8, eco=(0.12, 0.18))
-
     @classmethod
     def formatar(cls, valor):
         return f"{int(valor) // 60}:{int(valor) % 60:02d}"

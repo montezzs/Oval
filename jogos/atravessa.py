@@ -313,11 +313,6 @@ class Atravessa(MiniJogo):
     ROTULO_PONTOS = "PONTOS"
     CONTAGEM = True
 
-    TRILHA = dict(bpm=140, tom="G", escala="mixolidia", lead="quadrada", duty=0.5,
-                  envelope="staccato", baixo="oompah", onda_baixo="triangulo",
-                  acomp="contratempo", onda_acomp="quadrada", bateria="rock",
-                  energia=0.65, eco=(0.12, 0.15))
-
     MOEDAS_POR = 80
     MOEDAS_MAX = 45
     MOEDAS_MIN = 1

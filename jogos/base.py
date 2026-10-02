@@ -40,7 +40,6 @@ class MiniJogo(Cena):
     ROTULO_PONTOS = "PONTOS"
     CONTAGEM = True             # mostra 3, 2, 1 antes de começar
     MULTI = False               # jogo para 2 jogadores (ver MiniJogoMulti)
-    TRILHA = None               # estilo da música procedural (core/compositor.py)
 
     # Moedas ganhas ao terminar (ver calcular_moedas)
     MOEDAS_POR = 5              # 1 moeda a cada N pontos
@@ -58,13 +57,6 @@ class MiniJogo(Cena):
     @property
     def musica(self):
         return self.ID
-
-    def entrar(self):
-        # Trilha procedural: registra o estilo antes de tocar
-        if self.TRILHA:
-            from core import trilhas
-            trilhas.registrar(self.ID, self.TRILHA)
-        super().entrar()
 
     @classmethod
     def criar_fundo(cls, jogador):
@@ -236,7 +228,10 @@ class MiniJogo(Cena):
         self.menu_fim = ui.Menu(rotulos, LARGURA // 2, 420, 340, 54, 12, 16)
 
         # No multiplayer alguém sempre ganha: som de festa
-        self.som("vencer" if venceu or self.novo_recorde or self.MULTI else "perder")
+        if self.novo_recorde:
+            self.som("recorde")
+        else:
+            self.som("vencer" if venceu or self.MULTI else "perder")
         self._mudar_estado("fim")
 
     def sair_para_menu(self):

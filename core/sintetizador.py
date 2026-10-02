@@ -1,21 +1,14 @@
 import array
 import io
 import math
-import random
 import wave
 
 # ============================================================
-# SINTETIZADOR CHIPTUNE (PYTHON PURO)
+# SINTETIZADOR SIMPLES (PYTHON PURO)
 # ============================================================
-# Gera músicas e efeitos sonoros no estilo 8-bit, sem precisar
-# de numpy nem de arquivos de áudio externos.
-#
-# Notação das melodias (um "passo" = 1/16 de compasso):
-#   "C5"    -> nota Dó na oitava 5 durando 1 passo
-#   "E5*3"  -> nota Mi durando 3 passos
-#   "."     -> pausa de 1 passo
-#   ".*4"   -> pausa de 4 passos
-#   "|"     -> separador de compasso (ignorado, só para leitura)
+# Gera notas curtas na hora, sem arquivos de áudio (usado pelos
+# cantores do Coral dos Ovos). As músicas e os efeitos sonoros do
+# jogo são MP3 (ver ferramentas/compor_musicas.py).
 
 TAXA = 22050
 
@@ -35,21 +28,6 @@ def frequencia(nome):
     oitava = int(resto)
     midi = 12 * (oitava + 1) + semitom
     return 440.0 * 2 ** ((midi - 69) / 12)
-
-
-def transpor(nome, semitons):
-    """Transpõe uma nota em semitons (devolve outro nome)."""
-    nomes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
-    letra = nome[0].upper()
-    resto = nome[1:]
-    semitom = _SEMITONS[letra]
-
-    while resto and resto[0] in "#b":
-        semitom += 1 if resto[0] == "#" else -1
-        resto = resto[1:]
-
-    midi = 12 * (int(resto) + 1) + semitom + semitons
-    return f"{nomes[midi % 12]}{midi // 12 - 1}"
 
 
 # ============================================================
@@ -141,140 +119,15 @@ def nota(buf, inicio, n, freq, tipo="quadrada", vol=0.2, duty=0.5,
         inc *= mult_inc
 
 
-def sequencia(buf, seq, passo, **kw):
-    """Toca uma sequência de notas (ver notação no topo)."""
-    pos = 0
-
-    for tok in seq.split():
-        if tok == "|":
-            continue
-
-        nome, _, d = tok.partition("*")
-        dur = int(d) if d else 1
-        n = int(dur * passo)
-
-        if nome != ".":
-            if "+" in nome:
-                # Acorde: "C4+E4+G4"
-                partes = nome.split("+")
-                vol = kw.get("vol", 0.2) / len(partes) * 1.6
-                args = dict(kw, vol=vol)
-                for p in partes:
-                    nota(buf, pos, n, frequencia(p), **args)
-            else:
-                nota(buf, pos, n, frequencia(nome), **kw)
-
-        pos += n
-
-    return pos
-
-
 # ============================================================
-# BATERIA
+# FINALIZAÇÃO
 # ============================================================
-
-def _bumbo():
-    n = int(0.16 * TAXA)
-    fase = 0.0
-    out = []
-    for i in range(n):
-        t = i / n
-        f = 150 * (1 - t) + 45 * t
-        fase += f / TAXA
-        out.append(math.sin(fase * math.tau) * (1 - t) ** 2 * 0.9)
-    return out
-
-
-def _caixa():
-    rnd = random.Random(7)
-    n = int(0.13 * TAXA)
-    out = []
-    ant = 0.0
-    for i in range(n):
-        t = i / n
-        ruido = rnd.uniform(-1, 1)
-        ant = ant * 0.4 + ruido * 0.6
-        tom = math.sin(i * 190 * math.tau / TAXA)
-        out.append((ant * 0.55 + tom * 0.3) * (1 - t) ** 2.5)
-    return out
-
-
-def _chimbal():
-    rnd = random.Random(3)
-    n = int(0.035 * TAXA)
-    out = []
-    ant = 0.0
-    for i in range(n):
-        t = i / n
-        r = rnd.uniform(-1, 1)
-        out.append((r - ant) * 0.35 * (1 - t) ** 3)
-        ant = r
-    return out
-
-
-def _clap():
-    rnd = random.Random(11)
-    n = int(0.12 * TAXA)
-    out = []
-    for i in range(n):
-        t = i / n
-        pulso = 1.0 if (i % int(0.012 * TAXA)) < int(0.006 * TAXA) or t > 0.2 else 0.3
-        out.append(rnd.uniform(-1, 1) * 0.4 * (1 - t) ** 3 * pulso)
-    return out
-
-
-_BATERIA = {}
-
-
-def bateria(buf, padrao, passo, vol=1.0):
-    """
-    padrao: dict com 'k' (bumbo), 's' (caixa), 'h' (chimbal), 'c' (palma)
-    Cada um é uma string onde 'x' toca e '.' não toca, um caractere
-    por passo. A string se repete até preencher o buffer.
-    """
-    if not _BATERIA:
-        _BATERIA.update(k=_bumbo(), s=_caixa(), h=_chimbal(), c=_clap())
-
-    total = len(buf)
-
-    for peca, ritmo in padrao.items():
-        ritmo = ritmo.replace(" ", "").replace("|", "")
-        amostra = _BATERIA[peca]
-        passos = int(total / passo)
-
-        for p in range(passos):
-            if ritmo[p % len(ritmo)] != "x":
-                continue
-            inicio = int(p * passo)
-            for i, v in enumerate(amostra):
-                if inicio + i >= total:
-                    break
-                buf[inicio + i] += v * vol
-
-
-# ============================================================
-# EFEITOS / FINALIZAÇÃO
-# ============================================================
-
-def eco(buf, atraso_s=0.18, forca=0.25):
-    d = int(atraso_s * TAXA)
-    for i in range(d, len(buf)):
-        buf[i] += buf[i - d] * forca
-
 
 def para_pcm(buf, pico=0.85):
     """Normaliza e converte para 16 bits."""
     maior = max(1e-6, max(abs(v) for v in buf))
     escala = pico * 32767 / maior
     return array.array("h", (int(v * escala) for v in buf))
-
-
-def salvar_wav(caminho, pcm):
-    with wave.open(caminho, "wb") as w:
-        w.setnchannels(1)
-        w.setsampwidth(2)
-        w.setframerate(TAXA)
-        w.writeframes(pcm.tobytes())
 
 
 def wav_em_memoria(pcm):

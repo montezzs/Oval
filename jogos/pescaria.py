@@ -304,11 +304,6 @@ class Pescaria(MiniJogo):
     MOEDAS_POR = 25
     MOEDAS_MAX = 45
 
-    TRILHA = dict(bpm=120, tom="F#", escala="menor", lead="quadrada", duty=0.5,
-                  envelope="normal", baixo="oompah", onda_baixo="triangulo",
-                  acomp="arpejo8", onda_acomp="sino", bateria="galope",
-                  energia=0.55, eco=(0.2, 0.25))
-
     # --------------------------------------------------------
     # CENÁRIO: mar de manhã
     # --------------------------------------------------------

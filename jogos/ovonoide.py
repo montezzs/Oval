@@ -387,11 +387,6 @@ class Ovonoide(MiniJogo):
     ROTULO_PONTOS = "PONTOS"
     CONTAGEM = True
 
-    TRILHA = dict(bpm=138, tom="C", escala="menor", lead="serra", duty=0.5,
-                  envelope="normal", baixo="rock", onda_baixo="serra",
-                  acomp="arpejo16", onda_acomp="quadrada", bateria="disco",
-                  energia=0.7, eco=(0.22, 0.3), vol_lead=0.16)
-
     MOEDAS_POR = 100
     MOEDAS_MAX = 45
 

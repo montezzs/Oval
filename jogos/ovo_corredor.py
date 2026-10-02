@@ -449,11 +449,6 @@ class OvoCorredor(MiniJogo):
     ROTULO_PONTOS = "PONTOS"
     CONTAGEM = True
 
-    TRILHA = dict(bpm=168, tom="Bb", escala="maior", lead="quadrada", duty=0.25,
-                  envelope="staccato", baixo="rock", onda_baixo="quadrada",
-                  acomp="arpejo16", onda_acomp="sino", bateria="galope",
-                  energia=0.85, eco=(0.12, 0.15))
-
     MOEDAS_POR = 40
     MOEDAS_MAX = 45
     MOEDAS_MIN = 2

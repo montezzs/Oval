@@ -18,7 +18,7 @@ LIMITE_NOME = 15
 
 class CenaNome(Cena):
 
-    musica = "ovein"
+    musica = "casa"
 
     def __init__(self, app, modo="inicial", ao_terminar=None):
         super().__init__(app)

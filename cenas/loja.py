@@ -240,8 +240,7 @@ class CenaLoja(Cena):
             if not self._ativo(p):
                 self._alternar(p, silencioso=True)
         save.salvar()
-        self.som("moeda")
-        self.som("vencer", 0.5)
+        self.som("compra")
         cores = [CORES_RARIDADE.get(p.raridade, BRANCO), AMARELO, BRANCO]
         self.particulas.explodir(PROVADOR.center, cores, 40, 380)
         self._avisar(f"{p.nome} COMPRADO!")

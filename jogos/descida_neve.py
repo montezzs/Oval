@@ -257,10 +257,6 @@ class DescidaNeve(MiniJogo):
     ROTULO_PONTOS = "PONTOS"
     CONTAGEM = True
 
-    TRILHA = dict(bpm=132, tom="B", escala="maior", lead="sino", envelope="pluck",
-                  baixo="pop", onda_baixo="triangulo", acomp="arpejo16", onda_acomp="triangulo",
-                  bateria="galope", energia=0.7, eco=(0.2, 0.25))
-
     MOEDAS_POR = 40
     MOEDAS_MAX = 45
 

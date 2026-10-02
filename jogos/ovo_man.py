@@ -392,11 +392,6 @@ class OvoMan(MiniJogo):
     ROTULO_PONTOS = "PONTOS"
     CONTAGEM = True
 
-    TRILHA = dict(bpm=150, tom="Eb", escala="menor", lead="quadrada", duty=0.25,
-                  envelope="staccato", baixo="sincopado", onda_baixo="serra",
-                  acomp="arpejo16", onda_acomp="sino", bateria="galope",
-                  energia=0.85, eco=(0.1, 0.15))
-
     MOEDAS_POR = 150
     MOEDAS_MAX = 45
 

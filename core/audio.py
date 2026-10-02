@@ -1,204 +1,25 @@
 import os
-import random
 
 import pygame
 
 from settings import *
-from core import sintetizador as s
 from core import trilhas
 
 # ============================================================
 # ÁUDIO
 # ============================================================
 # - Música: troca de faixa com fade (sem travar o jogo)
-# - Efeitos sonoros: gerados na hora pelo sintetizador
+# - Efeitos sonoros: MP3 em musicas/sfx (ferramentas/compor_musicas.py)
 
 FAIXAS_FIXAS = {
     "ovein": os.path.join(PASTA_MUSICAS, "Ovein.mp3"),
 }
 
-
-# ------------------------------------------------------------
-# EFEITOS SONOROS
-# ------------------------------------------------------------
-
-def _sfx_clique():
-    b = s.buffer_vazio(0.06)
-    s.nota(b, 0, len(b), 900, "quadrada", 0.2, 0.25)
-    return b
-
-
-def _sfx_selecionar():
-    b = s.buffer_vazio(0.1)
-    m = len(b) // 2
-    s.nota(b, 0, m, 660, "quadrada", 0.2, 0.25)
-    s.nota(b, m, m, 990, "quadrada", 0.2, 0.25)
-    return b
-
-
-def _sfx_voltar():
-    b = s.buffer_vazio(0.1)
-    m = len(b) // 2
-    s.nota(b, 0, m, 700, "quadrada", 0.2, 0.25)
-    s.nota(b, m, m, 470, "quadrada", 0.2, 0.25)
-    return b
-
-
-def _sfx_comer():
-    b = s.buffer_vazio(0.16)
-    n = len(b) // 4
-    for i, f in enumerate([523, 659, 784, 1046]):
-        s.nota(b, i * n, n, f, "quadrada", 0.35, 0.5)
-    return b
-
-
-def _sfx_moeda():
-    b = s.buffer_vazio(0.3)
-    s.nota(b, 0, int(0.07 * s.TAXA), 988, "quadrada", 0.35, 0.5)
-    s.nota(b, int(0.07 * s.TAXA), int(0.23 * s.TAXA), 1319, "quadrada", 0.35, 0.5,
-           envelope="pluck")
-    return b
-
-
-def _sfx_pulo():
-    b = s.buffer_vazio(0.16)
-    s.nota(b, 0, len(b), 300, "quadrada", 0.35, 0.5, deslize=1.2)
-    return b
-
-
-def _sfx_mola():
-    b = s.buffer_vazio(0.4)
-    s.nota(b, 0, len(b), 220, "triangulo", 0.7, deslize=2.0, envelope="pluck")
-    s.nota(b, 0, len(b), 440, "quadrada", 0.15, 0.25, deslize=2.0, envelope="pluck")
-    return b
-
-
-def _sfx_boing():
-    b = s.buffer_vazio(0.3)
-    m = len(b) // 2
-    s.nota(b, 0, m, 260, "triangulo", 0.7, deslize=1.0)
-    s.nota(b, m, m, 520, "triangulo", 0.6, deslize=-0.8, envelope="pluck")
-    return b
-
-
-def _sfx_explosao():
-    rnd = random.Random(5)
-    n = int(0.7 * s.TAXA)
-    b = []
-    ant = 0.0
-    for i in range(n):
-        t = i / n
-        ant = ant * 0.85 + rnd.uniform(-1, 1) * 0.15
-        b.append(ant * 4 * (1 - t) ** 2)
-    s.nota(b, 0, int(0.3 * s.TAXA), 110, "seno", 0.8, deslize=-1.5, envelope="pluck")
-    return b
-
-
-def _sfx_perder():
-    b = s.buffer_vazio(0.75)
-    n = len(b) // 4
-    for i, f in enumerate([392, 330, 262, 196]):
-        s.nota(b, i * n, n, f, "quadrada", 0.35, 0.5,
-               deslize=-0.1 if i == 3 else 0)
-    return b
-
-
-def _sfx_vencer():
-    b = s.buffer_vazio(0.9)
-    n = int(0.1 * s.TAXA)
-    for i, f in enumerate([523, 659, 784, 1046]):
-        s.nota(b, i * n, n, f, "quadrada", 0.3, 0.25)
-    s.nota(b, 4 * n, len(b) - 4 * n, 1318, "quadrada", 0.3, 0.25, envelope="pluck")
-    s.nota(b, 4 * n, len(b) - 4 * n, 784, "triangulo", 0.4, envelope="pluck")
-    return b
-
-
-def _sfx_bandeira():
-    b = s.buffer_vazio(0.09)
-    s.nota(b, 0, len(b), 440, "quadrada", 0.35, 0.25, deslize=0.5)
-    return b
-
-
-def _sfx_revelar():
-    b = s.buffer_vazio(0.05)
-    s.nota(b, 0, len(b), 1200, "triangulo", 0.5, envelope="pluck")
-    return b
-
-
-def _sfx_virar():
-    rnd = random.Random(9)
-    n = int(0.09 * s.TAXA)
-    b = []
-    for i in range(n):
-        t = i / n
-        b.append(rnd.uniform(-1, 1) * 0.35 * (t * (1 - t) * 4))
-    return b
-
-
-def _sfx_bater():
-    b = s.buffer_vazio(0.12)
-    s.nota(b, 0, len(b), 180, "seno", 0.9, deslize=-0.6, envelope="pluck")
-    s.nota(b, 0, int(len(b) * 0.3), 700, "quadrada", 0.12, 0.5, envelope="pluck")
-    return b
-
-
-def _sfx_erro():
-    b = s.buffer_vazio(0.22)
-    s.nota(b, 0, len(b), 140, "quadrada", 0.35, 0.5)
-    s.nota(b, 0, len(b), 147, "quadrada", 0.35, 0.5)
-    return b
-
-
-def _sfx_asa():
-    rnd = random.Random(2)
-    n = int(0.12 * s.TAXA)
-    b = []
-    ant = 0.0
-    for i in range(n):
-        t = i / n
-        ant = ant * 0.7 + rnd.uniform(-1, 1) * 0.3
-        b.append(ant * 1.4 * (1 - t) * min(1, t * 10))
-    s.nota(b, 0, n, 500, "triangulo", 0.2, deslize=0.6, envelope="pluck")
-    return b
-
-
-def _sfx_ponto():
-    b = s.buffer_vazio(0.25)
-    m = int(0.08 * s.TAXA)
-    s.nota(b, 0, m, 784, "quadrada", 0.3, 0.5)
-    s.nota(b, m, len(b) - m, 1046, "quadrada", 0.3, 0.5, envelope="pluck")
-    return b
-
-
-def _sfx_acerto():
-    b = s.buffer_vazio(0.35)
-    n = int(0.08 * s.TAXA)
-    for i, f in enumerate([659, 784, 1046]):
-        s.nota(b, i * n, len(b) - i * n, f, "sino", 0.3, envelope="pluck")
-    return b
-
-
-SFX = {
-    "clique": _sfx_clique,
-    "selecionar": _sfx_selecionar,
-    "voltar": _sfx_voltar,
-    "comer": _sfx_comer,
-    "moeda": _sfx_moeda,
-    "pulo": _sfx_pulo,
-    "mola": _sfx_mola,
-    "boing": _sfx_boing,
-    "explosao": _sfx_explosao,
-    "perder": _sfx_perder,
-    "vencer": _sfx_vencer,
-    "bandeira": _sfx_bandeira,
-    "revelar": _sfx_revelar,
-    "virar": _sfx_virar,
-    "bater": _sfx_bater,
-    "erro": _sfx_erro,
-    "asa": _sfx_asa,
-    "ponto": _sfx_ponto,
-    "acerto": _sfx_acerto,
-}
+SFX = (
+    "clique", "selecionar", "voltar", "comer", "moeda", "pulo", "mola", "boing",
+    "explosao", "perder", "vencer", "recorde", "compra", "bandeira", "revelar",
+    "virar", "bater", "erro", "asa", "ponto", "acerto",
+)
 
 
 # ============================================================
@@ -220,11 +41,10 @@ class Audio:
 
         if self.ativo:
             pygame.mixer.set_num_channels(16)
-            for nome, gerar in SFX.items():
+            for nome in SFX:
                 try:
-                    pcm = s.para_pcm(gerar(), 0.7)
-                    self.sons[nome] = pygame.mixer.Sound(file=s.wav_em_memoria(pcm))
-                except pygame.error:
+                    self.sons[nome] = pygame.mixer.Sound(os.path.join(PASTA_SFX, nome + ".mp3"))
+                except (pygame.error, FileNotFoundError):
                     pass
 
     # --------------------------------------------------------
@@ -272,10 +92,7 @@ class Audio:
 
         if not trilhas.existe(nome):
             raise ValueError(f"trilha desconhecida: {nome}")
-        arq = trilhas.arquivo(nome)
-        if not os.path.exists(arq):
-            trilhas.gerar(nome)
-        return arq
+        return trilhas.arquivo(nome)
 
     def _iniciar(self, nome):
         self.atual = nome

@@ -504,9 +504,6 @@ class NinhoArrumado(MiniJogo):
     ]
     ROTULO_PONTOS = "ESTRELAS"
     CONTAGEM = False
-    TRILHA = dict(bpm=84, tom="Ab", escala="lidia", lead="triangulo", envelope="normal",
-                  baixo="longo", onda_baixo="seno", acomp="arpejo8", onda_acomp="sino",
-                  bateria="suave", energia=0.25, eco=(0.3, 0.3))
 
     # Moedas: regra própria (ver calcular_moedas)
     MOEDAS_MAX = 20

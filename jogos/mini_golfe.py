@@ -843,10 +843,6 @@ class MiniGolfe(MiniJogo):
     ROTULO_PONTOS = "TACADAS"
     CONTAGEM = True
 
-    TRILHA = dict(bpm=108, tom="A", escala="maior", lead="sino", envelope="pluck",
-                  baixo="walking", onda_baixo="triangulo", acomp="contratempo",
-                  onda_acomp="triangulo", bateria="reggae", energia=0.4, eco=(0.25, 0.25))
-
     MOEDAS_MIN = 1
 
     # --------------------------------------------------------

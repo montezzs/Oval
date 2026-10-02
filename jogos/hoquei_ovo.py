@@ -164,10 +164,6 @@ class HoqueiOvo(MiniJogoMulti):
     MOEDAS_VITORIA_J1 = 8
     MOEDAS_MAX = 30
 
-    TRILHA = dict(bpm=152, tom="E", escala="maior", lead="serra", envelope="normal",
-                  baixo="rock", onda_baixo="quadrada", acomp="chop", onda_acomp="quadrada",
-                  bateria="rock", energia=0.8, eco=(0.1, 0.15))
-
     # --------------------------------------------------------
     # CENÁRIO: arena com a mesa de gelo
     # --------------------------------------------------------

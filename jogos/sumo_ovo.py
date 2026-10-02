@@ -285,11 +285,6 @@ class SumoOvo(MiniJogoMulti):
     MOEDAS_VITORIA_J1 = 8
     MOEDAS_MAX = 30
 
-    TRILHA = dict(bpm=128, tom="D", escala="hirajoshi",
-                  lead="sino", envelope="pluck", baixo="misterio", onda_baixo="triangulo",
-                  acomp="chop", onda_acomp="quadrada", bateria="taiko",
-                  energia=0.6, eco=(0.22, 0.25), vol_bateria=0.6)
-
     # --------------------------------------------------------
     # CENÁRIO: dojô de madeira com o tatame de argila
     # --------------------------------------------------------

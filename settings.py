@@ -25,6 +25,7 @@ def caminho(*partes):
 FONTE = caminho("Fonts", "PressStart2P-Regular.ttf")
 PASTA_MUSICAS = caminho("musicas")
 PASTA_TRILHAS = caminho("musicas", "trilhas")
+PASTA_SFX = caminho("musicas", "sfx")
 ARQUIVO_SAVE = os.path.join(PASTA_DADOS, "save.json")
 
 # ============================================================
@@ -45,7 +46,7 @@ VOLUME_PADRAO = 0.25           # volume inicial da música (0.0 a 1.0)
 VOLUMES = [0.0, 0.25, 0.5, 0.75, 1.0]
 
 # Ganho de cada faixa: a Ovein.mp3 é mais alta que as trilhas
-# geradas, então é atenuada para todas soarem parecidas
+# (normalizadas em -16 LUFS), então é atenuada para todas soarem parecidas
 GANHO_FAIXA = {
     "ovein": 0.3,
 }

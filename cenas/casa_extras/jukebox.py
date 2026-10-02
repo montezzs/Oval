@@ -24,10 +24,10 @@ class Jukebox:
     def faixas(self):
         from jogos import JOGOS
         jogados = set(self.ctx.app.save["jogados"])
-        lista = [("ovein", "TEMA DO OVEIO", None)]
+        lista = [("casa", "TEMA DA CASA"), ("ovein", "OVEIN (CLÁSSICO)")]
         for jogo in JOGOS:
             if jogo.ID in jogados:
-                lista.append((jogo.ID, jogo.TITULO, getattr(jogo, "TRILHA", None)))
+                lista.append((jogo.ID, jogo.TITULO))
         return lista
 
     def abrir(self):
@@ -35,11 +35,7 @@ class Jukebox:
         self.ctx.som("selecionar")
 
     def _tocar(self, faixa):
-        fid, _, estilo = faixa
-        if estilo:
-            from core import trilhas
-            trilhas.registrar(fid, estilo)
-        self.ctx.definir_faixa(fid)
+        self.ctx.definir_faixa(faixa[0])
         self.ctx.som("clique")
 
     def evento(self, e):
@@ -86,7 +82,7 @@ class Jukebox:
         ui.painel(tela, caixa, (40, 24, 20), (230, 170, 90), 18, 4)
         ui.desenhar_texto(tela, "♪ JUKEBOX ♪", (caixa.centerx, caixa.y + 18), 22, AMARELO, "midtop")
         atual = self.ctx.faixa
-        for k, (fid, nome, _) in enumerate(lista[self.inicio:self.inicio + POR_PAGINA]):
+        for k, (fid, nome) in enumerate(lista[self.inicio:self.inicio + POR_PAGINA]):
             i = self.inicio + k
             r = pygame.Rect(caixa.x + 24, caixa.y + 70 + k * 50, caixa.w - 48, 42)
             self.rects.append((i, r))
@@ -97,5 +93,5 @@ class Jukebox:
             tocando = fid == atual
             ui.desenhar_texto(tela, ("▶ " if tocando else "   ") + nome, (r.x + 14, r.centery), 12,
                               AMARELO if tocando else BRANCO, "midleft")
-        ui.desenhar_texto(tela, f"{len(lista) - 1} trilhas desbloqueadas • jogue mais para liberar!",
+        ui.desenhar_texto(tela, f"{len(lista) - 2} trilhas desbloqueadas • jogue mais para liberar!",
                           (caixa.centerx, caixa.bottom - 28), 8, (230, 200, 160), "midtop")

@@ -106,7 +106,7 @@ class CenaCasa(Cena):
         self.bola_pet = Bola(self)
         self.rotina = Rotina(self)
         self.jukebox = Jukebox(self)
-        self.faixa = "ovein"
+        self.faixa = "casa"
         self.moveis = {}
         self.pet = None
         self._pet_id = None
@@ -160,7 +160,7 @@ class CenaCasa(Cena):
 
     @property
     def jukebox_tocando(self):
-        return self.faixa != "ovein"
+        return self.faixa != "casa"
 
     @property
     def olhando(self):

@@ -223,11 +223,6 @@ class Ovotris(MiniJogo):
     ]
     OPCOES = ["FÁCIL (NÍVEL 1)", "MÉDIO (NÍVEL 5)", "DIFÍCIL (NÍVEL 10)"]
 
-    TRILHA = dict(bpm=144, tom="G", escala="harmonica", lead="quadrada", duty=0.5,
-                  envelope="staccato", baixo="rock", onda_baixo="quadrada",
-                  acomp="arpejo8", onda_acomp="sino", bateria="marcha",
-                  energia=0.75, eco=(0.1, 0.15))
-
     MOEDAS_POR = 300
     MOEDAS_MAX = 45
 

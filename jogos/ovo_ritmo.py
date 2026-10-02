@@ -1,13 +1,10 @@
 import math
-import os
 import random
-import threading
 
 import pygame
 
 from settings import *
 from core import ui
-from core import sintetizador as sint
 from core import trilhas
 from jogos.base import MiniJogo
 
@@ -15,11 +12,11 @@ from jogos.base import MiniJogo
 # OVO NO RITMO
 # ============================================================
 # Ovinhos coloridos caem em 4 pistas no ritmo da música: aperte a
-# seta certa quando o ovinho chegar no receptor! A música é
-# composta aqui mesmo (Si bemol menor, 120 BPM, 44 compassos) e o
-# mapa de notas sai DA MESMA melodia: cada nota da melodia vira um
-# ovinho. O seu ovo dança na pista de disco, com o ROBERT e o TOTÓ
-# de fãs.
+# seta certa quando o ovinho chegar no receptor! A melodia é escrita
+# aqui mesmo (Si bemol menor, 120 BPM, 44 compassos): o mapa de notas
+# sai dela (cada nota vira um ovinho) e o MP3 da música é gravado a
+# partir dela por ferramentas/compor_musicas.py. O seu ovo dança na
+# pista de disco, com o ROBERT e o TOTÓ de fãs.
 #
 # Sincronia: o relógio do jogo é próprio (t += dt) e é a fonte de
 # verdade. Se houver áudio, ele é puxado bem de leve (10%) na
@@ -65,15 +62,7 @@ TECLAS_PISTA = {
 # A MÚSICA (melodia escrita à mão)
 # ============================================================
 # Cada seção: (compassos, acordes (1 por compasso), melodia, bateria, acomp)
-
-ACORDES = {
-    "Bbm": ["Bb3", "Db4", "F4", "Bb4"],
-    "Gb": ["Gb3", "Bb3", "Db4", "Gb4"],
-    "Db": ["Db4", "F4", "Ab4", "Db5"],
-    "Ab": ["Ab3", "C4", "Eb4", "Ab4"],
-    "F": ["F3", "A3", "C4", "F4"],
-}
-RAIZES = {"Bbm": "Bb2", "Gb": "Gb2", "Db": "Db3", "Ab": "Ab2", "F": "F2"}
+# O arranjo (instrumentos) fica em ferramentas/partituras.py.
 
 BATERIAS = {
     "intro": {"k": "x...x...x...x...", "h": "..x...x...x...x."},
@@ -139,61 +128,6 @@ SECOES = [
 
 COMPASSOS = sum(s[0] for s in SECOES)       # 44
 DURACAO = COMPASSOS * 16 * PASSO            # 88 s
-
-
-def _compor_musica():
-    """Gera o áudio da música inteira (seção por seção)."""
-    buf = []
-    for compassos, acordes, melodia, bateria, acomp in SECOES:
-        vozes = [
-            (melodia, dict(tipo="serra", vol=0.12, envelope="normal")),
-            (trilhas.baixo_rock([RAIZES[a] for a in acordes]),
-             dict(tipo="triangulo", vol=0.34, envelope="staccato")),
-        ]
-        notas = [ACORDES[a] for a in acordes]
-        if acomp == "pad":
-            vozes.append((trilhas.acordes_sustentados([n[:3] for n in notas]),
-                          dict(tipo="triangulo", vol=0.08)))
-        else:
-            vozes.append((trilhas.arpejo16(notas),
-                          dict(tipo="quadrada", duty=0.125, vol=0.045, envelope="pluck")))
-        buf.extend(trilhas.compor(BPM, compassos, vozes, bateria=BATERIAS[bateria],
-                                  vol_bateria=0.5, eco=(0.18, 0.15)))
-    return buf
-
-
-# A trilha deste jogo é composta à mão: registra no dicionário de
-# trilhas (sem mexer no arquivo core/trilhas.py)
-trilhas.TRILHAS[ID_JOGO] = _compor_musica
-
-_pronta = threading.Event()
-_estado_trilha = {"thread": None, "falhou": False}
-
-
-def _gerar_em_segundo_plano():
-    arq = trilhas.arquivo(ID_JOGO)
-    try:
-        os.makedirs(PASTA_TRILHAS, exist_ok=True)
-        buf = _compor_musica()
-        temp = f"{arq}.{os.getpid()}.tmp"
-        sint.salvar_wav(temp, sint.para_pcm(buf, 0.8))
-        os.replace(temp, arq)
-    except Exception:           # sem música o jogo funciona igual (relógio próprio)
-        _estado_trilha["falhou"] = True
-    finally:
-        _pronta.set()
-
-
-def _preparar_trilha():
-    """Gera o .wav numa thread (a primeira vez demora uns segundos)."""
-    if _pronta.is_set() or _estado_trilha["thread"] is not None:
-        return
-    if os.path.exists(trilhas.arquivo(ID_JOGO)):
-        _pronta.set()
-        return
-    t = threading.Thread(target=_gerar_em_segundo_plano, daemon=True)
-    _estado_trilha["thread"] = t
-    t.start()
 
 
 # ============================================================
@@ -487,7 +421,6 @@ class OvoRitmo(MiniJogo):
     OPCOES = ["FÁCIL", "MÉDIO", "DIFÍCIL"]
     ROTULO_PONTOS = "PONTOS"
     CONTAGEM = True
-    TRILHA = None           # música composta à mão (ver _compor_musica)
 
     MOEDAS_MAX = 45
     SINCRONIZAR = True      # corrigir o relógio pela posição do áudio
@@ -562,26 +495,15 @@ class OvoRitmo(MiniJogo):
 
     def __init__(self, app, menu):
         self._musica_pausada = False
-        self._esperando_musica = False
         self.teclas_pista = {}
         self.modo_dfjk = False
         self.mouse_pista = None
-        _preparar_trilha()
         super().__init__(app, menu)
 
     @property
     def musica(self):
-        if _pronta.is_set() and not _estado_trilha["falhou"]:
-            return self.ID
-        return None
-
-    def comecar(self):
-        # Espera a música ficar pronta (só na primeira vez que abre o jogo)
-        if not _pronta.is_set():
-            self._esperando_musica = True
-            return
-        self._esperando_musica = False
-        super().comecar()
+        # Sem o MP3 o jogo funciona igual (o relógio é próprio)
+        return self.ID if trilhas.existe(self.ID) else None
 
     def pausar(self):
         antes = self.estado
@@ -640,8 +562,6 @@ class OvoRitmo(MiniJogo):
                         self.audio.reiniciar_musica()
                 except pygame.error:
                     pass
-        if self._esperando_musica and _pronta.is_set() and self.estado == "inicio":
-            self.comecar()
         super().atualizar(dt)
 
     # --------------------------------------------------------
@@ -1127,12 +1047,3 @@ class OvoRitmo(MiniJogo):
                          border_radius=3)
         pygame.draw.rect(tela, (120, 90, 160), (c4.x + 8, c4.y + 8, c4.w - 16, 6), 1, border_radius=3)
 
-    def desenhar(self, tela):
-        super().desenhar(tela)
-        if self._esperando_musica and self.estado == "inicio":
-            caixa = pygame.Rect(0, 0, 520, 60)
-            caixa.center = (LARGURA // 2, ALTURA // 2)
-            ui.painel(tela, caixa, (28, 32, 56), self.COR, 14, 4)
-            pontos = "." * (1 + int(self.tempo * 3) % 3)
-            ui.desenhar_texto(tela, f"AFINANDO A MÚSICA{pontos}", (caixa.x + 40, caixa.centery), 14,
-                              AMARELO, "midleft")

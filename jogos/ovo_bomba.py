@@ -283,11 +283,6 @@ class OvoBomba(MiniJogoMulti):
     CONTROLES_J2 = "SETAS + ENTER"
     CONTAGEM = True
 
-    TRILHA = dict(bpm=140, tom="C#", escala="menor", lead="quadrada", duty=0.25,
-                  envelope="normal", baixo="sincopado", onda_baixo="serra",
-                  acomp="arpejo16", onda_acomp="quadrada", bateria="breakbeat",
-                  energia=0.85, eco=(0.12, 0.2))
-
     MOEDAS_PARTIDA = 12
     MOEDAS_VITORIA_J1 = 8
     MOEDAS_POR_ROUND = 2

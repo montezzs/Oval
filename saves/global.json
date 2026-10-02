@@ -1,0 +1,28 @@
+{
+  "versao": 2,
+  "volume": 0.25,
+  "sons": true,
+  "volume_sfx": 1.0,
+  "tutorial": 99,
+  "mostrar_fps": false,
+  "reduzir_tremor": false,
+  "daltonico": false,
+  "amigos": [],
+  "janela": [
+    1024,
+    720
+  ],
+  "sempre_dia": false,
+  "j2": [],
+  "j2_slot": -1,
+  "ultimo_ovo": 0,
+  "temas_ouvidos": [
+    "abertura",
+    "rua_noite",
+    "cancao_de_ninar"
+  ],
+  "viu_rua": false,
+  "tem_ovo": true,
+  "migrado": true,
+  "banner_migracao": false
+}

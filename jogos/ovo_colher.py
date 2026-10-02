@@ -252,11 +252,6 @@ class OvoColher(MiniJogo):
     MOEDAS_POR = 10
     MOEDAS_MAX = 45
 
-    TRILHA = dict(bpm=120, tom="D", escala="mixolidia", lead="quadrada", duty=0.5,
-                  envelope="normal", baixo="oompah", onda_baixo="triangulo",
-                  acomp="contratempo", onda_acomp="quadrada", bateria="baiao",
-                  energia=0.6, eco=(0.12, 0.15))
-
     # --------------------------------------------------------
     # CENÁRIO: festa junina ao entardecer
     # --------------------------------------------------------

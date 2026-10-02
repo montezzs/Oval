@@ -518,10 +518,6 @@ class Ovo2048(MiniJogo):
     OPCOES = ["4x4", "5x5 FÁCIL", "3x3 DESAFIO"]
     CONTAGEM = False
 
-    TRILHA = dict(bpm=92, tom="F", escala="lidia", lead="seno", envelope="normal",
-                  baixo="longo", onda_baixo="triangulo", acomp="pad", onda_acomp="triangulo",
-                  bateria="halftime", energia=0.3, eco=(0.3, 0.3), vol_bateria=0.3)
-
     MOEDAS_POR = 100
     MOEDAS_MAX = 45
 

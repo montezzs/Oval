@@ -266,11 +266,6 @@ class Toupeiras(MiniJogo):
     ROTULO_PONTOS = "PONTOS"
     CONTAGEM = True
 
-    TRILHA = dict(bpm=126, tom="F", escala="blues", lead="quadrada", duty=0.125,
-                  envelope="staccato", baixo="walking", onda_baixo="triangulo",
-                  acomp="chop", onda_acomp="quadrada", bateria="shuffle",
-                  energia=0.65, eco=(0.12, 0.15))
-
     MOEDAS_POR = 100            # os pontos passam de 1000 fácil (combo x5)
     MOEDAS_MAX = 45
 

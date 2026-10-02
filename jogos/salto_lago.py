@@ -346,10 +346,6 @@ class SaltoLago(MiniJogo):
     ROTULO_PONTOS = "PONTOS"
     CONTAGEM = True
 
-    TRILHA = dict(bpm=90, tom="Db", escala="pentatonica", lead="seno", envelope="normal",
-                  baixo="longo", onda_baixo="triangulo", acomp="arpejo8", onda_acomp="sino",
-                  bateria="suave", energia=0.3, eco=(0.33, 0.35))
-
     MOEDAS_POR = 2
     MOEDAS_MAX = 45
     MOEDAS_MIN = 1

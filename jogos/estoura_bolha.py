@@ -268,11 +268,6 @@ class EstouraBolha(MiniJogo):
     ROTULO_PONTOS = "PONTOS"
     CONTAGEM = True
 
-    TRILHA = dict(bpm=120, tom="F#", escala="pentatonica", lead="quadrada", duty=0.125,
-                  envelope="staccato", baixo="rock", onda_baixo="triangulo",
-                  acomp="arpejo8", onda_acomp="sino", bateria="pop",
-                  energia=0.65, eco=(0.18, 0.22))
-
     # O design pedia 1 moeda a cada 60, mas pintinhos (+100) e fases (+500)
     # rendem muito: com 150 uma partida típica (2-3 fases) dá ~20-27 moedas.
     MOEDAS_POR = 150

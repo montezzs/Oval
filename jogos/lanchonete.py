@@ -248,11 +248,6 @@ class Lanchonete(MiniJogo):
     MOEDAS_MAX = 45
     MOEDAS_VITORIA = 5
 
-    TRILHA = dict(bpm=150, tom="Bb", escala="blues", lead="quadrada", duty=0.5,
-                  envelope="normal", baixo="walking", onda_baixo="triangulo",
-                  acomp="chop", onda_acomp="quadrada", bateria="shuffle",
-                  energia=0.7, eco=(0.12, 0.15))
-
     # --------------------------------------------------------
     # CENÁRIO: lanchonete anos 50
     # --------------------------------------------------------

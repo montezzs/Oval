@@ -337,10 +337,6 @@ class OvoEstrada(MiniJogo):
         "No ar ← e → giram: cambalhota vale +50. Não capote!",
         "→/D acelera • ←/A freia e dá ré (mouse: dir./esq.)",
     ]
-    TRILHA = dict(bpm=132, tom="E", escala="mixolidia", lead="quadrada", duty=0.5,
-                  envelope="normal", baixo="rock", onda_baixo="triangulo",
-                  acomp="contratempo", onda_acomp="quadrada", bateria="rock",
-                  energia=0.7, eco=(0.12, 0.15))
 
     MOEDAS_MAX = 50
 

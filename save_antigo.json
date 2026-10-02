@@ -1,0 +1,52 @@
+{
+  "nome": "ovenho",
+  "ovo": 0,
+  "cabelo": 1,
+  "olho": 1,
+  "boca": 2,
+  "volume": 0.25,
+  "sons": true,
+  "recordes": {},
+  "janela": [
+    1024,
+    720
+  ],
+  "moedas": 20,
+  "moedas_total": 20,
+  "inventario": [],
+  "equipado": {},
+  "pet": "",
+  "moveis": [],
+  "comida": {
+    "maca": 1
+  },
+  "necessidades": {
+    "fome": 79.25,
+    "energia": 79.5,
+    "diversao": 80.38,
+    "higiene": 79.63
+  },
+  "jardim": [
+    {},
+    {},
+    {},
+    {}
+  ],
+  "ultimo_tempo": 1790901306.3810947,
+  "sempre_dia": false,
+  "album": [],
+  "diario": {
+    "bau_seq": 1,
+    "bau_ultimo": "2026-10-01",
+    "desafio": {
+      "dia": "2026-10-01",
+      "jogo": "voador",
+      "tipo": "maior",
+      "meta": 15,
+      "texto": "Faça 15 em OVO VOADOR!",
+      "feito": false,
+      "pago": false
+    }
+  },
+  "jogados": []
+}

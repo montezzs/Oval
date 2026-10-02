@@ -248,10 +248,6 @@ class LigaOvos(MiniJogo):
         "MOUSE ou SETAS/WASD + ESPAÇO • H dica",
     ]
 
-    TRILHA = dict(bpm=104, tom="E", escala="pentatonica", lead="triangulo", envelope="normal",
-                  baixo="pop", onda_baixo="seno", acomp="arpejo8", onda_acomp="sino",
-                  bateria="halftime", energia=0.4, eco=(0.25, 0.25), vol_bateria=0.35)
-
     MOEDAS_POR = 40
     MOEDAS_MAX = 45
 

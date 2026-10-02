@@ -210,11 +210,6 @@ class GuerraTinta(MiniJogoMulti):
     CONTROLES_J2 = "SETAS + ENTER"
     CONTAGEM = True
 
-    TRILHA = dict(bpm=116, tom="D", escala="dorica", lead="quadrada", duty=0.25,
-                  envelope="staccato", baixo="sincopado", onda_baixo="serra",
-                  acomp="chop", onda_acomp="quadrada", bateria="funk",
-                  energia=0.7, eco=(0.15, 0.2))
-
     MOEDAS_PARTIDA = 12
     MOEDAS_VITORIA_J1 = 8
     MOEDAS_MODO_LONGO = 6       # MELHOR DE 3 e SUPER 120s

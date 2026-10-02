@@ -166,10 +166,6 @@ class CoralOvos(MiniJogo):
     ROTULO_PONTOS = "SEQUÊNCIA"
     CONTAGEM = True
 
-    TRILHA = dict(bpm=100, tom="Eb", escala="maior", lead="triangulo", envelope="normal",
-                  baixo="pop", onda_baixo="seno", acomp="arpejo8", onda_acomp="sino",
-                  bateria="suave", energia=0.35, eco=(0.28, 0.3))
-
     MOEDAS_MAX = 40
 
     # --------------------------------------------------------

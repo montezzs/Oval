@@ -385,10 +385,6 @@ class Invasores(MiniJogo):
     ROTULO_PONTOS = "PONTOS"
     CONTAGEM = True
 
-    TRILHA = dict(bpm=118, tom="F", escala="menor", lead="serra", envelope="normal",
-                  baixo="walking", onda_baixo="quadrada", acomp="pad", onda_acomp="triangulo",
-                  bateria="marcha", energia=0.6, eco=(0.18, 0.2))
-
     MOEDAS_POR = 60
     MOEDAS_MAX = 45
 
