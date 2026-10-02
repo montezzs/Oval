@@ -27,6 +27,7 @@ O progresso é salvo em `%APPDATA%\\Oval\\save.json`.
 
 
 def rodar(*cmd):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     print(">", " ".join(cmd))
     subprocess.run(cmd, cwd=PASTA, check=True)
 
