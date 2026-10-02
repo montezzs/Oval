@@ -17,10 +17,10 @@
     "maca": 1
   },
   "necessidades": {
-    "fome": 77.75,
-    "energia": 80.2,
-    "diversao": 79.13,
-    "higiene": 78.88
+    "fome": 68.09,
+    "energia": 73.76,
+    "diversao": 71.09,
+    "higiene": 74.06
   },
   "jardim": [
     {},
@@ -28,7 +28,7 @@
     {},
     {}
   ],
-  "ultimo_tempo": 1790901585.2199366,
+  "ultimo_tempo": 1790903501.4200742,
   "album": [],
   "diario": {
     "bau_seq": 1,

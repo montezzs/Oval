@@ -5,6 +5,7 @@ import pygame
 
 from settings import *
 from core import ui
+from core.assets import comida_sup
 from jogos.base import MiniJogo
 
 # ============================================================
@@ -193,6 +194,8 @@ def _fruta_sup(tipo):
     s = _sprites.get(chave)
     if s is not None:
         return s
+    s = _sprites[chave] = comida_sup(34)
+    return s
     s = pygame.Surface((34, 34), pygame.SRCALPHA)
     if tipo == "limao":
         ui.limao(s, (17, 18), 12)

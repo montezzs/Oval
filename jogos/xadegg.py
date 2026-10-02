@@ -348,10 +348,47 @@ def bot_xadrez(pos, dif, limite=1.5):
 _sprites = {}
 
 
+_NOMES_IMG = {"P": "peao", "N": "cavalo", "B": "bispo", "R": "torre", "Q": "rainha", "K": "rei"}
+_imgs = {}
+
+
+def _imagem_peca(tipo, branco):
+    """Imagem desenhada em Img/xadregg (None se faltar). Maiúscula = brancas."""
+    chave = (tipo, branco)
+    if chave not in _imgs:
+        import os
+        from settings import caminho
+        nome = _NOMES_IMG.get(tipo)
+        img = None
+        sufixos = ("branco", "branca") if branco else ("preto", "preta")
+        for suf in sufixos if nome else ():
+            arq = caminho("Img", "xadregg", f"{nome}_{suf}.png")
+            if os.path.exists(arq):
+                try:
+                    img = pygame.image.load(arq).convert_alpha()
+                except pygame.error:
+                    img = pygame.image.load(arq)
+                break
+        _imgs[chave] = img
+    return _imgs[chave]
+
+
 def sprite_peca(tipo, cor, lado):
-    chave = (tipo, cor, lado)
+    """tipo maiúsculo = peça branca (jogador 1), minúsculo = preta (jogador 2/IA)."""
+    branco = tipo.isupper()
+    tipo = tipo.upper()
+    chave = (tipo, branco, cor, lado)
     sup = _sprites.get(chave)
     if sup is not None:
+        return sup
+    img = _imagem_peca(tipo, branco)
+    if img is not None:
+        w, h = img.get_size()
+        k = lado / max(w, h)
+        esc = pygame.transform.smoothscale(img, (max(1, round(w * k)), max(1, round(h * k))))
+        sup = pygame.Surface((lado, lado), pygame.SRCALPHA)
+        sup.blit(esc, ((lado - esc.get_width()) // 2, lado - esc.get_height()))
+        _sprites[chave] = sup
         return sup
     S = lado
     sup = pygame.Surface((S, S), pygame.SRCALPHA)
@@ -492,7 +529,7 @@ class Xadegg(JogoTabuleiro):
         cor = jogador.cor_do_ovo(jogador.ovo)
         t = int(h * 0.5)
         sup.blit(sprite_peca("K", cor, t), (w // 2 - t - 4, h // 2 - t // 2))
-        sup.blit(sprite_peca("N", (60, 60, 70), t), (w // 2 + 4, h // 2 - t // 2))
+        sup.blit(sprite_peca("n", (60, 60, 70), t), (w // 2 + 4, h // 2 - t // 2))
 
     # --------------------------------------------------------
 
@@ -642,7 +679,7 @@ class Xadegg(JogoTabuleiro):
             if p == VAZIO or s == movendo:
                 continue
             x, y = casa_xy(s)
-            tela.blit(sprite_peca(p.upper(), cores[0 if p.isupper() else 1], CEL), (x, y - 4))
+            tela.blit(sprite_peca(p, cores[0 if p.isupper() else 1], CEL), (x, y - 4))
 
         if self.sel is not None:
             for m in self.destinos(self.sel):
@@ -662,7 +699,7 @@ class Xadegg(JogoTabuleiro):
             (x1, y1), (x2, y2) = casa_xy(s), casa_xy(t)
             x, y = x1 + (x2 - x1) * k, y1 + (y2 - y1) * k - math.sin(k * math.pi) * 16
             final = b[t]
-            tela.blit(sprite_peca(final.upper(), cores[0 if final.isupper() else 1], CEL), (x, y - 4))
+            tela.blit(sprite_peca(final, cores[0 if final.isupper() else 1], CEL), (x, y - 4))
         self.textos.desenhar(tela)
 
     def desenhar_hud(self, tela):
@@ -685,7 +722,7 @@ class Xadegg(JogoTabuleiro):
             for k, p in enumerate(comidas[:15]):
                 x = r.x + 10 + (k % 5) * 32
                 y = r.y + 146 + (k // 5) * 40
-                tela.blit(sprite_peca(p, self.cor(1 - i), 34), (x, y))
+                tela.blit(sprite_peca(p if i == 1 else p.lower(), self.cor(1 - i), 34), (x, y))
         if self.aviso and (self.aviso != "XEQUE!" or int(self.tempo * 3) % 2 == 0):
             ui.desenhar_texto(tela, self.aviso, (LARGURA // 2, 70), 22, (255, 110, 110), "center")
         elif self._fim is None:

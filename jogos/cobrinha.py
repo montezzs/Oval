@@ -5,6 +5,7 @@ import pygame
 
 from settings import *
 from core import ui
+from core.assets import comida_sup
 from jogos.base import MiniJogo
 
 # ============================================================
@@ -102,7 +103,8 @@ class Cobrinha(MiniJogo):
             pygame.draw.circle(sup, jogador.cor_contorno, (x, h // 2 + 12), 11)
             pygame.draw.circle(sup, cor, (x, h // 2 + 12), 9)
         jogador.desenhar(sup, (w // 2 + 40, h // 2 + 6), 40)
-        ui.limao(sup, (w // 2 + 80, h // 2 - 26), 12)
+        c = comida_sup(28)
+        sup.blit(c, c.get_rect(center=(w // 2 + 80, h // 2 - 26)))
 
     # --------------------------------------------------------
     # PARTIDA
@@ -247,7 +249,8 @@ class Cobrinha(MiniJogo):
         if self.limao:
             cx, cy = _tela(self.limao)
             pygame.draw.ellipse(tela, (70, 120, 50), (cx - 12, cy + 8, 24, 8))
-            ui.limao(tela, (cx, cy + dy), 12)
+            c = comida_sup(28)
+            tela.blit(c, c.get_rect(center=(cx, cy + dy)))
 
         if self.dourado:
             cx, cy = _tela(self.dourado)
@@ -255,7 +258,8 @@ class Cobrinha(MiniJogo):
             if piscando:
                 brilho = int(18 + 4 * abs(balanco - 1))
                 pygame.draw.circle(tela, (255, 240, 120), (int(cx), int(cy)), brilho, 3)
-                ui.limao(tela, (cx, cy + dy), 14)
+                c = comida_sup(32)
+                tela.blit(c, c.get_rect(center=(cx, cy + dy)))
                 ui.estrela(tela, (cx + 14, cy - 14), 6, AMARELO, self.tempo * 3)
 
         # Corpo: do rabo para a cabeça

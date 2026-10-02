@@ -71,3 +71,28 @@ def fonte(tamanho):
         _fontes[tamanho] = f
 
     return f
+
+
+_comidas = {}
+
+
+def comida_sup(tam):
+    """Img/jogos/comida.png escalada (suave) para caber em tam x tam, com cache."""
+    tam = max(1, int(tam))
+    s = _comidas.get(tam)
+    if s is None:
+        base = _comidas.get("base")
+        if base is None:
+            base = pygame.image.load(caminho("Img", "jogos", "comida.png"))
+            try:
+                base = base.convert_alpha()
+            except pygame.error:
+                pass
+            _comidas["base"] = base
+        w, h = base.get_size()
+        k = tam / max(w, h)
+        img = pygame.transform.smoothscale(base, (max(1, round(w * k)), max(1, round(h * k))))
+        s = pygame.Surface((tam, tam), pygame.SRCALPHA)
+        s.blit(img, img.get_rect(center=(tam // 2, tam // 2)))
+        _comidas[tam] = s
+    return s

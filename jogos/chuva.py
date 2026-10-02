@@ -5,6 +5,7 @@ import pygame
 
 from settings import *
 from core import ui
+from core.assets import comida_sup
 from jogos.base import MiniJogo
 
 # ============================================================
@@ -189,6 +190,8 @@ PAVIO = ((116 - TAM_SPRITE * Z / 2) / Z, (12 - TAM_SPRITE * Z / 2) / Z)
 
 def _sprite(tipo):
     s = _sprites.get(tipo)
+    if s is None and tipo in ("limao", "maca", "melancia", "bolo"):
+        s = _sprites[tipo] = comida_sup(TAM_SPRITE)
     if s is None:
         s = pygame.transform.smoothscale(_DESENHOS[tipo](), (TAM_SPRITE, TAM_SPRITE))
         _sprites[tipo] = s

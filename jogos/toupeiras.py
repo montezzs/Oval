@@ -125,19 +125,23 @@ def _sprite(tipo):
         for x, y in ((cx - 30, 40), (cx + 28, 90)):
             ui.estrela(sup, (x, y), 5, (255, 255, 220))
     else:
-        _corpo_toupeira(sup, (130, 95, 80), (170, 135, 115), tipo == "tonta")
-    if tipo == "capacete":
-        # Capacete de obra amarelo com lanterninha
-        pygame.draw.ellipse(sup, (160, 120, 20), (cx - 50, 30, 100, 16))
-        casco = pygame.Rect(cx - 42, 4, 84, 56)
-        pygame.draw.ellipse(sup, (200, 160, 20), casco.move(0, 2))
-        pygame.draw.ellipse(sup, (250, 205, 40), casco)
-        pygame.draw.rect(sup, (0, 0, 0, 0), (cx - 50, 36, 100, 30))
-        pygame.draw.ellipse(sup, (230, 185, 30), (cx - 50, 30, 100, 12))
-        pygame.draw.line(sup, (255, 240, 150), (cx - 24, 12), (cx - 8, 7), 3)
-        pygame.draw.rect(sup, (200, 160, 20), (cx - 5, 5, 10, 30))
-        pygame.draw.circle(sup, (255, 255, 200), (cx, 20), 6)
-        pygame.draw.circle(sup, (180, 150, 60), (cx, 20), 6, 2)
+        _corpo_toupeira(sup, (130, 95, 80), (170, 135, 115), tipo in ("tonta", "capacete_tonta"))
+    if tipo.startswith("capacete"):
+        # Capacete de obra amarelo com lanterninha. Desenhado numa camada
+        # própria (o recorte da base do casco não pode apagar o rosto).
+        cap = pygame.Surface((LARG_SPRITE, 44), pygame.SRCALPHA)
+        casco = pygame.Rect(cx - 40, 2, 80, 60)
+        pygame.draw.ellipse(cap, (200, 160, 20), casco.move(0, 2))
+        pygame.draw.ellipse(cap, (250, 205, 40), casco)
+        pygame.draw.rect(cap, (0, 0, 0, 0), (0, 32, LARG_SPRITE, 20))
+        pygame.draw.line(cap, (255, 240, 150), (cx - 24, 11), (cx - 9, 6), 3)
+        pygame.draw.rect(cap, (200, 160, 20), (cx - 5, 3, 10, 29))
+        pygame.draw.circle(cap, (255, 255, 200), (cx, 18), 6)
+        pygame.draw.circle(cap, (180, 150, 60), (cx, 18), 6, 2)
+        # Aba por cima da base do casco
+        pygame.draw.ellipse(cap, (160, 120, 20), (cx - 50, 28, 100, 14))
+        pygame.draw.ellipse(cap, (230, 185, 30), (cx - 50, 27, 100, 11))
+        sup.blit(cap, (0, -4))
     _sprites[tipo] = sup
     return sup
 
@@ -730,7 +734,7 @@ class Toupeiras(MiniJogo):
             if m.tipo == "dourada":
                 nome = "dourada_tonta" if tonta else "dourada"
             elif m.tipo == "capacete":
-                nome = "capacete"
+                nome = "capacete_tonta" if tonta else "capacete"
             else:
                 nome = "tonta" if tonta else "toupeira"
             img = _sprite(nome)
