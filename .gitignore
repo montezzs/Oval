@@ -12,3 +12,9 @@ dist/
 erro.log
 save.json
 save.json.tmp
+save_antigo*.json
+saves/
+fotos/
+meu_codigo_oval.txt
+*.tmp
+*.corrompido

@@ -111,7 +111,10 @@ class Bandeja:
     def comer(self, cid):
         ctx = self.ctx
         save = ctx.app.save
-        if ctx.necessidade("fome") >= 95:
+        itens = _itens()
+        pocao = bool(itens and itens.COMIDAS.get(cid, {}).get("pocao"))
+        # Poções são bebidas: o ovo aceita mesmo de barriga cheia
+        if ctx.necessidade("fome") >= 95 and not pocao:
             ctx.recusar()
             return
         if save["comida"].get(cid, 0) <= 0:
@@ -278,6 +281,10 @@ class Banho:
                 self.bolhas.clear()
                 self.brilho = 1.5
                 self.ctx.som("acerto")
+                # Banho completo: conta para as conquistas e dá XP
+                from core import progresso
+                progresso.contar(self.ctx.app, "banhos")
+                progresso.ganhar_xp(self.ctx.app, progresso.XP_BANHO)
 
     def desenhar_no_ovo(self, tela):
         corpo = self.ctx.rect_corpo()

@@ -712,3 +712,154 @@ def icone_semente(semente_id, tamanho):
         _pacotes.clear()
     _pacotes[chave] = s
     return s
+
+
+# ============================================================
+# ITENS NOVOS (coleção "Vizinhança")
+# ============================================================
+
+COMIDAS.update({
+    "cenoura": dict(nome="CENOURA", preco=10, efeitos={"fome": 12, "energia": 5}, loja=True,
+                    cor=(255, 140, 40), especial=None),
+    "pipoca": dict(nome="PIPOCA", preco=14, efeitos={"fome": 10, "diversao": 8}, loja=True,
+                   cor=(255, 250, 230), especial=None),
+    "brigadeiro": dict(nome="BRIGADEIRO", preco=18, efeitos={"fome": 8, "diversao": 15}, loja=True,
+                       cor=(90, 50, 30), especial=None),
+    "melancia": dict(nome="MELANCIA", preco=28, efeitos={"fome": 30, "higiene": 5}, loja=True,
+                     cor=(240, 70, 80), especial=None),
+})
+
+SEMENTES["semente_melancia"] = dict(nome="SEMENTE DE MELANCIA", preco=60, tempo=7200,
+                                    colheita=dict(comida={"melancia": 2}, moedas=20),
+                                    cor=(90, 170, 80), planta="MELANCIA")
+
+
+def _cenoura(p):
+    p.poligono((255, 140, 40), [(12, 14), (26, 12), (20, 38)])
+    p.poligono((255, 170, 80), [(15, 15), (20, 14), (19, 30)])
+    for y in (19, 25, 31):
+        p.linha((200, 95, 20), (15 + (y - 14) * 0.2, y), (20 + (y - 14) * 0.1, y - 1), 1.2)
+    for dx in (-5, 0, 5):
+        p.poligono((80, 170, 60), [(18 + dx * 0.3, 13), (21 + dx * 0.3, 13), (19 + dx, 2)])
+
+
+def _pipoca(p):
+    balde = [(9, 16), (31, 16), (28, 38), (12, 38)]
+    p.poligono((250, 250, 250), balde)
+    for x in (13, 21):
+        p.poligono((220, 50, 60), [(x, 16), (x + 4, 16), (x + 3.3, 38), (x + 0.8, 38)])
+    p.poligono((220, 50, 60), [(29, 16), (31, 16), (28, 38), (27, 38)])
+    for x, y, r in ((12, 14, 4), (18, 11, 4.5), (24, 12, 4.5), (29, 14, 4), (15, 7, 3.5),
+                    (22, 6, 4), (27, 8, 3.5)):
+        p.circulo((255, 250, 230), x, y, r)
+        p.circulo((255, 220, 120), x + 1, y + 1, r * 0.35)
+
+
+def _brigadeiro(p):
+    for i in range(10):
+        a = math.pi * (0.05 + i * 0.1)
+        p.linha((255, 170, 200), (20, 30), (20 + math.cos(a) * 16, 30 + math.sin(a) * 7), 3)
+    p.elipse((255, 200, 220), 5, 24, 30, 13)
+    p.circulo((90, 50, 30), 20, 22, 11)
+    for x, y in ((15, 17), (22, 14), (26, 20), (18, 24), (13, 22), (24, 26), (20, 19)):
+        p.rect((60, 30, 15), x, y, 2.2, 1.2)
+    p.circulo((140, 90, 60), 16, 17, 2.5)
+
+
+def _melancia(p):
+    p.poligono((60, 150, 60), [(3, 14), (37, 14), (20, 38)])
+    p.poligono((240, 240, 200), [(6, 14), (34, 14), (20, 34)])
+    p.poligono((240, 70, 80), [(8, 14), (32, 14), (20, 31)])
+    for x, y in ((14, 18), (20, 21), (26, 18), (17, 25), (23, 25), (20, 17)):
+        p.elipse((40, 30, 30), x, y, 1.8, 2.8)
+    p.linha((255, 150, 150), (11, 15), (29, 15), 1.2)
+
+
+_DESENHOS.update({"cenoura": _cenoura, "pipoca": _pipoca, "brigadeiro": _brigadeiro,
+                  "melancia": _melancia})
+
+
+def _melancia_planta(s, estagio):
+    bx, by = BASE_PLANTA
+    pygame.draw.lines(s, CAULE, False, [(bx - 44, by - 3), (bx - 18, by - 9), (bx + 4, by - 4),
+                                        (bx + 28, by - 11), (bx + 46, by - 4)], 3)
+    for x, ang in ((-36, -35), (-10, 25), (18, -25), (40, 30)):
+        _folha(s, (bx + x, by - 6), ang, 20, 9)
+    if estagio == 2:
+        pygame.draw.circle(s, (255, 220, 60), (bx - 8, by - 20), 5)
+        pygame.draw.circle(s, (255, 240, 150), (bx - 8, by - 20), 2)
+        r = pygame.Rect(0, 0, 22, 16)
+        r.midbottom = (bx + 10, by)
+        pygame.draw.ellipse(s, (60, 150, 60), r)
+        pygame.draw.ellipse(s, (30, 100, 30), r, 1)
+        return
+    r = pygame.Rect(0, 0, 70, 40)
+    r.midbottom = (bx, by)
+    pygame.draw.ellipse(s, (60, 150, 60), r)
+    for i in range(5):
+        x = r.x + 10 + i * 12
+        pygame.draw.arc(s, (30, 100, 30), (x - 6, r.y + 2, 12, r.h - 4), -1.2, 1.2, 3)
+    pygame.draw.ellipse(s, (30, 100, 30), r, 2)
+    pygame.draw.ellipse(s, (140, 210, 120), (r.x + 12, r.y + 6, 14, 8))
+
+
+_PLANTAS["semente_melancia"] = _melancia_planta
+
+
+# ============================================================
+# POÇÕES (MERCADO)
+# ============================================================
+# Atalhos pagos: recarregam uma barra na hora (sem esperar o ovo
+# dormir) ou dão um reforço temporário. Bebidas não enchem a
+# barriga (o ovo aceita mesmo "cheio"). `buff`: ver core/progresso.
+
+COMIDAS.update({
+    "pocao_sono": dict(nome="POÇÃO DO SONO", preco=45, efeitos={"energia": 70}, loja=True,
+                       cor=(90, 110, 230), especial=None, pocao=True),
+    "pocao_alegria": dict(nome="POÇÃO DA ALEGRIA", preco=40, efeitos={"diversao": 60}, loja=True,
+                          cor=(255, 120, 190), especial="confete", pocao=True),
+    "pocao_banho": dict(nome="POÇÃO DE ESPUMA", preco=35, efeitos={"higiene": 70}, loja=True,
+                        cor=(120, 220, 255), especial=None, pocao=True),
+    "elixir_total": dict(nome="ELIXIR TOTAL", preco=160, loja=True, pocao=True,
+                         efeitos={"fome": 50, "energia": 50, "diversao": 50, "higiene": 50},
+                         cor=(255, 214, 64), especial="confete"),
+    "pocao_sorte": dict(nome="POÇÃO DA SORTE", preco=120, efeitos={}, loja=True, pocao=True,
+                        cor=(90, 210, 110), especial=None,
+                        buff=("sorte", 3),
+                        descricao="OVOEDAS x1,5 nas próximas 3 partidas."),
+    "pocao_xp": dict(nome="POÇÃO DE XP", preco=90, efeitos={}, loja=True, pocao=True,
+                     cor=(170, 120, 255), especial=None,
+                     buff=("xp", 900),
+                     descricao="XP em DOBRO por 15 minutos."),
+})
+
+
+def _frasco(cor, formato="redondo"):
+    def desenhar(p):
+        escura = tuple(max(0, c - 70) for c in cor)
+        clara = tuple(min(255, c + 90) for c in cor)
+        if formato == "redondo":
+            p.circulo((225, 235, 245), 20, 26, 12)
+            p.circulo(cor, 20, 27, 10)
+            p.rect((225, 235, 245), 16, 6, 8, 12)
+            p.poligono(clara, [(12, 25), (28, 25), (29, 28), (11, 28)])
+        else:
+            p.poligono((225, 235, 245), [(15, 6), (25, 6), (25, 14), (31, 22), (31, 37), (9, 37),
+                                         (9, 22), (15, 14)])
+            p.poligono(cor, [(11, 23), (29, 23), (29, 35), (11, 35)])
+            p.rect(clara, 11, 23, 18, 3)
+        p.rect((150, 100, 60), 15, 3, 10, 5, raio=1)
+        p.elipse((255, 255, 255), 13, 20, 4, 7)
+        p.circulo(escura, 24, 31, 1.6)
+        p.circulo(clara, 17, 30, 1.2)
+    return desenhar
+
+
+_DESENHOS.update({
+    "pocao_sono": _frasco((90, 110, 230)),
+    "pocao_alegria": _frasco((255, 120, 190)),
+    "pocao_banho": _frasco((120, 220, 255), "reto"),
+    "elixir_total": _frasco((255, 200, 50), "reto"),
+    "pocao_sorte": _frasco((90, 210, 110)),
+    "pocao_xp": _frasco((170, 120, 255), "reto"),
+})

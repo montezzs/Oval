@@ -223,8 +223,8 @@ class Ovotris(MiniJogo):
     ]
     OPCOES = ["FÁCIL (NÍVEL 1)", "MÉDIO (NÍVEL 5)", "DIFÍCIL (NÍVEL 10)"]
 
-    MOEDAS_POR = 300
-    MOEDAS_MAX = 45
+    MOEDAS_POR = 1000
+    MOEDAS_MAX = 30
 
     # --------------------------------------------------------
     # CENÁRIO: galinheiro à noite

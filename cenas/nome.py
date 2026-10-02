@@ -3,27 +3,32 @@ import math
 import pygame
 
 from settings import *
-from core import ui
+from core import perfis, ui
 from core.cena import Cena, tecla_voltar
 from core.fundo_menu import FundoAnimado
 
 # ============================================================
 # NOME
 # ============================================================
-# Usada no começo do jogo (modo "inicial") e no menu de pausa
-# para trocar o nome (modo "trocar").
+# Usada no começo do jogo (modo "inicial"), no menu de pausa
+# para trocar o nome (modo "trocar") e no +NOVO da vizinhança
+# (modo "novo"). Dois ovos da rua não podem ter o mesmo nome.
 
 LIMITE_NOME = 15
 
 
 class CenaNome(Cena):
 
-    musica = "casa"
+    musica = "nasce_um_ovo"
 
-    def __init__(self, app, modo="inicial", ao_terminar=None):
+    def __init__(self, app, modo="inicial", ao_terminar=None, ao_cancelar=None, slot=None):
         super().__init__(app)
         self.modo = modo
         self.ao_terminar = ao_terminar
+        self.ao_cancelar = ao_cancelar or ao_terminar
+        self.slot = app.slot if slot is None else slot
+        self.pode_cancelar = modo in ("trocar", "novo")
+        self.erro = ""
         self.texto = self.jogador.nome if modo == "trocar" else ""
         self.fundo = FundoAnimado((30, 110, 50), (90, 190, 90), semente=3)
         self.tempo = 0.0
@@ -33,7 +38,7 @@ class CenaNome(Cena):
         self.caixa.center = (LARGURA // 2, 330)
 
         self.botao_ok = ui.Botao((0, 0, 260, 60), "CONFIRMAR", 18)
-        self.botao_ok.rect.center = (LARGURA // 2 + (145 if modo == "trocar" else 0), 460)
+        self.botao_ok.rect.center = (LARGURA // 2 + (145 if self.pode_cancelar else 0), 460)
 
         self.botao_cancelar = ui.Botao((0, 0, 260, 60), "CANCELAR", 18,
                                        cor=(110, 60, 60), cor_hover=(160, 80, 80))
@@ -60,6 +65,12 @@ class CenaNome(Cena):
             self.som("erro")
             return
 
+        if perfis.normalizar_nome(nome) in perfis.nomes_em_uso(excluir=self.slot):
+            self.tremer = 0.4
+            self.erro = f"JÁ TEM UM {nome.upper()} NA RUA!"
+            self.som("erro")
+            return
+
         self.som("selecionar")
         self.jogador.nome = nome
         self.jogador.salvar()
@@ -69,8 +80,8 @@ class CenaNome(Cena):
 
     def _cancelar(self):
         self.som("voltar")
-        if self.ao_terminar:
-            self.ao_terminar()
+        if self.ao_cancelar:
+            self.ao_cancelar()
 
     # --------------------------------------------------------
 
@@ -79,19 +90,21 @@ class CenaNome(Cena):
             for c in e.text:
                 if self._valido(c) and len(self.texto) < LIMITE_NOME:
                     self.texto += c
+                    self.erro = ""
                     self.som("revelar", 0.6)
 
         elif e.type == pygame.KEYDOWN:
             if e.key == pygame.K_BACKSPACE:
                 self.texto = self.texto[:-1]
+                self.erro = ""
             elif e.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
                 self._confirmar()
-            elif tecla_voltar(e) and self.modo == "trocar":
+            elif tecla_voltar(e) and self.pode_cancelar:
                 self._cancelar()
 
         if self.botao_ok.evento(e):
             self._confirmar()
-        elif self.modo == "trocar" and self.botao_cancelar.evento(e):
+        elif self.pode_cancelar and self.botao_cancelar.evento(e):
             self._cancelar()
 
     def atualizar(self, dt):
@@ -111,6 +124,11 @@ class CenaNome(Cena):
             ui.desenhar_texto(tela, "OVAL!", (LARGURA // 2, y + 48), 56,
                               AMARELO, "midtop")
             ui.centralizado(tela, "Como vai se chamar o seu ovo?", 240, 16)
+        elif self.modo == "novo":
+            y = 100 + math.sin(self.tempo * 2) * 6
+            ui.desenhar_texto(tela, "NOME DO NOVO OVO", (LARGURA // 2, y), 36, AMARELO, "midtop")
+            ui.centralizado(tela, f"ELE VAI MORAR NA CASA {self.slot + 1}", 190, 12)
+            ui.centralizado(tela, "Como vai se chamar o novo ovo?", 240, 16)
         else:
             ui.centralizado(tela, "TROCAR NOME", 110, 40, AMARELO)
             ui.centralizado(tela, "Digite o novo nome:", 240, 16)
@@ -131,9 +149,12 @@ class CenaNome(Cena):
         ui.desenhar_texto(tela, f"{len(self.texto)}/{LIMITE_NOME}",
                           (caixa.right, caixa.bottom + 12), 12, BRANCO, "topright")
 
+        if self.erro:
+            ui.centralizado(tela, self.erro, 396, 12, (230, 70, 70))
+
         self.botao_ok.desenhar(tela)
 
-        if self.modo == "trocar":
+        if self.pode_cancelar:
             self.botao_cancelar.desenhar(tela)
             ui.centralizado(tela, "ENTER confirma  •  ESC cancela", 640, 12)
         else:

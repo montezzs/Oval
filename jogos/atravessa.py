@@ -313,8 +313,8 @@ class Atravessa(MiniJogo):
     ROTULO_PONTOS = "PONTOS"
     CONTAGEM = True
 
-    MOEDAS_POR = 80
-    MOEDAS_MAX = 45
+    MOEDAS_POR = 180
+    MOEDAS_MAX = 28
     MOEDAS_MIN = 1
 
     # --------------------------------------------------------

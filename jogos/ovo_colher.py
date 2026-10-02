@@ -55,7 +55,7 @@ TEMPO_PASSARINHO = 2.0
 # CENÁRIO
 # ------------------------------------------------------------
 ALTURA_OVO = 60
-BOCA_MEDO = 2                   # boca em "O"
+from core.jogador import BOCA_ABERTA as BOCA_MEDO   # boca em "O"
 GRAMA_Y = 562
 PISTA_Y = 612
 X_PE = 440                      # onde os pés de quem carrega passam pelas coisas do chão
@@ -249,8 +249,8 @@ class OvoColher(MiniJogo):
         "Cuidado: pedras, poças, vento e bichinhos!",
         "←→/AD inclina • ↑↓/WS anda • mouse",
     ]
-    MOEDAS_POR = 10
-    MOEDAS_MAX = 45
+    MOEDAS_POR = 24
+    MOEDAS_MAX = 26
 
     # --------------------------------------------------------
     # CENÁRIO: festa junina ao entardecer

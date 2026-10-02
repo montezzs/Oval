@@ -26,7 +26,7 @@ MEIA_LARG = ALTURA_OVO * 0.45
 VEL_TECLADO = 560
 ACELERACAO = 3200
 VEL_MOUSE = 900
-BOCA_ABERTA = 2                 # índice da boca "aberta" (formato de O)
+from core.jogador import BOCA_ABERTA   # boca "aberta" (formato de O, vale com boca extra)
 
 # Itens
 RAIO_ITEM = 20
@@ -255,8 +255,8 @@ class Item:
 class ChuvaComida(MiniJogo):
 
     ID = "chuva"
-    MOEDAS_POR = 8
-    MOEDAS_MAX = 45
+    MOEDAS_POR = 12
+    MOEDAS_MAX = 25
     TITULO = "CHUVA DE COMIDA"
     TITULO_CURTO = "CHUVA"
     DESCRICAO = "Está chovendo comida na cozinha! Pegue tudo de boca aberta e fuja da pimenta e da bomba."

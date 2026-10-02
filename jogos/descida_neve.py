@@ -257,8 +257,8 @@ class DescidaNeve(MiniJogo):
     ROTULO_PONTOS = "PONTOS"
     CONTAGEM = True
 
-    MOEDAS_POR = 40
-    MOEDAS_MAX = 45
+    MOEDAS_POR = 120
+    MOEDAS_MAX = 25
 
     # --------------------------------------------------------
     # CENÁRIO

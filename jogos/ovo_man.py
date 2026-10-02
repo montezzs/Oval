@@ -392,8 +392,8 @@ class OvoMan(MiniJogo):
     ROTULO_PONTOS = "PONTOS"
     CONTAGEM = True
 
-    MOEDAS_POR = 150
-    MOEDAS_MAX = 45
+    MOEDAS_POR = 400
+    MOEDAS_MAX = 30
 
     # --------------------------------------------------------
     # CENÁRIO: horta à noite com cerca-viva

@@ -506,7 +506,7 @@ class NinhoArrumado(MiniJogo):
     CONTAGEM = False
 
     # Moedas: regra própria (ver calcular_moedas)
-    MOEDAS_MAX = 20
+    MOEDAS_MAX = 16
     MOEDAS_RECORDE = 0          # cada nível novo já paga bem; sem bônus de recorde
 
     _miniaturas = {}
@@ -900,11 +900,11 @@ class NinhoArrumado(MiniJogo):
         self.estrelas_ganhas = estrelas
         self.estrelas_mostradas = 0
 
-        # Moedas: 1ª vez = 5 + 5·estrelas; melhorou = diferença ×5; repetir = 2
+        # Moedas: 1ª vez = 4 + 4·estrelas; melhorou = diferença ×4; repetir = 2
         if antes == 0:
-            self._moedas_nivel = min(20, 5 + 5 * estrelas)
+            self._moedas_nivel = min(16, 4 + 4 * estrelas)
         elif estrelas > antes:
-            self._moedas_nivel = (estrelas - antes) * 5
+            self._moedas_nivel = (estrelas - antes) * 4
         else:
             # Repetir nível curtinho não vira fazendinha de moedas
             self._moedas_nivel = 2 if self.tempo_partida >= self.TEMPO_MINIMO else 0

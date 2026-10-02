@@ -387,8 +387,8 @@ class Ovonoide(MiniJogo):
     ROTULO_PONTOS = "PONTOS"
     CONTAGEM = True
 
-    MOEDAS_POR = 100
-    MOEDAS_MAX = 45
+    MOEDAS_POR = 270
+    MOEDAS_MAX = 30
 
     # --------------------------------------------------------
     # CENÁRIO: fliperama neon

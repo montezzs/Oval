@@ -1955,6 +1955,15 @@ class PetNoMundo:
                 self.olhando = -1 if self._ovo_x > self.x else 1
         elif pid == "unicornio":
             self._som(ctx, "acerto")
+        elif pid == "tartaruga":
+            self._som(ctx, "bater", 0.6)
+            self._texto(ctx, "TOC!", topo, (200, 240, 160))
+        elif pid == "coelho":
+            self._som(ctx, "mola")
+            self._texto(ctx, "BOING!", topo, (255, 200, 220))
+        elif pid == "capivara":
+            self._som(ctx, "selecionar", 0.4)
+            self._texto(ctx, "RELAXA...", topo, (255, 200, 140))
 
     def _atualizar_reacao(self, dt, ctx):
         u = 1 - self.reacao / self.esp.reacao_dur
@@ -2083,6 +2092,7 @@ class PetNoMundo:
             self.dormindo = False
             alvo = float(CASINHA[0])
 
+        vmax *= getattr(self.esp, "vel_mult", 1.0)
         self.y_chao += (alvo_chao - self.y_chao) * min(1.0, dt * 6)
 
         # ---------------- andar ----------------
@@ -2419,3 +2429,7 @@ class PetNoMundo:
             _brilho(tela, (b[0], b[1]), 2 + b[2] * 6, b[3])
         for x, y, _, vida in self.coracoes:
             ui.coracao(tela, (int(x), int(y)), int(16 * min(1, vida + 0.3)))
+
+
+# Coleção nova (registra-se no CATALOGO e em _ESPECIES)
+from core import pets_novos  # noqa: E402,F401

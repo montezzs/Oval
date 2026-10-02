@@ -5,16 +5,27 @@ import sys
 # CAMINHOS
 # ============================================================
 
-# Pasta do projeto (funciona mesmo rodando o jogo de outra pasta)
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# Rodando como .exe (PyInstaller)? Os arquivos do jogo (imagens,
+# fonte, músicas) ficam dentro do pacote, numa pasta temporária que
+# some ao fechar o jogo; por isso os saves vão para %APPDATA%\Oval.
+CONGELADO = getattr(sys, "frozen", False)
 
-# No .exe (PyInstaller) os arquivos ficam numa pasta temporária que some
-# ao fechar o jogo, então o save vai para %APPDATA%\Oval
-if getattr(sys, "frozen", False):
-    PASTA_DADOS = os.path.join(os.environ.get("APPDATA") or os.path.expanduser("~"), "Oval")
-    os.makedirs(PASTA_DADOS, exist_ok=True)
+if CONGELADO:
+    BASE_DIR = getattr(sys, "_MEIPASS", os.path.dirname(sys.executable))
+    DADOS_DIR = os.path.join(os.environ.get("APPDATA") or os.path.expanduser("~"), "Oval")
 else:
-    PASTA_DADOS = BASE_DIR
+    # Pasta do projeto (funciona mesmo rodando o jogo de outra pasta)
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    DADOS_DIR = BASE_DIR
+
+# Para testes: OVAL_DADOS=<pasta> grava saves, fotos e logs em outro lugar
+if os.environ.get("OVAL_DADOS"):
+    DADOS_DIR = os.environ["OVAL_DADOS"]
+
+if CONGELADO:
+    os.makedirs(DADOS_DIR, exist_ok=True)
+
+PASTA_DADOS = DADOS_DIR
 
 
 def caminho(*partes):
@@ -22,11 +33,18 @@ def caminho(*partes):
     return os.path.join(BASE_DIR, *partes)
 
 
+def caminho_dados(*partes):
+    """Caminho de um arquivo gravável (saves, fotos, logs)."""
+    return os.path.join(DADOS_DIR, *partes)
+
+
 FONTE = caminho("Fonts", "PressStart2P-Regular.ttf")
 PASTA_MUSICAS = caminho("musicas")
+# Trilhas que já vêm prontas com o jogo
 PASTA_TRILHAS = caminho("musicas", "trilhas")
 PASTA_SFX = caminho("musicas", "sfx")
-ARQUIVO_SAVE = os.path.join(PASTA_DADOS, "save.json")
+ARQUIVO_SAVE = caminho_dados("save.json")          # save antigo (1 ovo só)
+PASTA_SAVES = caminho_dados("saves")
 
 # ============================================================
 # JANELA
@@ -35,6 +53,7 @@ ARQUIVO_SAVE = os.path.join(PASTA_DADOS, "save.json")
 LARGURA = 1024
 ALTURA = 720
 TITULO = "Oval"
+VERSAO = "2.0"
 FPS = 60
 
 # ============================================================

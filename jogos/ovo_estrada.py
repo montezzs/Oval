@@ -338,7 +338,7 @@ class OvoEstrada(MiniJogo):
         "→/D acelera • ←/A freia e dá ré (mouse: dir./esq.)",
     ]
 
-    MOEDAS_MAX = 50
+    MOEDAS_MAX = 30
 
     # --------------------------------------------------------
     # CENÁRIO
@@ -801,7 +801,7 @@ class OvoEstrada(MiniJogo):
         ])
 
     def calcular_moedas(self, valor, venceu):
-        return max(0, min(self.MOEDAS_MAX, self.moedas_pista + self.metros // 50))
+        return max(0, min(self.MOEDAS_MAX, self.moedas_pista + self.metros // 200))
 
     def _pegar_itens(self):
         cx, cy = self._mundo(0, -24)

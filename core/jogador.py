@@ -1,3 +1,5 @@
+import math
+
 import pygame
 
 from core import assets
@@ -9,6 +11,34 @@ from core.ui import escurecer, clarear
 # Guarda o nome e a aparência do ovo, e monta o "avatar"
 # (todas as partes empilhadas) com cache, para os mini jogos
 # poderem usar o personagem em qualquer tamanho sem custo.
+
+
+# Use no lugar do índice da boca para desenhar uma boca triste
+BOCA_TRISTE = "triste"
+# Use no lugar do índice do olho para olhos fechados (dormindo / piscando)
+OLHO_FECHADO = "fechado"
+# Use no lugar do índice da boca para a boca "aberta" (comendo / susto).
+# Desenha assets.BOCAS[2] mesmo quando o jogador usa uma BOCA EXTRA.
+BOCA_ABERTA = "aberta"
+_INDICE_BOCA_ABERTA = 2
+
+
+class IndiceOvo(int):
+    """
+    Índice da cor base do ovo (0..3) que "carrega" a COR EXTRA equipada
+    (core/visual_extra.py). Continua sendo um int normal (compara,
+    soma, indexa assets.OVOS, vai para o JSON), mas cor_do_ovo(ap[0])
+    devolve a cor extra, então os jogos que pintam coisas com a cor do
+    ovo do jogador acompanham a cor comprada.
+    """
+
+    def __new__(cls, valor, cor_x=None):
+        obj = super().__new__(cls, valor)
+        obj.cor_x = cor_x
+        return obj
+
+    def __getnewargs__(self):
+        return (int(self), self.cor_x)
 
 
 class Jogador:
@@ -24,6 +54,9 @@ class Jogador:
         self.boca = save["boca"]
         self._corrigir_indices()
         self._cache = {}
+        # False = ignora cabelo/olhos/boca/cor EXTRA (ex: no criador,
+        # para ver as partes base que estão sendo escolhidas)
+        self.usar_extras = True
 
     # --------------------------------------------------------
 
@@ -41,9 +74,28 @@ class Jogador:
             valor = getattr(self, parte)
             if not isinstance(valor, int) or not 0 <= valor < len(lista):
                 setattr(self, parte, 0)
+            else:
+                setattr(self, parte, int(valor))    # tira o IndiceOvo
+
+    def _extra(self, slot):
+        if not self.usar_extras:
+            return None
+        try:
+            return self.save["equipado"].get(slot) or None
+        except (KeyError, TypeError, AttributeError):
+            return None
 
     def aparencia(self):
-        return (self.ovo, self.cabelo, self.olho, self.boca)
+        """
+        Índices BASE (ovo, cabelo, olho, boca) do criador. Os extras
+        comprados na loja entram no desenho pelos cosméticos equipados;
+        o ovo vira IndiceOvo quando há uma cor extra equipada.
+        """
+        ovo = self.ovo
+        cor_x = self._extra("cor_x")
+        if cor_x:
+            ovo = IndiceOvo(ovo, cor_x)
+        return (ovo, self.cabelo, self.olho, self.boca)
 
     def definir_aparencia(self, ovo, cabelo, olho, boca):
         self.ovo, self.cabelo, self.olho, self.boca = ovo, cabelo, olho, boca
@@ -67,18 +119,64 @@ class Jogador:
         por cima (ou por trás, no caso das auras).
         """
         from core import cosmeticos as cos
+        from core import visual_extra as vx
+
+        # Aparência extra (cabelo/olhos/boca/cor comprados na loja)
+        ext = vx.extras_de(cosmeticos) if cosmeticos else {}
+        cor_x = ext.get("cor_x")
+        cab_x = ext.get("cabelo_x")
+        olho_x = ext.get("olhos_x")
+        boca_x = ext.get("boca_x")
+        ovo_cos = vx.ovo_para_cosmeticos(ovo, cor_x) if cor_x else ovo
+        escuro = vx.escuro(cor_x)
+
+        def linhas(img):
+            # Rosto base (traço preto) fica claro em ovo escuro
+            return vx.linhas_claras(img) if escuro else img
 
         sup = pygame.Surface((100, 100), pygame.SRCALPHA)
-        cos.aplicar(sup, cosmeticos, "atras", ovo)
-        sup.blit(assets.OVOS[ovo], (0, 0))
-        cos.aplicar(sup, cosmeticos, "corpo", ovo)
-        # Chapéus grandes escondem os cabelos "de topo"
-        esconde = getattr(cos, "esconde_cabelo", None)
-        if not (cosmeticos and esconde and esconde(cosmeticos, cabelo)):
-            sup.blit(assets.CABELOS[cabelo], (0, 0))
-        sup.blit(assets.OLHOS[olho], (0, 0))
-        sup.blit(assets.BOCAS[boca], (0, 0))
-        cos.aplicar(sup, cosmeticos, "frente", ovo)
+        cos.aplicar(sup, cosmeticos, "atras", ovo_cos)
+        cab_escondido = bool(cab_x) and vx.cabelo_escondido(cab_x, cosmeticos)
+        if cab_x:
+            sup.blit(vx.cabelo(cab_x, "atras", cab_escondido), (0, 0))
+        sup.blit(vx.corpo(cor_x) if cor_x else assets.OVOS[ovo], (0, 0))
+        cos.aplicar(sup, cosmeticos, "corpo", ovo_cos)
+        if cab_x:
+            sup.blit(vx.cabelo(cab_x, "frente", cab_escondido), (0, 0))
+        else:
+            # Chapéus grandes escondem os cabelos "de topo"
+            esconde = getattr(cos, "esconde_cabelo", None)
+            if not (cosmeticos and esconde and esconde(cosmeticos, cabelo)):
+                sup.blit(assets.CABELOS[cabelo], (0, 0))
+
+        if olho == OLHO_FECHADO:
+            # Dois risquinhos curvos no lugar dos olhos (os olhos 1 como guia)
+            r = assets.OLHOS[0].get_bounding_rect()
+            larg = max(10, int(r.w * 0.34))
+            cor = vx.CLARO_LINHA if escuro else (25, 20, 25)
+            for cx in (r.x + r.w * 0.2, r.right - r.w * 0.2):
+                arco = pygame.Rect(0, 0, larg, larg)
+                arco.center = (round(cx), round(r.centery - r.h * 0.05))
+                pygame.draw.arc(sup, cor, arco, math.pi * 1.15, math.pi * 1.85, 2)
+        elif olho_x:
+            sup.blit(vx.olhos(olho_x, escuro), (0, 0))
+        else:
+            sup.blit(linhas(assets.OLHOS[olho]), (0, 0))
+
+        if boca == BOCA_TRISTE:
+            # Boquinha triste (necessidades baixas / despedida)
+            r = assets.BOCAS[0].get_bounding_rect()
+            r = pygame.Rect(0, 0, max(12, r.w), max(8, r.h))
+            r.center = assets.BOCAS[0].get_bounding_rect().center
+            cor = vx.CLARO_LINHA if escuro else (40, 30, 30)
+            pygame.draw.arc(sup, cor, r.move(0, r.h // 3), 0.35, 2.8, 3)
+        elif boca == BOCA_ABERTA:
+            sup.blit(linhas(assets.BOCAS[_INDICE_BOCA_ABERTA]), (0, 0))
+        elif boca_x:
+            sup.blit(vx.boca(boca_x, escuro), (0, 0))
+        else:
+            sup.blit(linhas(assets.BOCAS[boca]), (0, 0))
+        cos.aplicar(sup, cosmeticos, "frente", ovo_cos)
         return sup
 
     # --------------------------------------------------------
@@ -94,9 +192,22 @@ class Jogador:
         # Só o próprio jogador usa os cosméticos. Olhos e boca podem
         # variar (dormindo, boca aberta comendo...), então comparamos
         # a cor do ovo e o cabelo. CPU/J2/família não usam.
-        if tuple(apar[:2]) == self.aparencia()[:2]:
-            return tuple(v for _, v in self.chave_visual())
-        return ()
+        if tuple(apar[:2]) != self.aparencia()[:2]:
+            return ()
+        ids = []
+        for slot, v in self.chave_visual():
+            if not self.usar_extras and slot in ("cabelo_x", "olhos_x", "boca_x", "cor_x"):
+                continue
+            # Olhos/boca EXTRA só valem com os olhos/boca do próprio
+            # jogador: um jogo que troca a expressão (boca de susto,
+            # olhos de outro ovo) mostra a expressão pedida.
+            if slot == "olhos_x" and apar[2] != self.olho and apar[2] != OLHO_FECHADO:
+                continue
+            if slot == "boca_x" and apar[3] != self.boca and apar[3] not in (BOCA_TRISTE,
+                                                                             BOCA_ABERTA):
+                continue
+            ids.append(v)
+        return tuple(ids)
 
     # O corpo do ovo ocupa este retângulo dentro da imagem 100x100
     OVO_RECT = pygame.Rect(15, 14, 67, 74)
@@ -143,7 +254,7 @@ class Jogador:
         return sup
 
     def desenhar(self, tela, centro, altura, aparencia=None, espelhar=False,
-                 angulo=0.0):
+                 angulo=0.0, esticar=(1.0, 1.0)):
         """
         Desenha o avatar com o CENTRO DO OVO em `centro`.
         Devolve o retângulo do corpo do ovo na tela (bom para colisão).
@@ -162,6 +273,11 @@ class Jogador:
             sup = pygame.transform.flip(sup, True, False)
         if angulo:
             sup = pygame.transform.rotate(sup, angulo)
+        if esticar != (1.0, 1.0):
+            # Squash & stretch (amassar / esticar o ovo)
+            w, h = sup.get_size()
+            sup = pygame.transform.smoothscale(sup, (max(1, round(w * esticar[0])),
+                                                     max(1, round(h * esticar[1]))))
 
         # Diferença entre o centro do ovo e o centro da imagem
         dx = (self.OVO_RECT.centerx - 50) * escala * (-1 if espelhar else 1)
@@ -192,13 +308,24 @@ class Jogador:
 
     @staticmethod
     def cor_do_ovo(indice):
+        """
+        Cor de um índice de ovo. Com o ovo de aparencia() do jogador
+        (IndiceOvo) devolve a COR EXTRA equipada.
+        """
+        cor_x = getattr(indice, "cor_x", None)
+        if cor_x:
+            from core import visual_extra
+            cor = visual_extra.rgb(cor_x)
+            if cor:
+                return cor
         img = assets.OVOS[indice]
         c = img.get_at((50, 55))
         return (c.r, c.g, c.b)
 
     @property
     def cor(self):
-        return self.cor_do_ovo(self.ovo)
+        """Cor do ovo (a COR EXTRA equipada, se houver)."""
+        return self.cor_do_ovo(self.aparencia()[0])
 
     @property
     def cor_escura(self):

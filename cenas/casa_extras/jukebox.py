@@ -6,8 +6,9 @@ from core import ui
 # ============================================================
 # JUKEBOX (vitrola da casa)
 # ============================================================
-# Toca o tema da casa ou a trilha de qualquer mini jogo que o
-# jogador já jogou pelo menos uma vez.
+# Toca o tema da casa, a Ovein clássica, os TEMAS do jogo (tela inicial, rua, loja...
+# liberados quando ouvidos pela 1ª vez) ou a trilha de qualquer
+# mini jogo que o jogador já jogou pelo menos uma vez.
 
 POR_PAGINA = 8
 
@@ -22,12 +23,20 @@ class Jukebox:
         self.inicio = 0
 
     def faixas(self):
+        """[(id, nome, bloqueada, dica)]"""
+        from core import trilhas
         from jogos import JOGOS
         jogados = set(self.ctx.app.save["jogados"])
-        lista = [("casa", "TEMA DA CASA"), ("ovein", "OVEIN (CLÁSSICO)")]
+        ouvidos = set(self.ctx.app.config["temas_ouvidos"])
+        lista = [("casa", trilhas.NOMES_TEMAS["casa"], False, ""),
+                 ("ovein", trilhas.NOMES_TEMAS["ovein"], False, "")]
+        for tid in trilhas.TEMAS:
+            bloqueada = tid not in ouvidos
+            lista.append((tid, trilhas.NOMES_TEMAS.get(tid, tid.upper()), bloqueada,
+                          trilhas.DICAS_TEMAS.get(tid, "DICA: EXPLORE O JOGO")))
         for jogo in JOGOS:
             if jogo.ID in jogados:
-                lista.append((jogo.ID, jogo.TITULO))
+                lista.append((jogo.ID, jogo.TITULO, False, ""))
         return lista
 
     def abrir(self):
@@ -35,7 +44,11 @@ class Jukebox:
         self.ctx.som("selecionar")
 
     def _tocar(self, faixa):
-        self.ctx.definir_faixa(faixa[0])
+        fid, _, bloqueada, _ = faixa
+        if bloqueada:
+            self.ctx.som("erro")
+            return
+        self.ctx.definir_faixa(fid)
         self.ctx.som("clique")
 
     def evento(self, e):
@@ -82,7 +95,7 @@ class Jukebox:
         ui.painel(tela, caixa, (40, 24, 20), (230, 170, 90), 18, 4)
         ui.desenhar_texto(tela, "♪ JUKEBOX ♪", (caixa.centerx, caixa.y + 18), 22, AMARELO, "midtop")
         atual = self.ctx.faixa
-        for k, (fid, nome) in enumerate(lista[self.inicio:self.inicio + POR_PAGINA]):
+        for k, (fid, nome, bloqueada, dica) in enumerate(lista[self.inicio:self.inicio + POR_PAGINA]):
             i = self.inicio + k
             r = pygame.Rect(caixa.x + 24, caixa.y + 70 + k * 50, caixa.w - 48, 42)
             self.rects.append((i, r))
@@ -91,7 +104,13 @@ class Jukebox:
             if sel:
                 pygame.draw.rect(tela, AMARELO, r, 2, border_radius=10)
             tocando = fid == atual
-            ui.desenhar_texto(tela, ("▶ " if tocando else "   ") + nome, (r.x + 14, r.centery), 12,
+            if bloqueada:
+                ui.desenhar_texto(tela, "   ???", (r.x + 14, r.centery), 12, (150, 120, 100), "midleft")
+                ui.desenhar_texto(tela, dica, (r.right - 12, r.centery), 8, (200, 170, 130), "midright")
+                continue
+            tam = ui.tamanho_que_cabe(nome, r.w - 60, (12, 10, 8))
+            ui.desenhar_texto(tela, ("▶ " if tocando else "   ") + nome, (r.x + 14, r.centery), tam,
                               AMARELO if tocando else BRANCO, "midleft")
-        ui.desenhar_texto(tela, f"{len(lista) - 2} trilhas desbloqueadas • jogue mais para liberar!",
+        liberadas = sum(1 for f in lista if not f[2]) - 2
+        ui.desenhar_texto(tela, f"{liberadas} trilhas liberadas • jogue e explore para liberar mais!",
                           (caixa.centerx, caixa.bottom - 28), 8, (230, 200, 160), "midtop")

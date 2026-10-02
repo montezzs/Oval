@@ -679,6 +679,438 @@ musica(
 
 
 # ============================================================
+# TEMAS DAS TELAS (tela inicial, rua, loja, reforma...)
+# ============================================================
+
+HONKY, ACORDEAO, ORGAO_ROCK, GUIT_JAZZ, VIOLINO, ORQ_HIT = 3, 21, 18, 26, 40, 55
+SAX_ALTO, OBOE, FLAUTIM, FLAUTA_DOCE, ASSOBIO, CHARANG = 65, 68, 72, 74, 78, 84
+
+BATERIAS.update({
+    "baiao": dict(k="x..x....x..x....", F="...x.......x....", G="x.x.x.x.x.x.x.x.",
+                  g=".x.x.x.x.x.x.x.x", fill=dict(k="x..x....x.......", F="...x....x.x.xxxx",
+                                                  g=".x.x.x.x.x.x.x.x")),
+    "techno": dict(k="x...x...x...x...", c="....x.......x...", h="xxxxxxxxxxxxxxxx",
+                   H="..x...x...x...x.", fill=dict(k="x...x...x...x...", e="........xxxxXXXX",
+                                                   h="xxxxxxxx........")),
+    "breakbeat": dict(k="x.....x...x..x..", s="....X..o.o..X..o", h="x.x.x.x.x.x.x.x.",
+                      fill=dict(k="x.....x...x.....", s="....X..o.oXoXXXX", h="x.x.x.x.")),
+    "celta": dict(k="x.......x.......", F="x..x..x.x..x..x.", b="....x.......x...",
+                  fill=dict(k="x.......x.......", F="x..x..x.xxxxxxxx")),
+})
+
+# Tela inicial: o Tema do Oval em grande estilo (metais, cordas, sinos)
+musica(
+    "abertura", bpm=112, tonica="C5", modo="maior",
+    inst=dict(lead=I(METAIS, 104, 60, 50), sino=I(GLOCK, 94, 72, 55),
+              dobra=I(CORDAS, 84, 76, 55), acomp=I(PIANO, 72, 42, 45),
+              pad=I(CORDAS_LENTAS, 54, 64, 65), contra=I(TROMPA, 70, 86, 50),
+              baixo=I(BAIXO_DEDO, 90, 64, 15), timp=I(TIMPANO, 88, 64, 45, 0, 1.0),
+              bat=K(ORQUESTRA)),
+    baixo="pop", acomp="arpejo8", bat="pop", dobra=-12,
+    extras=[("timp", ["A2", "B"], "C2*4 . . . . C2*2 . . G1*4")],
+    progA="C | F/C | Am7 | G7sus4 G7 | C | F/C | Fmaj7 G | C",
+    a="G4*2 C5*2 E5*3 D5 C5*2 G5*6 | A4*2 C5*2 F5*3 E5 D5*2 A5*6 | "
+      "C6*2 B5*2 A5*4 E5*4 G5*4 | F5*4 G5*4 B5*4 D6*4",
+    fimA="A5*2 C6*2 E6*4 D6*2 B5*2 G5*4 | C6*12 .*4",
+    progB="Am7 | Em7 | Fmaj7 | G | Am7 | Em7 | Dm7 | Gsus4 G7",
+    b="E5*6 A5*2 C6*4 B5*2 A5*2 | G5*6 B5*2 E6*4 D6*2 B5*2 | C6*4 A5*4 F5*4 E5*4 | "
+      "D5*6 G5*2 B5*8",
+    fimB="F5*2 A5*2 D6*4 C6*2 A5*2 F5*4 | C6*8 B5*4 D6*4",
+)
+
+# Vizinhança de dia: passeio assobiado (violão, escovinha, swing)
+musica(
+    "rua_dos_ovos", bpm=100, tonica="G5", modo="maior", swing=0.2, lufs=-17,
+    inst=dict(lead=I(ASSOBIO, 100, 60, 45), sino=I(GLOCK, 90, 72, 50),
+              dobra=I(GLOCK, 66, 76, 50), acomp=I(VIOLAO_ACO, 80, 42, 35),
+              contra=I(CLARINETE, 64, 86, 40), baixo=I(BAIXO_AC, 92, 64, 15),
+              bat=K(ESCOVA, 85)),
+    baixo="saltitante", acomp="strum", bat="pop", dobra=12, vel_bat=0.8,
+    progA="G | B7 | Em7 | A7 D7 | G | B7 | C Cm6 | G",
+    a="D5*2 G5*2 B5*3 A5 G5*2 D5*6 | D#5*2 F#5*2 A5*3 G5 F#5*2 D#5*6 | "
+      "E5*2 G5*2 B5*4 D6*4 B5*4 | C#6*2 A5*2 G5*2 E5*2 F#5*2 A5*2 C6*4",
+    fimA="E5*2 G5*2 C6*4 Eb5*2 G5*2 A5*4 | G5*2 B5*2 D6*8 .*4",
+    progB="C | D | Bm7 | Em7 | C | D | Am7 | D7",
+    b="E6*3 D6 C6*2 G5*2 E5*4 G5*4 | F#6*3 E6 D6*2 A5*2 F#5*4 A5*4 | "
+      "B5*2 D6*2 F#6*4 E6*2 D6*2 B5*4 | G5*6 F#5*2 E5*8",
+    fimB="C6*2 E6*2 A6*4 G6*2 E6*2 C6*4 | F#6*4 D6*4 C6*4 A5*4",
+)
+
+# Vizinhança de noite: jazz noturno em Lá dórico (guitarra, Rhodes)
+musica(
+    "rua_noite", bpm=72, tonica="A5", modo="dorica", lufs=-18, swing=0.15,
+    forma=["A", "B", "A2"],
+    inst=dict(lead=I(GUIT_JAZZ, 104, 58, 55), sino=I(VIBRAFONE, 90, 72, 60),
+              dobra=I(VIBRAFONE, 70, 76, 60), acomp=I(EPIANO, 74, 42, 55, 30),
+              pad=I(PAD_QUENTE, 50, 64, 70), baixo=I(FRETLESS, 84, 64, 25),
+              bat=K(ESCOVA, 70)),
+    baixo="meio", acomp="blocos", centro_acomp=58, bat="calmo", dobra=12, vel_bat=0.7,
+    progA="Am7 | D7 | Am7 | D7 | Am7 | D7 | Fmaj7 G | Am7",
+    a="E5*4 G5*2 A5*2 C6*6 B5*2 | A5*4 F#5*2 D5*2 F#5*8 | C5*2 E5*2 G5*4 A5*4 E5*4 | "
+      "F#5*6 E5*2 D5*8",
+    fimA="A5*4 C6*4 B5*4 D6*4 | C6*4 B5*2 A5*2 E5*8",
+    progB="Fmaj7 | Em7 | Dm7 | Em7 | Fmaj7 | Em7 | Dm7 | E7sus4 E7",
+    b="A5*6 G5*2 E5*8 | G5*6 F#5*2 D5*8 | F5*4 A5*4 C6*4 A5*4 | B5*12 .*4",
+    fimB="D6*4 C6*2 A5*2 F5*8 | A5*8 G#5*8",
+)
+
+# Dia de chuva: piano esparso e melancólico (estilo C418)
+musica(
+    "dia_de_chuva", bpm=86, tonica="E5", modo="dorica", lufs=-19,
+    inst=dict(lead=I(PIANO, 104, 60, 65), sino=I(CAIXINHA, 86, 72, 70),
+              acomp=I(CELESTA, 62, 42, 70), pad=I(CORDAS_LENTAS, 58, 64, 75, 30),
+              baixo=I(FRETLESS, 78, 64, 30), bat=K(STANDARD, 60)),
+    baixo="raiz", acomp="caixinha", centro_acomp=70, bat="calmo", dobra=12, vel_bat=0.55,
+    progA="Em9 | Cmaj7 | G | D/F# | Em9 | Cmaj7 | Am7 B7 | Em",
+    a="B4*4 E5*4 F#5*4 G5*4 | B5*6 G5*2 E5*8 | D5*4 G5*4 A5*4 B5*4 | A5*6 F#5*2 D5*8",
+    fimA="C6*4 A5*4 B5*4 D#5*4 | E5*12 .*4",
+    progB="Cmaj7 | D | Bm7 | Em7 | Cmaj7 | D | Am7 | B7sus4 B7",
+    b="G5*4 E5*4 B5*8 | A5*4 F#5*4 D6*8 | D6*6 C#6*2 B5*8 | G5*4 F#5*4 E5*8",
+    fimB="E5*4 A5*4 C6*4 B5*4 | E5*8 D#5*8",
+)
+
+# Reforma / mudança: canção de trabalho (metais, tuba, sino de obra)
+musica(
+    "maos_a_obra", bpm=124, tonica="F5", modo="mixolidia",
+    inst=dict(lead=I(METAIS, 100, 60, 35, 0, 0.8), sino=I(XILOFONE, 96, 72, 40),
+              dobra=I(XILOFONE, 80, 76, 40), acomp=I(GUIT_LIMPA, 74, 42, 30, 0, 0.5),
+              baixo=I(TUBA, 92, 64, 20), bat=K(STANDARD, 90)),
+    baixo="oompah", acomp="pop", bat="polka", dobra=12,
+    extras=[("bat", ["A", "B", "A2", "B2"], "G#3 . . G#3 . . G#3 . G#3 . . G#3 . . G#3 .")],
+    progA="F | Eb | Bb | C7 | F | Eb | Bb C7 | F",
+    a="C5*2 C5 C5 F5*2 A5*2 G5*2 F5*2 C5*4 | Bb4*2 Bb4 Bb4 Eb5*2 G5*2 F5*2 Eb5*2 Bb4*4 | "
+      "D5*2 F5*2 Bb5*2 D6*2 C6*2 Bb5*2 F5*4 | E5*2 G5*2 Bb5*2 C6*2 E6*4 C6*4",
+    fimA="D6*2 Bb5*2 F5*2 D5*2 E5*2 G5*2 Bb5*2 C6*2 | A5*2 . F5 . C5*3 F5*8",
+    progB="Dm | Bb | F | C | Dm | Bb | Gm7 | C7",
+    b="A5*3 A5*3 F5*2 D5*4 F5*4 | Bb5*3 Bb5*3 F5*2 D5*4 F5*4 | "
+      "C6*2 A5*2 F5*2 A5*2 C6*2 F6*2 Eb6*4 | E6*6 D6*2 C6*8",
+    fimB="Bb5*2 D6*2 G6*4 F6*2 D6*2 Bb5*4 | C6*4 E6*4 G6*4 Bb6*4",
+)
+
+# Loja: bossa de vitrine (flauta, violão, vibrafone)
+musica(
+    "vitrine", bpm=104, tonica="Ab5", modo="maior", lufs=-17,
+    inst=dict(lead=I(FLAUTA, 104, 60, 50), sino=I(VIBRAFONE, 94, 72, 55),
+              dobra=I(VIBRAFONE, 76, 76, 55), acomp=I(VIOLAO, 82, 42, 35),
+              pad=I(CORDAS_LENTAS, 46, 64, 60), baixo=I(BAIXO_AC, 92, 64, 15),
+              bat=K(ESCOVA, 80)),
+    baixo="bossa", acomp="bossa", centro_acomp=60, bat="bossa", dobra=12,
+    progA="Abmaj7 | F7 | Bbm7 | Eb7 | Abmaj7 | F7 | Dbmaj7 Dbm6 | Abmaj7",
+    a="Eb5*2 Ab5*2 C6*3 Bb5 . Ab5*3 G5*4 | Eb5*2 F5*2 A5*3 C6 . Eb6*3 C6*4 | "
+      "Db6*3 C6 Bb5*2 F5*2 Ab5*4 Bb5*4 | G5*6 F5*2 Eb5*4 Db5*4",
+    fimA="F5*2 Ab5*2 C6*4 Fb5*2 Ab5*2 Bb5*4 | C6*12 .*4",
+    progB="Dbmaj7 | Cm7 | Bbm7 | Eb7 | Dbmaj7 | Cm7 | Fm7 Bb7 | Bbm7 Eb7",
+    b="F5*2 Ab5*2 C6*4 Bb5*2 Ab5*2 F5*4 | Eb5*2 G5*2 Bb5*4 Ab5*2 G5*2 Eb5*4 | "
+      "Db5*2 F5*2 Ab5*4 Bb5*4 Db6*4 | Db6*6 Bb5*2 G5*8",
+    fimB="Ab5*2 C6*2 Eb6*4 D6*2 Bb5*2 Ab5*4 | Db6*4 Bb5*4 G5*4 Eb5*4",
+)
+
+# Nome + criador: nasce um ovo (caixinha de música, harpa, coro)
+musica(
+    "nasce_um_ovo", bpm=96, tonica="Db5", modo="maior", lufs=-18,
+    inst=dict(lead=I(CAIXINHA, 110, 60, 60), sino=I(CELESTA, 92, 72, 65),
+              dobra=I(CELESTA, 72, 76, 65), acomp=I(HARPA, 72, 42, 60),
+              pad=I(PAD_CORO, 54, 64, 70), contra=I(CORDAS, 58, 86, 60),
+              baixo=I(BAIXO_AC, 76, 64, 25), bat=K(ESCOVA, 60)),
+    baixo="meio", acomp="harpa", centro_acomp=60, bat="calmo", dobra=12, vel_bat=0.6,
+    progA="Db | Gb/Db | Bbm7 | Ab7sus4 Ab7 | Db | Gb/Db | Gbmaj7 Ab | Db",
+    a="F5*4 Ab5*4 Db6*6 C6*2 | Bb5*4 Gb5*4 Db5*8 | F5*2 Bb5*2 Db6*4 C6*2 Bb5*2 F5*4 | "
+      "Db6*4 Eb6*4 C6*4 Gb5*4",
+    fimA="Bb5*2 Db6*2 F6*4 Eb6*2 C6*2 Ab5*4 | Db6*12 .*4",
+    progB="Bbm7 | Gbmaj7 | Ebm7 | Ab | Bbm7 | Gbmaj7 | Ebm7 | Absus4 Ab",
+    b="Db6*6 C6*2 Bb5*8 | Bb5*6 Ab5*2 F5*8 | Gb5*4 Bb5*4 Db6*4 Eb6*4 | C6*12 .*4",
+    fimB="Eb6*4 Db6*4 Bb5*4 Gb5*4 | Ab5*8 C6*8",
+)
+
+# Casa com a luz apagada: canção de ninar (caixinha, harpa, cello)
+musica(
+    "cancao_de_ninar", bpm=66, tonica="F5", modo="maior", lufs=-20,
+    forma=["A", "B", "A2"],
+    inst=dict(lead=I(CAIXINHA, 104, 60, 70), dobra=I(CELESTA, 66, 76, 70),
+              acomp=I(HARPA, 62, 42, 65), pad=I(PAD_NEWAGE, 50, 64, 75),
+              baixo=I(CELLO, 62, 64, 40)),
+    baixo="raiz", reg_baixo=(36, 48), acomp="arpejo8", centro_acomp=58, dobra=12,
+    progA="F | Dm7 | Bb | C | F | Dm7 | Bb C | F",
+    a="C5*4 F5*4 A5*6 G5*2 | F5*4 D5*4 A4*8 | Bb4*4 D5*4 F5*4 D5*4 | E5*6 D5*2 C5*8",
+    fimA="D5*4 F5*4 E5*4 G5*4 | F5*12 .*4",
+    progB="Bb | F | Gm7 | C | Bb | F | Gm7 | Csus4 C",
+    b="D6*6 C6*2 Bb5*8 | A5*6 G5*2 F5*8 | G5*4 Bb5*4 D6*4 C6*4 | C6*12 .*4",
+    fimB="Bb5*4 A5*4 G5*4 F5*4 | F5*8 E5*8",
+)
+
+# Quintal de dia: baião alegre (sanfona, violão, zabumba, triângulo)
+musica(
+    "quintal_feliz", bpm=118, tonica="A5", modo="mixolidia",
+    inst=dict(lead=I(ACORDEAO, 98, 60, 40), sino=I(XILOFONE, 94, 72, 40),
+              dobra=I(FLAUTA, 76, 76, 45), acomp=I(VIOLAO, 80, 42, 35, 0, 0.6),
+              baixo=I(BAIXO_AC, 92, 64, 15), bat=K(STANDARD, 92)),
+    baixo="sincopado", acomp="strum", bat="baiao", dobra=12,
+    progA="A | G | D | E7 | A | G | D E7 | A",
+    a="E5*2 A5*2 . C#6*3 B5*2 A5*2 E5*4 | D5*2 G5*2 . B5*3 A5*2 G5*2 D5*4 | "
+      "F#5*2 A5*2 D6*2 F#6*2 E6*2 D6*2 A5*4 | G#5*3 B5*3 D6*2 E6*4 D6*2 B5*2",
+    fimA="A5*2 F#5*2 D5*2 F#5*2 G#5*2 B5*2 D6*2 E6*2 | C#6*2 . A5 . E5*3 A5*8",
+    progB="F#m | D | A | E | F#m | D | Bm7 | E7",
+    b="C#6*3 C#6*3 A5*2 F#5*4 A5*4 | D6*3 D6*3 A5*2 F#5*4 D6*4 | "
+      "E6*2 C#6*2 A5*2 C#6*2 E6*2 A6*2 G6*4 | G#6*6 F#6*2 E6*8",
+    fimB="D6*2 F#6*2 B6*4 A6*2 F#6*2 D6*4 | E6*4 D6*4 B5*4 G#5*4",
+)
+
+
+# ============================================================
+# MINI JOGOS DA VERSÃO 2.0
+# ============================================================
+
+# Boliche: disco-funk de pista de boliche (sax, Rhodes, slap)
+musica(
+    "boliche", bpm=118, tonica="F5", modo="mixolidia",
+    inst=dict(lead=I(SAX_ALTO, 102, 60, 40), sino=I(VIBRAFONE, 94, 72, 45),
+              dobra=I(TROMPETE, 76, 76, 40), acomp=I(EPIANO, 74, 42, 40, 30),
+              contra=I(CORDAS, 60, 86, 50), baixo=I(SLAP, 98, 64, 10), bat=K(STANDARD)),
+    baixo="oitavas", acomp="pop", bat="disco", dobra=12,
+    progA="F7 | Eb | Bb | C7 | F7 | Eb | Bb C7 | F7",
+    a="C5*2 F5*2 A5*2 C6*2 Eb6*3 C6 A5*4 | Bb4*2 Eb5*2 G5*2 Bb5*2 C6*3 Bb5 G5*4 | "
+      "F5*2 D5*2 F5*2 Bb5*4 A5*2 F5*4 | E5*4 G5*4 Bb5*2 C6*2 E6*4",
+    fimA="D6*2 Bb5*2 F5*2 D5*2 E5*2 G5*2 C6*4 | Eb6*2 . C6 . A5*3 F5*8",
+    progB="Bb | Bbm6 | Am7 | D7 | Bb | Bbm6 | Gm7 | C7",
+    b="D6*4 F6*4 D6*2 Bb5*2 F5*4 | Db6*4 F6*4 Db6*2 Bb5*2 G5*4 | "
+      "C6*2 E6*2 A6*4 G6*2 E6*2 C6*4 | F#6*6 E6*2 D6*4 C6*4",
+    fimB="Bb5*2 D6*2 G6*4 F6*2 D6*2 Bb5*4 | E6*4 C6*4 Bb5*4 G5*4",
+)
+
+# Corrida na rua: rock de kart (synth distorcido, power chords)
+musica(
+    "corrida_rua", bpm=160, tonica="A5", modo="mixolidia", lufs=-15,
+    inst=dict(lead=I(CHARANG, 92, 58, 35), sino=I(GLOCK, 90, 72, 45),
+              dobra=I(SERRA, 70, 80, 35), acomp=I(GUIT_DIST, 64, 38, 20, 0, 0.45),
+              baixo=I(SYNBAIXO, 96, 64, 10), bat=K(POWER)),
+    baixo="oitavas", reg_baixo=(33, 45), acomp="power", power=True, centro_acomp=52,
+    bat="rapido", dobra="tercas",
+    progA="A | G | D | E | A | G | F G | A",
+    a="E5*2 A5*2 C#6*2 E6*2 D6*2 C#6*2 A5*4 | D5*2 G5*2 B5*2 D6*2 C6*2 B5*2 G5*4 | "
+      "F#5*2 A5*2 D6*4 E6*2 F#6*2 A6*4 | G#6*6 F#6*2 E6*4 B5*4",
+    fimA="A5*2 C6*2 F6*4 G5*2 B5*2 D6*4 | E6*2 . . C#6*2 . . A5*4 .*4",
+    progB="F#m | D | A | E | F#m | D | Bm | E7",
+    b="A5*3 A5*3 F#5*2 C#6*4 A5*4 | A5*3 A5*3 F#5*2 D6*4 A5*4 | "
+      "C#6*2 E6*2 A6*4 G6*2 E6*2 C#6*4 | B5*6 G#5*2 E5*8",
+    fimB="D6*2 F#6*2 B6*4 A6*2 F#6*2 D6*4 | B5*4 D6*4 E6*4 G#6*4",
+)
+
+# Dardos: blues de bar (piano honky-tonk, guitarra jazz, shuffle)
+musica(
+    "dardos", bpm=100, tonica="G5", modo="mixolidia", swing=0.3,
+    inst=dict(lead=I(HONKY, 100, 58, 40), sino=I(VIBRAFONE, 92, 72, 45),
+              dobra=I(GUIT_JAZZ, 76, 80, 40), acomp=I(ORGAO, 56, 42, 40),
+              baixo=I(BAIXO_AC, 96, 64, 15), bat=K(JAZZ, 90)),
+    baixo="caminhando", reg_baixo=(31, 45), acomp="seminimas", bat="swing", dobra=-12,
+    progA="G7 | C7 | G7 | D7 | G7 | C7 | Am7 D7 | G7",
+    a="D5*2 G5*2 Bb5 B5*3 D6*2 B5*2 G5*4 | E5*2 G5*2 Bb5*4 G5*2 E5*2 C5*4 | "
+      "B5*2 D6*2 F6*2 D6*2 B5*2 A5*2 G5*4 | F#5*6 A5*2 C6*4 D6*4",
+    fimA="C6*2 A5*2 E5*2 G5*2 F#5*2 A5*2 C6*4 | B5*2 . G5 . D5*3 G5*8",
+    progB="C7 | C7 | G7 | E7 | C7 | C7 | A7 | D7",
+    b="G5*3 G5*3 E5*2 Bb5*4 G5*4 | E6*3 E6*3 C6*2 Bb5*4 G5*4 | "
+      "D6*2 B5*2 G5*2 B5*2 D6*2 G6*2 F6*4 | G#5*6 B5*2 D6*8",
+    fimB="C#6*2 E6*2 G6*4 E6*2 C#6*2 A5*4 | F#6*4 D6*4 C6*4 A5*4",
+)
+
+# Jogo da velha: minueto brincalhão (oboé, pizzicato)
+musica(
+    "jogo_velha", bpm=96, tonica="G5", modo="maior", lufs=-17,
+    inst=dict(lead=I(OBOE, 104, 60, 45), sino=I(CELESTA, 92, 72, 55),
+              dobra=I(FLAUTA, 72, 76, 50), acomp=I(PIZZ, 76, 42, 40),
+              pad=I(CORDAS_LENTAS, 48, 64, 60), baixo=I(BAIXO_AC, 82, 64, 20),
+              bat=K(ESCOVA, 70)),
+    baixo="pop", acomp="seminimas", bat="calmo", dobra=12, vel_bat=0.7,
+    progA="G | D/F# | Em | C D | G | D/F# | C D7 | G",
+    a="B5*2 G5*2 D5*2 G5*2 B5*4 A5*4 | A5*2 F#5*2 D5*2 F#5*2 A5*4 G5*4 | "
+      "G5*2 E5*2 B4*2 E5*2 G5*2 B5*2 E6*4 | E6*4 C6*4 D6*4 A5*4",
+    fimA="E5*2 G5*2 C6*4 F#5*2 A5*2 C6*4 | B5*4 G5*4 D5*4 G5*4",
+    progB="C | G/B | Am7 | D | C | G/B | Am7 | D7",
+    b="G5*3 C6 E6*4 D6*2 C6*2 G5*4 | B5*3 D6 G6*4 F#6*2 D6*2 B5*4 | "
+      "C6*2 E6*2 A5*2 C6*2 E6*4 G6*4 | F#6*6 E6*2 D6*8",
+    fimB="A5*2 C6*2 E6*4 D6*2 C6*2 A5*4 | F#5*4 A5*4 C6*4 D6*4",
+)
+
+# Micro-ovo: maluquice de microjogos (xilofone, slap, metais)
+musica(
+    "micro_ovo", bpm=152, tonica="C5", modo="maior",
+    inst=dict(lead=I(XILOFONE, 116, 60, 35, 0, 0.8), sino=I(GLOCK, 92, 72, 40),
+              dobra=I(TROMPETE, 80, 76, 35), acomp=I(CLAV, 72, 42, 25, 0, 0.5),
+              baixo=I(SLAP, 98, 64, 10), bat=K(STANDARD)),
+    baixo="saltitante", acomp="funk", bat="rapido", dobra=-12,
+    progA="C | Ab | Bb | C | C | Ab | F G | C",
+    a="C5 E5 G5 C6 . G5 E5 C5 D5 . E5 . G5*4 | C5 Eb5 Ab5 C6 . Ab5 Eb5 C5 D5 . Eb5 . Ab5*4 | "
+      "D5 F5 Bb5 D6 . Bb5 F5 D5 Eb5 . F5 . Bb5*4 | C6*2 B5*2 C6*2 G5*2 E5*2 G5*2 C6*4",
+    fimA="A5*2 C6*2 F6*4 B5*2 D6*2 G6*4 | C6 . C6 . . . G5 . C5*4 .*4",
+    progB="F | G | Em | Am | F | G | Dm7 | G7",
+    b="A5*2 A5 A5 A5*2 C6*2 A5*2 F5*2 C5*4 | B5*2 B5 B5 B5*2 D6*2 B5*2 G5*2 D5*4 | "
+      "E6*2 D6*2 B5*2 G5*2 E5*2 G5*2 B5*4 | C6*6 B5*2 A5*8",
+    fimB="F5*2 A5*2 C6*2 D6*2 F6*4 D6*4 | B5*2 D6*2 F6*2 G6*2 B6*8",
+)
+
+# Ovo cozinheiro: jazz manouche de cozinha (violino, violão, swing)
+musica(
+    "ovo_cozinheiro", bpm=112, tonica="Bb5", modo="maior", swing=0.3,
+    inst=dict(lead=I(VIOLINO, 104, 58, 45), sino=I(VIBRAFONE, 92, 72, 45),
+              dobra=I(CLARINETE, 78, 80, 45), acomp=I(VIOLAO, 84, 42, 30, 0, 0.4),
+              baixo=I(BAIXO_AC, 96, 64, 15), bat=K(ESCOVA, 85)),
+    baixo="caminhando", reg_baixo=(33, 47), acomp="seminimas", bat="swing", dobra="tercas",
+    progA="Bb6 | Gm7 | Cm7 | F7 | Bb6 | Gm7 | Eb Ebm6 | Bb6",
+    a="F5*2 G5*2 Bb5*3 D6 . C6*3 Bb5*4 | D5*2 F5*2 G5*3 Bb5 . A5*3 G5*4 | "
+      "Eb6*2 D6*2 C6*2 G5*2 Bb5*4 C6*4 | A5*6 G5*2 F5*4 Eb5*4",
+    fimA="G5*2 Bb5*2 Eb6*4 Gb5*2 Bb5*2 C6*4 | D6*6 Bb5*2 .*8",
+    progB="Dm7 | G7 | Cm7 | F7 | Dm7 | G7 | Cm7 | F7",
+    b="A5*2 C6*2 F6*4 E6*2 D6*2 A5*4 | B5*2 D6*2 F6*4 E6*2 D6*2 B5*4 | "
+      "Eb6*3 D6 C6*2 G5*2 Bb5*8 | A5*6 C6*2 Eb6*8",
+    fimB="G5*2 Bb5*2 Eb6*4 D6*2 C6*2 G5*4 | F5*4 A5*4 C6*4 Eb6*4",
+)
+
+# Ovo Kombat: techno-metal de luta de verdade (serra, orquestra, coro)
+musica(
+    "ovo_kombat", bpm=150, tonica="D5", modo="harmonica", lufs=-14,
+    inst=dict(lead=I(SERRA, 100, 60, 35, 20), sino=I(ORQ_HIT, 96, 64, 40),
+              dobra=I(GUIT_DIST, 80, 80, 30), acomp=I(ORQ_HIT, 78, 44, 35, 0, 0.5),
+              pad=I(CORO, 58, 64, 55), baixo=I(SYNBAIXO, 100, 64, 10),
+              bat=K(ELETRONICO, 110)),
+    baixo="dezesseis", reg_baixo=(26, 38), acomp="pop", bat="techno", dobra=-12,
+    progA="Dm | Dm | Bb | C | Dm | Dm | Bb A | Dm",
+    a="D5 D5 . D5 . D5 F5 . D5 . G5 . F5 E5 . C5 | D5 D5 . D5 . D5 F5 . D5 . A5 . G5 F5 . E5 | "
+      "F5*2 Bb5*2 D6*2 C6*2 Bb5*2 A5*2 F5*4 | G5*2 C6*2 E6*2 D6*2 C6*2 Bb5*2 G5*4",
+    fimA="F5*2 Bb5*2 D6*4 C#6*2 E6*2 A6*4 | D6*2 . . A5*2 . . D5*4 .*4",
+    progB="Bb | C | Dm | Dm | Bb | C | Gm | A7",
+    b="D6*3 D6*3 F6*2 D6*4 Bb5*4 | E6*3 E6*3 G6*2 E6*4 C6*4 | "
+      "F6*2 E6*2 D6*2 A5*2 F5*2 A5*2 D6*4 | A5*12 .*4",
+    fimB="Bb5*2 D6*2 G6*4 F6*2 D6*2 Bb5*4 | C#6*4 E6*4 G6*4 A6*4",
+)
+
+# Ovo sobrevivente: batalha de chefe (metais sintéticos, cordas, breakbeat)
+musica(
+    "ovo_sobrevivente", bpm=146, tonica="A5", modo="harmonica", lufs=-15,
+    inst=dict(lead=I(SYNMETAIS, 100, 60, 40), sino=I(GLOCK, 90, 72, 45),
+              dobra=I(TROMPA, 84, 76, 45), acomp=I(CORDAS, 70, 42, 40, 0, 0.45),
+              pad=I(CORO, 52, 64, 55), baixo=I(SYNBAIXO2, 98, 64, 10), bat=K(POWER)),
+    baixo="oitavas", reg_baixo=(33, 45), acomp="arpejo16", centro_acomp=62, bat="breakbeat",
+    dobra=-12,
+    progA="Am | F | Dm | E7 | Am | F | Dm E7 | Am",
+    a="A5*3 E5 A5*2 C6*2 B5*3 A5 G#5*2 E5*2 | A5*3 F5 A5*2 C6*2 F6*4 E6*4 | "
+      "D6*2 F6*2 A6*4 G#6*2 F6*2 D6*4 | E6*6 D6*2 B5*4 G#5*4",
+    fimA="F5*2 A5*2 D6*4 E6*2 G#6*2 B6*4 | A6*4 E6*4 A5*8",
+    progB="F | G | C | E7 | F | G | Dm7 | E7",
+    b="C6*3 C6*3 A5*2 F5*4 A5*4 | D6*3 D6*3 B5*2 G5*4 B5*4 | "
+      "E5*2 G5*2 C6*4 B5*2 G5*2 E5*4 | G#5*6 B5*2 E6*8",
+    fimB="F5*2 A5*2 C6*2 D6*2 F6*4 E6*4 | D6*4 B5*4 G#5*4 E5*4",
+)
+
+# Pinball ovo: boogie de fliperama (órgão de rock, guitarra, shuffle)
+musica(
+    "pinball_ovo", bpm=150, tonica="A5", modo="maior", swing=0.25,
+    inst=dict(lead=I(ORGAO_ROCK, 96, 58, 40), sino=I(GLOCK, 92, 72, 45),
+              dobra=I(GUIT_OVER, 76, 80, 35), acomp=I(GUIT_OVER, 62, 40, 25, 0, 0.5),
+              baixo=I(BAIXO_DEDO, 96, 64, 10), bat=K(STANDARD)),
+    baixo="caminhando", reg_baixo=(33, 47), acomp="power", power=True, centro_acomp=52,
+    bat="rock", dobra=-12,
+    progA="A | D | A | E7 | A | D | E7 D | A",
+    a="E5*2 A5*2 C#6*2 E6*2 F#6*2 E6*2 C#6*4 | F#5*2 A5*2 D6*2 F#6*2 A6*2 F#6*2 D6*4 | "
+      "C#6*2 C6 C#6 E6*2 C#6*2 A5*2 G5*2 E5*4 | G#5*4 B5*4 D6*4 E6*4",
+    fimA="B5*2 G#5*2 E5*2 G#5*2 A5*2 F#5*2 D5*2 F#5*2 | A5*2 . E5 . C#5*3 A4*8",
+    progB="F#m | D | Bm7 | E7 | F#m | D | Bm7 | E7sus4 E7",
+    b="C#6*3 A5*3 F#5*2 A5*2 C#6*2 F#6*4 | D6*3 A5*3 F#5*2 A5*2 D6*2 F#6*4 | "
+      "D6*2 F#6*2 A6*4 F#6*2 D6*2 B5*4 | G#5*6 B5*2 E6*8",
+    fimB="B5*2 D6*2 F#6*2 A6*2 F#6*4 D6*4 | A5*8 G#5*8",
+)
+
+# Pontinhos: lo-fi tranquilo (Rhodes, violão, vibrafone)
+musica(
+    "pontinhos", bpm=100, tonica="A5", modo="maior", swing=0.2, lufs=-17,
+    inst=dict(lead=I(EPIANO, 104, 60, 50, 30), sino=I(KALIMBA, 92, 72, 55),
+              dobra=I(VIBRAFONE, 74, 76, 55), acomp=I(VIOLAO, 76, 42, 40),
+              pad=I(PAD_QUENTE, 48, 64, 65), baixo=I(BAIXO_DEDO, 88, 64, 15),
+              bat=K(ELETRONICO, 80)),
+    baixo="sincopado", acomp="arpejo8", centro_acomp=58, bat="vapor", dobra=12,
+    progA="Amaj7 | F#m7 | Dmaj7 | E7sus4 E7 | Amaj7 | F#m7 | Bm7 E7 | Amaj7",
+    a="E5*2 . F#5 A5*2 . B5 C#6*4 B5*2 A5*2 | C#5*2 . E5 F#5*2 . A5 B5*4 A5*2 F#5*2 | "
+      "F#5*4 A5*4 C#6*4 E6*4 | E6*4 D6*4 B5*4 G#5*4",
+    fimA="D6*2 B5*2 F#5*2 A5*2 G#5*2 B5*2 D6*4 | C#6*12 .*4",
+    progB="Dmaj7 | C#m7 | Bm7 | E | Dmaj7 | C#m7 | F#m7 | E7",
+    b="A5*2 . B5 C#6*2 . E6 F#6*4 E6*2 C#6*2 | G#5*2 . A5 B5*2 . C#6 E6*4 C#6*2 B5*2 | "
+      "D6*4 C#6*2 B5*2 F#5*8 | G#5*6 B5*2 E6*8",
+    fimB="A5*4 C#6*4 E6*4 F#6*4 | E6*4 D6*4 B5*4 G#5*4",
+)
+
+# 4 em linha: folk celta (flauta doce, violão, rabeca, bodhrán)
+musica(
+    "quatro_linha", bpm=104, tonica="D5", modo="mixolidia",
+    inst=dict(lead=I(FLAUTA_DOCE, 104, 60, 45), sino=I(GLOCK, 88, 72, 50),
+              dobra=I(RABECA, 80, 78, 45), acomp=I(VIOLAO_ACO, 80, 42, 35),
+              baixo=I(BAIXO_AC, 88, 64, 15), bat=K(STANDARD, 88)),
+    baixo="pop", acomp="strum", bat="celta", dobra="tercas",
+    progA="D | C | D | Em | D | C | G A7 | D",
+    a="A5*3 F#5*3 D5*2 F#5*2 A5*2 D6*4 | G5*3 E5*3 C5*2 E5*2 G5*2 C6*4 | "
+      "A5*3 B5*3 A5*2 F#5*2 E5*2 D5*4 | E5*3 G5*3 B5*2 D6*8",
+    fimA="B5*2 D6*2 G6*4 E6*2 C#6*2 A5*4 | D6*12 .*4",
+    progB="G | D | Em | A | G | D | Bm | A7",
+    b="B5*2 D6*2 B5*2 G5*2 D5*4 G5*4 | A5*2 D6*2 A5*2 F#5*2 D5*4 F#5*4 | "
+      "G5*3 F#5*3 E5*2 B5*8 | C#6*3 B5*3 A5*2 E5*8",
+    fimB="D6*2 B5*2 F#5*2 B5*2 D6*2 F#6*2 B6*4 | A6*4 G6*4 E6*4 C#6*4",
+)
+
+# Rei do quintal: fanfarra-rock real (trompas, guitarra, tímpano)
+musica(
+    "rei_quintal", bpm=144, tonica="D5", modo="mixolidia", lufs=-15,
+    inst=dict(lead=I(TROMPA, 106, 60, 45), sino=I(GLOCK, 92, 72, 45),
+              dobra=I(TROMPETE, 82, 76, 40), acomp=I(GUIT_OVER, 64, 40, 25, 0, 0.45),
+              baixo=I(BAIXO_PALHETA, 96, 64, 10), timp=I(TIMPANO, 92, 64, 40, 0, 1.0),
+              bat=K(POWER)),
+    baixo="galope", reg_baixo=(26, 40), acomp="power_galope", power=True, centro_acomp=52,
+    bat="heroico", dobra=12,
+    extras=[("timp", ["A", "B", "A2", "B2"], "D2*4 . . . . D2*2 . . A1*4")],
+    progA="D | C | G | A | D | C | Bb C | D",
+    a="D5*3 A4 D5*2 F#5*2 A5*6 G5 F#5 | C5*3 G4 C5*2 E5*2 G5*6 F5 E5 | "
+      "D5*2 G5*2 B5*4 A5*2 G5*2 D5*4 | E5*4 A5*4 C#6*8",
+    fimA="F5*2 Bb5*2 D6*4 E5*2 G5*2 C6*4 | D6*4 A5*4 D5*8",
+    progB="Bm | G | D | A | Bm | G | Em7 | A7",
+    b="F#5*3 F#5*3 D5*2 B4*4 D5*4 | G5*3 G5*3 D5*2 B4*4 G5*4 | "
+      "A5*2 F#5*2 D5*2 F#5*2 A5*2 D6*2 C6*4 | C#6*6 B5*2 A5*8",
+    fimB="G5*2 B5*2 E6*4 D6*2 B5*2 G5*4 | A5*4 C#6*4 E6*4 G6*4",
+)
+
+# Egg fighter: luta de polegar circense e frenética (flautim, pizzicato)
+musica(
+    "thumb_fighter", bpm=168, tonica="G5", modo="maior",
+    inst=dict(lead=I(FLAUTIM, 100, 60, 35, 0, 0.75), sino=I(XILOFONE, 94, 72, 40),
+              dobra=I(XILOFONE, 80, 76, 40), acomp=I(PIZZ, 80, 42, 35),
+              baixo=I(TUBA, 94, 64, 15), bat=K(STANDARD, 95)),
+    baixo="oompah", acomp="seminimas", bat="marcha", dobra=0,
+    progA="G | D7 | G | C | G | D7 | C D7 | G",
+    a="G5 A5 B5 G5 D6*2 B5*2 G5 A5 B5 G5 D5*4 | F#5 G5 A5 F#5 C6*2 A5*2 F#5 G5 A5 F#5 D5*4 | "
+      "B5*2 D6*2 G6*2 D6*2 B5*2 G5*2 B5*4 | C6*2 E6*2 G6*4 E6*2 C6*2 G5*4",
+    fimA="E6*2 C6*2 G5*2 E5*2 F#5*2 A5*2 C6*2 D6*2 | B5*2 . G5 . D5*3 G5*8",
+    progB="Em | Bm | C | D | Em | Bm | Am7 | D7",
+    b="E6*2 B5*2 G5*2 B5*2 E6*2 G6*2 E6*4 | D6*2 B5*2 F#5*2 B5*2 D6*2 F#6*2 D6*4 | "
+      "C6*2 G5*2 E5*2 G5*2 C6*2 E6*2 G6*4 | F#6*6 E6*2 D6*8",
+    fimB="A5*2 C6*2 E6*2 G6*2 E6*2 C6*2 A5*4 | F#5*4 A5*4 C6*4 D6*4",
+)
+
+# Xadegg: barroco pensativo em Dó menor (cravo, harpa, cordas)
+musica(
+    "xadegg", bpm=84, tonica="C5", modo="harmonica", lufs=-18,
+    inst=dict(lead=I(CRAVO, 104, 60, 45), sino=I(CELESTA, 90, 72, 55),
+              dobra=I(FLAUTA, 70, 76, 50), acomp=I(HARPA, 70, 42, 50),
+              pad=I(CORDAS_LENTAS, 54, 64, 60), contra=I(CELLO, 62, 86, 50),
+              baixo=I(BAIXO_AC, 80, 64, 20)),
+    baixo="meio", acomp="alberti", centro_acomp=58, dobra=12, reg_contra=(48, 62),
+    progA="Cm | G/B | Bb | F/A | Ab | Eb/G | Fm7 G7 | Cm",
+    melA="G5*2 Eb5*2 C5*2 Eb5*2 G5*4 C6*4 | B5*2 G5*2 D5*2 G5*2 B5*4 D6*4 | "
+         "D6*2 Bb5*2 F5*2 Bb5*2 D6*4 F6*4 | C6*2 A5*2 F5*2 A5*2 C6*4 Eb6*4 | "
+         "C6*4 Ab5*4 Eb5*4 Ab5*4 | Bb5*4 G5*4 Eb5*4 G5*4 | "
+         "Ab5*2 G5*2 F5*2 Eb5*2 D5*2 F5*2 B5*4 | C6*12 .*4",
+    progB="Ab | Bb | Eb | Cm | Fm | G | Ab Fm | G7",
+    melB="Eb6*4 C6*2 Ab5*2 Eb5*8 | F6*4 D6*2 Bb5*2 F5*8 | G6*4 Eb6*2 Bb5*2 G5*4 Bb5*4 | "
+         "C6*12 .*4 | Ab5*2 C6*2 F6*4 Eb6*2 C6*2 Ab5*4 | B5*2 D6*2 G6*4 F6*2 D6*2 B5*4 | "
+         "C6*4 Ab5*4 F5*4 Ab5*4 | G5*4 B5*4 D6*4 F6*4",
+)
+
+
+# ============================================================
 # OVO NO RITMO (a melodia vem do próprio jogo: o mapa de notas
 # sai dela, então o tempo e as notas precisam bater exatamente)
 # ============================================================
@@ -990,3 +1422,52 @@ def sfx_acerto():
         p.nota_t("a", 0.05 * i, 0.3, n, 105)
         p.nota_t("b", 0.05 * i, 0.3, n - 12, 90)
     return p, 0.7
+
+
+@efeito
+def sfx_tic():
+    # Tique curtinho de contagem (madeira aguda, bem baixo)
+    p = _sfx("tic", bat=K(STANDARD, 100, 5), a=I(CELESTA, 80, 64, 10, humano=0))
+    p.nota_t("bat", 0, 0.03, 76, 70)
+    p.nota_t("a", 0, 0.04, 96, 50)
+    return p, 0.3
+
+
+@efeito
+def sfx_levelup():
+    # Escada rápida até o Dó agudo e acorde brilhante de metais + sinos
+    p = _sfx("levelup", a=I(GLOCK, 110, 64, 40, humano=0), b=I(METAIS, 100, 64, 40, humano=0),
+             c=I(CELESTA, 100, 64, 45, humano=0), bat=K(ORQUESTRA, 100, 35))
+    for i, n in enumerate((60, 64, 67, 72, 76, 79)):
+        p.nota_t("a", i * 0.06, 0.12, n + 12, 100)
+        p.nota_t("c", i * 0.06, 0.12, n + 12, 80)
+    t = 0.36
+    for n in (60, 64, 67, 72, 84):
+        p.nota_t("b", t, 0.7, n, 105)
+    p.nota_t("a", t, 0.9, 96, 115)
+    p.nota_t("bat", t, 0.8, 81, 100)
+    return p, 0.85
+
+
+@efeito
+def sfx_conquista():
+    # 5 - 1 - 3 - 5' do Tema do Oval em sinos, com brilho
+    p = _sfx("conquista", a=I(VIBRAFONE, 110, 64, 45, humano=0), b=I(SINOS, 90, 64, 50, humano=0),
+             c=I(GLOCK, 90, 64, 45, humano=0))
+    for i, n in enumerate((67, 72, 76, 79)):
+        p.nota_t("a", i * 0.08, 0.5 if i == 3 else 0.12, n, 105)
+        p.nota_t("c", i * 0.08, 0.3, n + 12, 75)
+    p.nota_t("b", 0.24, 0.8, 79, 95)
+    p.nota_t("b", 0.24, 0.8, 72, 80)
+    return p, 0.8
+
+
+@efeito
+def sfx_obturador():
+    # Clique-claque de câmera
+    p = _sfx("obturador", bat=K(STANDARD, 110, 5))
+    p.nota_t("bat", 0, 0.03, 76, 95)
+    p.nota_t("bat", 0, 0.03, 42, 100)
+    p.nota_t("bat", 0.07, 0.04, 77, 90)
+    p.nota_t("bat", 0.07, 0.04, 44, 90)
+    return p, 0.6

@@ -422,7 +422,7 @@ class OvoRitmo(MiniJogo):
     ROTULO_PONTOS = "PONTOS"
     CONTAGEM = True
 
-    MOEDAS_MAX = 45
+    MOEDAS_MAX = 24
     SINCRONIZAR = True      # corrigir o relógio pela posição do áudio
 
     # --------------------------------------------------------
@@ -825,8 +825,8 @@ class OvoRitmo(MiniJogo):
                       linhas=linhas)
 
     def calcular_moedas(self, valor, venceu):
-        moedas = self.acertos // 6
-        moedas += {"S": 15, "A": 10, "B": 5}.get(self.nota_final, 0)
+        moedas = self.acertos // 15
+        moedas += {"S": 8, "A": 5, "B": 2}.get(self.nota_final, 0)
         if valor > 0:
             moedas = max(moedas, self.MOEDAS_MIN)
         return max(0, min(self.MOEDAS_MAX, moedas))

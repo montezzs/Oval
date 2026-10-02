@@ -182,11 +182,11 @@ class CampoMinado(MiniJogo):
     ]
     OPCOES = ["FÁCIL", "MÉDIO", "DIFÍCIL"]
     MENOR_MELHOR = True
-    MOEDAS_MIN = 3
+    MOEDAS_MIN = 2
 
     def calcular_moedas(self, valor, venceu):
-        """Vencer vale 15 / 30 / 45 conforme a dificuldade."""
-        return (15, 30, 45)[self.opcao] if venceu else self.MOEDAS_MIN
+        """Vencer vale 8 / 18 / 30 conforme a dificuldade."""
+        return (8, 18, 30)[self.opcao] if venceu else self.MOEDAS_MIN
     ROTULO_PONTOS = "TEMPO"
     CONTAGEM = False
 

@@ -210,9 +210,9 @@ class GuerraTinta(MiniJogoMulti):
     CONTROLES_J2 = "SETAS + ENTER"
     CONTAGEM = True
 
-    MOEDAS_PARTIDA = 12
-    MOEDAS_VITORIA_J1 = 8
-    MOEDAS_MODO_LONGO = 6       # MELHOR DE 3 e SUPER 120s
+    MOEDAS_PARTIDA = 8
+    MOEDAS_VITORIA_J1 = 5
+    MOEDAS_MODO_LONGO = 3       # MELHOR DE 3 e SUPER 120s
 
     # --------------------------------------------------------
     # CENÁRIO: piso de ladrilho, muro com baldes de tinta

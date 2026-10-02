@@ -17,6 +17,7 @@ from core.fundo_menu import FundoAnimado
 #   ENTER avança / confirma
 # Modo "inicial": depois de confirmar vai para a casa.
 # Modo "editar": tem CANCELAR e volta para quem chamou.
+# Modo "novo": ovo novo da vizinhança (ESC volta para o nome).
 
 LINHAS = [
     ("ovo", "OVO"),
@@ -28,12 +29,15 @@ LINHAS = [
 
 class CenaCriador(Cena):
 
-    musica = "casa"
+    musica = "nasce_um_ovo"
 
-    def __init__(self, app, modo="inicial", ao_terminar=None):
+    def __init__(self, app, modo="inicial", ao_terminar=None, ao_cancelar=None):
         super().__init__(app)
         self.modo = modo
         self.ao_terminar = ao_terminar
+        self.ao_cancelar = ao_cancelar
+        # No criador só as partes básicas (os extras da loja ficam de fora)
+        self.jogador.usar_extras = False
         self.original = self.jogador.aparencia()
         self.valores = list(self.original)
         self.linha = 0
@@ -54,7 +58,7 @@ class CenaCriador(Cena):
             self.setas.append((esq, dir_, linha))
 
         base_y = self.painel.y + 380
-        if modo == "inicial":
+        if modo in ("inicial", "novo"):
             self.botoes = [ui.Botao((0, 0, 200, 56), "SORTEAR", 16,
                                     cor=(90, 70, 150), cor_hover=(130, 100, 200)),
                            ui.Botao((0, 0, 200, 56), "PRONTO!", 16,
@@ -93,12 +97,14 @@ class CenaCriador(Cena):
         self.particulas.explodir((260, 330), [AMARELO, BRANCO, self.jogador.cor], 30, 320)
 
     def _confirmar(self):
+        self.jogador.usar_extras = True
         self.som("vencer")
         self.jogador.salvar()
         if self.ao_terminar:
             self.ao_terminar()
 
     def _cancelar(self):
+        self.jogador.usar_extras = True
         self.som("voltar")
         self.jogador.definir_aparencia(*self.original)
         if self.ao_terminar:
@@ -126,6 +132,9 @@ class CenaCriador(Cena):
                     self._confirmar()
             elif tecla_voltar(e) and self.modo == "editar":
                 self._cancelar()
+            elif tecla_voltar(e) and self.modo == "novo" and self.ao_cancelar:
+                self.som("voltar")
+                self.ao_cancelar()
 
         elif e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
             for i, (esq, dir_, linha) in enumerate(self.setas):
@@ -139,7 +148,7 @@ class CenaCriador(Cena):
             if self.botoes[1].evento(e):
                 self._confirmar()
             elif self.botoes[0].evento(e):
-                if self.modo == "inicial":
+                if self.modo in ("inicial", "novo"):
                     self._sortear()
                 else:
                     self._cancelar()
@@ -166,7 +175,7 @@ class CenaCriador(Cena):
     def desenhar(self, tela):
         self.fundo.desenhar(tela)
 
-        titulo = "CRIE SEU OVO!" if self.modo == "inicial" else "TROCAR APARÊNCIA"
+        titulo = "CRIE SEU OVO!" if self.modo in ("inicial", "novo") else "TROCAR APARÊNCIA"
         ui.centralizado(tela, titulo, 50, 36, AMARELO)
         if self.jogador.nome:
             ui.centralizado(tela, self.jogador.nome, 104, 16)
@@ -212,4 +221,7 @@ class CenaCriador(Cena):
         for b in self.botoes:
             b.desenhar(tela)
 
-        ui.centralizado(tela, "↑ ↓ escolhe   ← → troca   ENTER avança", 660, 12)
+        dica = "↑ ↓ escolhe   ← → troca   ENTER avança"
+        if self.modo == "novo":
+            dica += "   ESC volta"
+        ui.centralizado(tela, dica, 660, 12)

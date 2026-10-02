@@ -266,8 +266,8 @@ class Toupeiras(MiniJogo):
     ROTULO_PONTOS = "PONTOS"
     CONTAGEM = True
 
-    MOEDAS_POR = 100            # os pontos passam de 1000 fácil (combo x5)
-    MOEDAS_MAX = 45
+    MOEDAS_POR = 125            # os pontos passam de 1000 fácil (combo x5)
+    MOEDAS_MAX = 16
 
     # --------------------------------------------------------
     # CENÁRIO: horta com cerca e sol de óculos

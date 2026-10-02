@@ -248,8 +248,8 @@ class LigaOvos(MiniJogo):
         "MOUSE ou SETAS/WASD + ESPAÇO • H dica",
     ]
 
-    MOEDAS_POR = 40
-    MOEDAS_MAX = 45
+    MOEDAS_POR = 100
+    MOEDAS_MAX = 30
 
     _sprites = {}
 

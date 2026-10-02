@@ -24,7 +24,7 @@ import numpy as np
 #   python ferramentas/compor_musicas.py --midi     -> só os .mid
 #
 # Saída:
-#   musicas/trilhas/<id>.mp3      músicas (loop perfeito)
+#   musicas/trilhas/<id>.mp3      músicas (loop perfeito, 128 kbps)
 #   musicas/sfx/<nome>.mp3        efeitos sonoros
 #   musicas/midi/...              os .mid (abrem no FL Studio)
 #
@@ -451,7 +451,7 @@ ACOMPS = {
 PECAS = {
     "k": 36, "s": 38, "S": 37, "c": 39, "e": 40, "h": 42, "H": 46, "p": 44,
     "r": 51, "R": 53, "C": 49, "Z": 57, "b": 54, "m": 70, "a": 69, "w": 76, "W": 77,
-    "g": 81, "o": 56, "q": 62, "Q": 63, "U": 64, "j": 60, "J": 61,
+    "g": 81, "G": 80, "o": 56, "q": 62, "Q": 63, "U": 64, "j": 60, "J": 61,
     "t": 50, "T": 47, "f": 43, "F": 41, "v": 75, "z": 55,
 }
 VEL_GOLPE = {"X": 118, "x": 92, "o": 48}
@@ -911,7 +911,7 @@ def produzir_musica(nome, d, pasta_tmp):
     lufs = _loudness(audio, pasta_tmp, nome)
     audio = audio * 10 ** ((alvo - lufs) / 20)
     audio = limitar(audio)
-    exportar_mp3(audio, os.path.join(PASTA_TRILHAS, nome + ".mp3"), pasta_tmp, nome, 160)
+    exportar_mp3(audio, os.path.join(PASTA_TRILHAS, nome + ".mp3"), pasta_tmp, nome, 128)
     return nome, p.segundos()
 
 
@@ -933,6 +933,18 @@ def produzir_sfx(nome, criar, pasta_tmp):
     audio = audio / np.abs(audio).max() * pico
     exportar_mp3(audio, os.path.join(PASTA_SFX, nome + ".mp3"), pasta_tmp, "sfx_" + nome, 128,
                  compensar=False)
+
+    # Efeitos muito repetidos ganham versões um pouco mais grave/aguda
+    # (o jogo sorteia uma a cada vez: ver core/audio.py)
+    from core.audio import VARIAR_TOM
+    if nome in VARIAR_TOM:
+        for sufixo, fator in (("_baixo", 0.94), ("_alto", 1.06)):
+            n = int(len(audio) / fator)
+            x = np.arange(n) * fator
+            var = np.stack([np.interp(x, np.arange(len(audio)), audio[:, c])
+                            for c in range(audio.shape[1])], axis=1)
+            exportar_mp3(var, os.path.join(PASTA_SFX, nome + sufixo + ".mp3"), pasta_tmp,
+                         "sfx_" + nome + sufixo, 128, compensar=False)
     return nome, len(audio) / TAXA
 
 

@@ -385,8 +385,8 @@ class Invasores(MiniJogo):
     ROTULO_PONTOS = "PONTOS"
     CONTAGEM = True
 
-    MOEDAS_POR = 60
-    MOEDAS_MAX = 45
+    MOEDAS_POR = 200
+    MOEDAS_MAX = 30
 
     # --------------------------------------------------------
     # CENÁRIO: cozinha à noite

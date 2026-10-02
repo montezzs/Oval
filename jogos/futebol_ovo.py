@@ -277,9 +277,9 @@ class FutebolOvo(MiniJogoMulti):
     CONTROLES_J2 = "← → ↑ + ENTER + SHIFT"
     CONTAGEM = True
 
-    MOEDAS_PARTIDA = 12
-    MOEDAS_VITORIA_J1 = 8
-    MOEDAS_MAX = 30
+    MOEDAS_PARTIDA = 8
+    MOEDAS_VITORIA_J1 = 5
+    MOEDAS_MAX = 18
 
     @classmethod
     def formatar(cls, valor):
@@ -321,7 +321,7 @@ class FutebolOvo(MiniJogoMulti):
 
         # Placas de propaganda na beira do campo
         pygame.draw.rect(sup, (40, 50, 90), (0, 396, LARGURA, 34))
-        for k, texto in enumerate(("OVEIO", "LIMÕES & CIA", "OVOEDAS", "OVEIO", "GOL!")):
+        for k, texto in enumerate(("OVAL", "LIMÕES & CIA", "OVOEDAS", "OVEIO", "GOL!")):
             cx = 110 + k * 200
             t = ui.texto(texto, 12, (255, 230, 90), sombra=False)
             pygame.draw.rect(sup, (60, 70, 130), t.get_rect(center=(cx, 413)).inflate(24, 12),
@@ -609,7 +609,7 @@ class FutebolOvo(MiniJogoMulti):
         self.terminar_multi(vencedor, linhas)
 
     def calcular_moedas(self, valor, venceu):
-        base = self.MOEDAS_PARTIDA + sum(self.placar)
+        base = self.MOEDAS_PARTIDA + sum(self.placar) // 2
         if venceu:
             base += self.MOEDAS_VITORIA_J1
         return min(self.MOEDAS_MAX, base)

@@ -1,4 +1,5 @@
 import os
+import random
 
 import pygame
 
@@ -19,7 +20,14 @@ SFX = (
     "clique", "selecionar", "voltar", "comer", "moeda", "pulo", "mola", "boing",
     "explosao", "perder", "vencer", "recorde", "compra", "bandeira", "revelar",
     "virar", "bater", "erro", "asa", "ponto", "acerto",
+    "tic", "levelup", "conquista", "obturador",
 )
+
+# Efeitos que tocam MUITO têm versões com o tom um pouco diferente
+# (<nome>_baixo.mp3 e <nome>_alto.mp3), sorteadas a cada vez para
+# não cansar o ouvido.
+VARIAR_TOM = ("clique", "moeda", "pulo", "ponto", "bater", "boing", "comer", "revelar", "tic")
+SUFIXOS_TOM = ("_baixo", "", "_alto")
 
 
 # ============================================================
@@ -33,7 +41,7 @@ class Audio:
     def __init__(self, save):
         self.save = save
         self.ativo = pygame.mixer.get_init() is not None
-        self.sons = {}
+        self.sons = {}             # nome -> [variações]
         self.atual = None          # faixa tocando
         self._proxima = None       # faixa esperando o fade
         self._fade = 0.0           # 1 = volume cheio
@@ -42,10 +50,16 @@ class Audio:
         if self.ativo:
             pygame.mixer.set_num_channels(16)
             for nome in SFX:
-                try:
-                    self.sons[nome] = pygame.mixer.Sound(os.path.join(PASTA_SFX, nome + ".mp3"))
-                except (pygame.error, FileNotFoundError):
-                    pass
+                sufixos = SUFIXOS_TOM if nome in VARIAR_TOM else ("",)
+                variacoes = []
+                for suf in sufixos:
+                    try:
+                        variacoes.append(pygame.mixer.Sound(
+                            os.path.join(PASTA_SFX, nome + suf + ".mp3")))
+                    except (pygame.error, FileNotFoundError):
+                        pass
+                if variacoes:
+                    self.sons[nome] = variacoes
 
     # --------------------------------------------------------
     # PREFERÊNCIAS
@@ -71,6 +85,26 @@ class Audio:
         self.save["sons"] = not self.save["sons"]
         self.save.salvar()
 
+    @property
+    def volume_sfx(self):
+        """0.0 = efeitos desligados."""
+        if not self.save["sons"]:
+            return 0.0
+        return max(0.0, min(1.0, float(self.save["volume_sfx"])))
+
+    def proximo_volume_sfx(self):
+        """100% -> 75% -> 50% -> 25% -> DESLIGADO -> 100%..."""
+        atual = self.volume_sfx
+        menores = [v for v in reversed(VOLUMES) if v < atual - 0.01 and v > 0]
+        if atual <= 0.01:
+            self.save["sons"] = True
+            self.save["volume_sfx"] = 1.0
+        elif menores:
+            self.save["volume_sfx"] = menores[0]
+        else:
+            self.save["sons"] = False
+        self.save.salvar()
+
     # --------------------------------------------------------
     # MÚSICA
     # --------------------------------------------------------
@@ -79,6 +113,7 @@ class Audio:
         """Troca a música com fade. Não faz nada se já estiver tocando."""
         if not self.ativo or nome == (self._proxima or self.atual):
             return
+        self._marcar_ouvido(nome)
 
         if self.atual is None:
             self._iniciar(nome)
@@ -93,6 +128,17 @@ class Audio:
         if not trilhas.existe(nome):
             raise ValueError(f"trilha desconhecida: {nome}")
         return trilhas.arquivo(nome)
+
+    def _marcar_ouvido(self, nome):
+        """Temas ouvidos aparecem na jukebox (seção TEMAS)."""
+        if nome in trilhas.TEMAS:
+            try:
+                ouvidos = self.save["temas_ouvidos"]
+            except KeyError:
+                return
+            if nome not in ouvidos:
+                ouvidos.append(nome)
+                self.save.salvar()
 
     def _iniciar(self, nome):
         self.atual = nome
@@ -153,9 +199,11 @@ class Audio:
     # --------------------------------------------------------
 
     def som(self, nome, volume=1.0):
-        if not self.ativo or not self.sons_ligados:
+        vol = self.volume_sfx if self.ativo else 0.0
+        if vol <= 0:
             return
-        snd = self.sons.get(nome)
-        if snd is not None:
-            snd.set_volume(0.55 * volume)
+        variacoes = self.sons.get(nome)
+        if variacoes:
+            snd = random.choice(variacoes)
+            snd.set_volume(min(1.0, 0.55 * volume * vol))
             snd.play()

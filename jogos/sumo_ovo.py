@@ -281,9 +281,9 @@ class SumoOvo(MiniJogoMulti):
     CONTROLES_J2 = "SETAS + ENTER + SHIFT"
     CONTAGEM = True
 
-    MOEDAS_PARTIDA = 12
-    MOEDAS_VITORIA_J1 = 8
-    MOEDAS_MAX = 30
+    MOEDAS_PARTIDA = 8
+    MOEDAS_VITORIA_J1 = 5
+    MOEDAS_MAX = 18
 
     # --------------------------------------------------------
     # CENÁRIO: dojô de madeira com o tatame de argila
@@ -839,7 +839,7 @@ class SumoOvo(MiniJogoMulti):
         self.terminar_multi(vencedor, [f"ROUNDS  {r[0]} × {r[1]}"])
 
     def calcular_moedas(self, valor, venceu):
-        base = self.MOEDAS_PARTIDA + 2 * self.rounds_jogados
+        base = self.MOEDAS_PARTIDA + self.rounds_jogados
         if venceu:
             base += self.MOEDAS_VITORIA_J1
         return min(self.MOEDAS_MAX, base)

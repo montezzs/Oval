@@ -44,8 +44,8 @@ class Cobrinha(MiniJogo):
     ID = "cobrinha"
     TITULO = "COBRINHA DO OVO"
     TITULO_CURTO = "COBRINHA"
-    MOEDAS_POR = 1              # 1 limão = 1 OVOEDA
-    MOEDAS_MAX = 40
+    MOEDAS_POR = 2              # 2 limões = 1 OVOEDA
+    MOEDAS_MAX = 22
     DESCRICAO = "Seu ovo virou cobra! Coma limões para a cauda crescer com a sua cor."
     COR = (60, 150, 70)
     INSTRUCOES = [
