@@ -18,3 +18,4 @@ fotos/
 meu_codigo_oval.txt
 *.tmp
 *.corrompido
+/oval.ico
