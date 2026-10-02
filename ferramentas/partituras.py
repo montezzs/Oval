@@ -746,27 +746,26 @@ def _glissando(p, papel, ini, dur, de, ate, passos=24, curva=1.0):
 
 @efeito
 def sfx_clique():
-    p = _sfx("clique", a=I(MARIMBA, 110, 64, 10, humano=0), bat=K(STANDARD, 100, 5))
-    p.nota_t("a", 0, 0.05, 96, 80)
-    p.nota_t("bat", 0, 0.03, 76, 50)
-    return p, 0.45
+    # "toc" de madeira grave e curto: confortável mesmo repetido muitas vezes
+    p = _sfx("clique", a=I(MARIMBA, 100, 64, 12, humano=0))
+    p.nota_t("a", 0, 0.06, 67, 70)
+    return p, 0.2
 
 
 @efeito
 def sfx_selecionar():
-    p = _sfx("selecionar", a=I(XILOFONE, 110, 64, 15, humano=0), b=I(GLOCK, 70, 64, 15))
-    p.nota_t("a", 0, 0.07, 88, 90)
-    p.nota_t("a", 0.05, 0.1, 95, 100)
-    p.nota_t("b", 0.05, 0.1, 95, 60)
-    return p, 0.6
+    p = _sfx("selecionar", a=I(MARIMBA, 100, 64, 15, humano=0))
+    p.nota_t("a", 0, 0.07, 67, 72)
+    p.nota_t("a", 0.05, 0.1, 74, 78)
+    return p, 0.26
 
 
 @efeito
 def sfx_voltar():
-    p = _sfx("voltar", a=I(XILOFONE, 110, 64, 15, humano=0))
-    p.nota_t("a", 0, 0.07, 95, 85)
-    p.nota_t("a", 0.05, 0.1, 88, 80)
-    return p, 0.5
+    p = _sfx("voltar", a=I(MARIMBA, 100, 64, 15, humano=0))
+    p.nota_t("a", 0, 0.07, 74, 72)
+    p.nota_t("a", 0.05, 0.1, 67, 70)
+    return p, 0.24
 
 
 @efeito
