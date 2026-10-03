@@ -32,6 +32,29 @@ def rodar(*cmd):
     subprocess.run(cmd, cwd=PASTA, check=True)
 
 
+def conferir_exe():
+    """Para tudo se algum .py de cenas/core/jogos não entrou no .exe."""
+    from PyInstaller.archive.readers import CArchiveReader
+    arq = CArchiveReader(EXE)
+    mods = set()
+    for nome in arq.toc:
+        if nome.startswith("PYZ"):
+            mods |= set(arq.open_embedded_archive(nome).toc)
+    faltando = []
+    for pasta in ("cenas", "core", "jogos"):
+        for raiz, _, arquivos in os.walk(os.path.join(PASTA, pasta)):
+            for a in arquivos:
+                if a.endswith(".py"):
+                    rel = os.path.relpath(os.path.join(raiz, a), PASTA)[:-3]
+                    mod = rel.replace(os.sep, ".").removesuffix(".__init__")
+                    if mod not in mods:
+                        faltando.append(mod)
+    if faltando:
+        print("Módulos que ficaram fora do .exe:", ", ".join(sorted(faltando)))
+        sys.exit(1)
+    print("Todos os módulos do jogo estão no .exe")
+
+
 def main():
     if len(sys.argv) < 3:
         print(__doc__)
@@ -57,9 +80,14 @@ def main():
           "--onefile", "--windowed", "--name", "Oval",
           "--icon", os.path.join(PASTA, "Img", "oval.ico"),
           *dados,
+          # casa/loja/caixa importam módulos pelo nome (__import__), então o
+          # PyInstaller não os acha sozinho: inclui todos os submódulos
+          "--collect-submodules", "core", "--collect-submodules", "cenas",
+          "--collect-submodules", "jogos",
           "--distpath", "dist", "--workpath", "build", "--specpath", "build",
           "main.py")
 
+    conferir_exe()
     rodar("git", "push", "origin", "main")
     rodar("gh", "release", "create", tag, EXE,
           "--title", f"Oval {versao}",

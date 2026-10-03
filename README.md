@@ -4,6 +4,8 @@ Oval is a cozy game developed by me (Samuel Montez) where the main goal is to ta
 
 Inspired by Pou (mobile game).
 
+**Current version / Versão atual: 2.1**
+
 ## ⬇️ [Download Oval.exe](https://github.com/montezzs/Oval/releases/latest/download/Oval.exe)
 
 **EN:** Click the link above, open `Oval.exe` and play, no install needed.
@@ -13,6 +15,18 @@ Inspired by Pou (mobile game).
 > Windows SmartScreen: *More info / Mais informações / Más información → Run anyway / Executar assim mesmo / Ejecutar de todas formas*.
 
 **Languages / Idiomas:** English, Português, Español. chosen the first time you open the game and changeable in OPTIONS.
+
+---
+
+## What's new / Novidades
+
+### 2.1
+- **EN:** Fixed the `.exe`: house furniture (fridge, trophy shelf and the rest) was missing from 2.0.
+- **PT:** Corrigido o `.exe`: os móveis da casa (geladeira, estante de troféus etc.) não vinham na 2.0.
+
+### 2.0
+- **EN:** English and Spanish translations, title screen, Egg Street, friends, achievements, renovation, XP and medals, 14 new mini games, a new soundtrack (57 original tracks) and a refreshed look.
+- **PT:** Tradução para inglês e espanhol, tela de título, Rua dos Ovos, amigos, conquistas, reforma, XP e medalhas, 14 minijogos novos, trilha sonora nova (57 músicas originais) e visual renovado.
 
 ---
 

@@ -53,7 +53,7 @@ PASTA_SAVES = caminho_dados("saves")
 LARGURA = 1024
 ALTURA = 720
 TITULO = "Oval"
-VERSAO = "2.0"
+VERSAO = "2.1"
 FPS = 60
 
 # ============================================================
