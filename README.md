@@ -6,13 +6,13 @@ Inspired by Pou (mobile game).
 
 ## ⬇️ [Download Oval.exe](https://github.com/montezzs/Oval/releases/latest/download/Oval.exe)
 
-**EN:** Click the link above, open `Oval.exe` and play — no install needed.
-**PT:** Clique no link acima, abra o `Oval.exe` e jogue — não precisa instalar nada.
-**ES:** Haz clic en el enlace, abre `Oval.exe` y juega — no necesitas instalar nada.
+**EN:** Click the link above, open `Oval.exe` and play, no install needed.
+**PT:** Clique no link acima, abra o `Oval.exe` e jogue, não precisa instalar nada.
+**ES:** Haz clic en el enlace, abre `Oval.exe` y juega, no necesitas instalar nada.
 
 > Windows SmartScreen: *More info / Mais informações / Más información → Run anyway / Executar assim mesmo / Ejecutar de todas formas*.
 
-**Languages / Idiomas:** English, Português, Español — chosen the first time you open the game and changeable in OPTIONS.
+**Languages / Idiomas:** English, Português, Español. chosen the first time you open the game and changeable in OPTIONS.
 
 ---
 
